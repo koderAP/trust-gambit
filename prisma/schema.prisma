@@ -1,0 +1,233 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model - represents a participant
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String   // Hashed
+  hostelName String?  // IIT Delhi hostel name (optional)
+  
+  // Profile completion status
+  profileComplete Boolean @default(false)
+  lobbyRequested  Boolean @default(false)
+  
+  lobbyId   String?
+  lobby     Lobby?   @relation(fields: [lobbyId], references: [id])
+  
+  // Domain ratings (10 domains)
+  domainRatings DomainRating[]
+  
+  submissions Submission[]
+  roundScores RoundScore[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([lobbyId])
+  @@index([email])
+  @@index([profileComplete])
+}
+
+// Domain Rating model - user's self-assessment for each domain
+model DomainRating {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  domain    String   // Algorithms, Finance, Economics, Statistics, Probability, ML, Crypto, Biology, Indian History, Game Theory
+  rating    Int      // 0-10 scale
+  reason    String?  // Optional reason for self-rating
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([userId, domain])
+  @@index([userId])
+  @@index([domain])
+}
+
+// Lobby model - pools for Stage 1 (15 players) or Stage 2 (16 players)
+model Lobby {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  poolNumber  Int      // Pool 1, Pool 2, etc.
+  stage       Int      @default(1) // 1 or 2
+  maxUsers    Int      @default(15) // 15 for Stage 1, 16 for Stage 2
+  currentUsers Int     @default(0)
+  status      String   @default("WAITING") // WAITING, ACTIVE, COMPLETED
+  
+  gameId      String
+  game        Game     @relation(fields: [gameId], references: [id])
+  
+  users       User[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([status])
+  @@index([stage])
+  @@index([gameId])
+}
+
+// Game model - represents the entire competition
+model Game {
+  id          String   @id @default(cuid())
+  name        String   @default("Trust Gambit Competition")
+  
+  // Game state controlled by admin
+  status      String   @default("NOT_STARTED") // NOT_STARTED, REGISTRATION_OPEN, LOBBIES_FORMING, STAGE_1_ACTIVE, STAGE_1_COMPLETE, STAGE_2_ACTIVE, STAGE_2_COMPLETE, ENDED
+  currentStage Int     @default(0) // 0=not started, 1=stage 1, 2=stage 2
+  currentRound Int     @default(0) // Current round number
+  
+  // Scoring parameters
+  lambda      Float    @default(0.5) // Chain propagation parameter
+  beta        Float    @default(0.1) // Trust bonus parameter (per delegator)
+  gamma       Float    @default(0.2) // Cycle penalty parameter
+  
+  lobbies     Lobby[]
+  rounds      Round[]
+  
+  startedAt   DateTime?
+  endedAt     DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([status])
+}
+
+// Question model - global questions shared across all games
+model Question {
+  id              String   @id @default(cuid())
+  
+  stage           Int      // 1 or 2
+  domain          String   // Algorithms, Finance, Economics, etc.
+  question        String   // The question text
+  correctAnswer   String   // The correct answer
+  
+  isUsed          Boolean  @default(false) // True once used in any game
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([stage])
+  @@index([isUsed])
+}
+
+// Round model - represents one question in the game
+model Round {
+  id              String   @id @default(cuid())
+  gameId          String
+  game            Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  
+  lobbyId         String?  // Which lobby/pool this round is for
+  
+  roundNumber     Int      // 1-20 for Stage 1, 1-8 for Stage 2
+  stage           Int      // 1 or 2
+  domain          String   // Algorithms, Finance, Economics, etc.
+  question        String   // The question text
+  correctAnswer   String   // The correct answer
+  
+  status          String   @default("NOT_STARTED") // NOT_STARTED, ACTIVE, COMPLETED
+  
+  // Timing
+  startTime       DateTime?
+  endTime         DateTime?
+  durationSeconds Int      @default(300) // 5 minutes default
+  
+  submissions     Submission[]
+  roundScores     RoundScore[]
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([gameId, stage, roundNumber, lobbyId])
+  @@index([gameId])
+  @@index([lobbyId])
+  @@index([status])
+}
+
+// Submission model - user's action for a round
+model Submission {
+  id          String   @id @default(cuid())
+  roundId     String
+  round       Round    @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  action      String   // SOLVE, DELEGATE, PASS
+  answer      String?  // Only if action=SOLVE
+  delegateTo  String?  // User ID if action=DELEGATE
+  
+  isCorrect   Boolean? // Null until evaluated, true/false after
+  
+  submittedAt DateTime @default(now())
+  
+  @@unique([roundId, userId]) // One submission per user per round
+  @@index([roundId])
+  @@index([userId])
+  @@index([delegateTo])
+}
+
+// RoundScore model - scoring results for each user in a round
+model RoundScore {
+  id              String   @id @default(cuid())
+  roundId         String
+  round           Round    @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Scoring components
+  solveScore      Float    @default(0) // λ component
+  delegateScore   Float    @default(0) // β component
+  trustScore      Float    @default(0) // γ component
+  totalScore      Float    @default(0) // Final round score
+  
+  // Graph metrics
+  inCycle         Boolean  @default(false)
+  distanceFromSolver Int?  // Distance in delegation chain
+  
+  createdAt       DateTime @default(now())
+  
+  @@unique([roundId, userId])
+  @@index([roundId])
+  @@index([userId])
+}
+
+// TrustEdge model - tracks trust relationships between users
+model TrustEdge {
+  id          String   @id @default(cuid())
+  fromUserId  String
+  toUserId    String
+  
+  // Trust metrics
+  trustCount  Int      @default(0) // Number of times delegated
+  lastTrusted DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@unique([fromUserId, toUserId])
+  @@index([fromUserId])
+  @@index([toUserId])
+}
+
+// Admin model - for game administrators
+model Admin {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String   // Hashed
+  
+  createdAt DateTime @default(now())
+  
+  @@index([username])
+}
