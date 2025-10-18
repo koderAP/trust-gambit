@@ -11,3 +11,10 @@ export const prisma =
   })
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+
+// Helper to disconnect Prisma in serverless environments
+export async function disconnectPrisma() {
+  if (process.env.NODE_ENV === 'production') {
+    await prisma.$disconnect()
+  }
+}

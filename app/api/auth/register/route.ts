@@ -7,10 +7,14 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
   try {
-    const { name, email, password, hostelName } = await request.json()
+    const body = await request.json()
+    const { name, email, password, hostelName } = body
+
+    console.log('📝 Registration attempt:', { email, name, hasPassword: !!password })
 
     // Validate input
     if (!name || !email || !password) {
+      console.log('❌ Validation failed: Missing fields')
       return NextResponse.json(
         { error: 'All fields are required' },
         { status: 400 }
@@ -23,6 +27,7 @@ export async function POST(request: Request) {
     })
 
     if (existingUser) {
+      console.log('❌ User already exists:', email)
       return NextResponse.json(
         { error: 'User with this email already exists' },
         { status: 400 }
@@ -45,14 +50,20 @@ export async function POST(request: Request) {
       },
     })
 
+    console.log('✅ User registered successfully:', { userId: user.id, email: user.email })
+
     return NextResponse.json({
       message: 'User registered successfully',
       userId: user.id,
     })
   } catch (error) {
-    console.error('Registration error:', error)
+    console.error('❌ Registration error:', error)
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+    })
     return NextResponse.json(
-      { error: 'Failed to register user' },
+      { error: 'Failed to register user', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }

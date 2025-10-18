@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { ensureAdminExists } from '@/lib/initAdmin';
+import { validateEnv, getEnvInfo } from '@/lib/validateEnv';
 
 /**
  * Health check endpoint for Docker container monitoring
@@ -12,6 +13,9 @@ let adminInitialized = false;
 
 export async function GET() {
   try {
+    // Validate environment variables
+    validateEnv();
+    
     // Initialize admin on first health check
     if (!adminInitialized) {
       await ensureAdminExists();
@@ -24,7 +28,8 @@ export async function GET() {
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
         environment: process.env.NODE_ENV,
-        adminInitialized
+        adminInitialized,
+        envInfo: getEnvInfo(),
       },
       { status: 200 }
     );

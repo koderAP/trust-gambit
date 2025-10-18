@@ -1,5 +1,7 @@
 generator client {
   provider = "prisma-client-js"
+  // Optimize for serverless environments
+  previewFeatures = ["jsonProtocol"]
 }
 
 datasource db {
