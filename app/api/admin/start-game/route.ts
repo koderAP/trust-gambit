@@ -58,16 +58,35 @@ export async function POST(request: Request) {
     const totalLobbies = Math.ceil(shuffledUsers.length / LOBBY_SIZE)
     const lobbiesCreated = []
 
-    // Create or find the game (look for NOT_STARTED or REGISTRATION_OPEN)
-    let game = await prisma.game.findFirst({
+    console.log(`[Lobby Assignment] Processing ${shuffledUsers.length} players, creating ${totalLobbies} lobby/lobbies`)
+
+    // Create or find the game (look for NOT_STARTED, REGISTRATION_OPEN, LOBBIES_FORMING, or STAGE_1_ACTIVE)
+    // This allows adding more lobbies to an existing game
+    const existingGame = await prisma.game.findFirst({
       where: {
         status: {
-          in: ['NOT_STARTED', 'REGISTRATION_OPEN'],
+          in: ['NOT_STARTED', 'REGISTRATION_OPEN', 'LOBBIES_FORMING', 'STAGE_1_ACTIVE'],
         },
       },
+      include: {
+        lobbies: {
+          orderBy: {
+            poolNumber: 'desc'
+          },
+          take: 1
+        }
+      }
     })
 
-    if (!game) {
+    // Get the next pool number to continue numbering from existing lobbies
+    let nextPoolNumber = 1
+    if (existingGame && existingGame.lobbies.length > 0) {
+      nextPoolNumber = existingGame.lobbies[0].poolNumber + 1
+    }
+
+    let game
+    if (!existingGame) {
+      // Create new game if none exists
       game = await prisma.game.create({
         data: {
           status: 'LOBBIES_FORMING',
@@ -78,12 +97,12 @@ export async function POST(request: Request) {
           gamma: params.gamma,
         },
       })
-    } else {
-      // Update game status to STAGE_1_ACTIVE (ready to start rounds)
+    } else if (existingGame.status === 'NOT_STARTED' || existingGame.status === 'REGISTRATION_OPEN') {
+      // Update game status only if it's NOT_STARTED or REGISTRATION_OPEN
       game = await prisma.game.update({
-        where: { id: game.id },
+        where: { id: existingGame.id },
         data: { 
-          status: 'STAGE_1_ACTIVE',
+          status: 'LOBBIES_FORMING',
           currentStage: 1,
           currentRound: 0,
           startedAt: new Date(),
@@ -92,21 +111,27 @@ export async function POST(request: Request) {
           gamma: params.gamma,
         },
       })
+    } else {
+      // If game is already LOBBIES_FORMING or STAGE_1_ACTIVE, use it as-is
+      game = existingGame
     }
 
-    // Create lobbies and assign users (ACTIVE status - ready for rounds)
+    // Create lobbies and assign users (WAITING status initially)
     for (let i = 0; i < totalLobbies; i++) {
       const lobbyUsers = shuffledUsers.slice(i * LOBBY_SIZE, (i + 1) * LOBBY_SIZE)
       
-      // Create lobby with current user count and ACTIVE status
+      console.log(`[Lobby Assignment] Creating Pool ${nextPoolNumber + i} with ${lobbyUsers.length} players`)
+      
+      // Create lobby with current user count and WAITING status
+      // Admin must manually activate lobbies using activate-lobbies endpoint
       const lobby = await prisma.lobby.create({
         data: {
-          name: `Pool ${i + 1}`,
-          poolNumber: i + 1,
+          name: `Pool ${nextPoolNumber + i}`,
+          poolNumber: nextPoolNumber + i,
           stage: 1,
           maxUsers: LOBBY_SIZE,
           currentUsers: lobbyUsers.length,
-          status: 'ACTIVE', // Set to ACTIVE immediately
+          status: 'WAITING', // Set to WAITING - admin must activate
           gameId: game.id,
         },
       })
@@ -131,8 +156,9 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({
-      message: 'Game started successfully',
+      message: 'Lobbies created successfully. Use "Activate Lobbies" to make them ready for play.',
       gameId: game.id,
+      gameStatus: game.status,
       lobbiesCreated: lobbiesCreated.length,
       playersAssigned: shuffledUsers.length,
       lobbies: lobbiesCreated,

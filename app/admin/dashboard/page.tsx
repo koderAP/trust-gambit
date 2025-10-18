@@ -185,10 +185,10 @@ export default function AdminDashboard() {
       const data = await res.json()
 
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to start game')
+        throw new Error(data.error || 'Failed to assign lobbies')
       }
 
-      setSuccess(`Game started! Created ${data.lobbiesCreated} lobbies with ${data.playersAssigned} players.`)
+      setSuccess(`Lobbies assigned! Created ${data.lobbiesCreated} lobbies with ${data.playersAssigned} players. Use "Activate Lobbies" button to make them ready.`)
       
       // Refresh game state
       await fetchGameState()
@@ -661,8 +661,9 @@ export default function AdminDashboard() {
                   </div>
                 ) : null}
 
-                {/* Assign Lobbies Button - Only show if game exists and is NOT_STARTED or REGISTRATION_OPEN */}
-                {activeGame && activeGame.status !== 'ENDED' && (
+                {/* Assign Lobbies Button - Show when game exists and has waiting players */}
+                {/* Can be used multiple times to add more lobbies incrementally */}
+                {activeGame && ['NOT_STARTED', 'REGISTRATION_OPEN', 'LOBBIES_FORMING', 'STAGE_1_ACTIVE'].includes(activeGame.status) && (
                   <Button
                     onClick={handleStartGame}
                     className="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-semibold"
@@ -704,6 +705,32 @@ export default function AdminDashboard() {
                       >
                         <Activity className="mr-2 h-4 w-4" />
                         Activate Lobbies (WAITING → ACTIVE)
+                      </Button>
+                    )}
+                    {/* Consolidate Lobbies Button: Show if there are multiple WAITING lobbies with few players */}
+                    {activeGame.lobbies.filter((l: any) => l.status === 'WAITING').length > 1 && (
+                      <Button
+                        onClick={async () => {
+                          setError('');
+                          setSuccess('');
+                          try {
+                            const res = await fetch('/api/admin/consolidate-lobbies', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ gameId: activeGame.id }),
+                            });
+                            const data = await res.json();
+                            if (!res.ok) throw new Error(data.error || 'Failed to consolidate lobbies');
+                            setSuccess(`Consolidated ${data.oldLobbies} lobbies into ${data.newLobbies} lobby/lobbies with ${data.totalPlayers} players!`);
+                            await fetchGameState();
+                          } catch (err: any) {
+                            setError(err.message);
+                          }
+                        }}
+                        className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold mt-2"
+                      >
+                        <Layers className="mr-2 h-4 w-4" />
+                        Consolidate Small Lobbies
                       </Button>
                     )}
                   </div>
