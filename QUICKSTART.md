@@ -35,19 +35,37 @@ Password: admin123
 
 ## 📦 Database Seeding
 
-### **Seed Admin User (Already Done ✅)**
+### **Seed Admin User**
+
+**Quick Method (Use This):**
 ```bash
-# Admin user has been created with:
-# Username: admin
-# Password: admin123
+# Run the seed script
+./scripts/seed-admin-docker.sh
+
+# Or manually:
+docker-compose exec postgres psql -U trustgambit -d trustgambit -c "
+UPDATE \"Admin\" SET password = '\$2a\$12\$Nr.Vyu.RBFkrrTS3mp8.4eyXWWnlkWwGYf9v10z5cWus7C7cVyvhy' 
+WHERE username = 'admin';
+"
+
+# Then restart the app
+docker-compose restart app
 ```
 
-### **To Re-seed or Create Additional Admins:**
+**Default Credentials:**
+- Username: `admin`
+- Password: `admin123`
+
+### **To Create Additional Admins:**
 ```bash
-# Option 1: Direct SQL (Quick method)
+# Generate password hash locally first
+cd /path/to/TrustGambit
+node -e "require('bcryptjs').hash('yourpassword', 12).then(h => console.log(h))"
+
+# Then insert with the generated hash
 docker-compose exec postgres psql -U trustgambit -d trustgambit -c "
 INSERT INTO \"Admin\" (id, username, password, \"createdAt\") 
-VALUES ('admin-2', 'admin2', '\$2a\$12\$rNqZVqNXJfLCuKRqFCKtKeFwXi3WvMPHPLOxdQn7FxKOKcQHn3tTW', NOW()) 
+VALUES ('admin-2', 'admin2', 'YOUR_GENERATED_HASH_HERE', NOW()) 
 ON CONFLICT (username) DO NOTHING;
 "
 ```
@@ -291,13 +309,32 @@ docker-compose logs app
 # - Migration errors → Check Prisma schema
 ```
 
-### **Can't login**
+### **Can't login to admin panel**
 ```bash
-# Verify admin exists
-docker-compose exec postgres psql -U trustgambit -d trustgambit -c "SELECT * FROM \"Admin\";"
+# 1. Verify admin exists
+docker-compose exec postgres psql -U trustgambit -d trustgambit -c "SELECT username FROM \"Admin\";"
 
-# Re-seed if needed (see Database Seeding section above)
+# 2. Update admin password with correct hash
+docker-compose exec postgres psql -U trustgambit -d trustgambit -c "
+UPDATE \"Admin\" SET password = '\$2a\$12\$Nr.Vyu.RBFkrrTS3mp8.4eyXWWnlkWwGYf9v10z5cWus7C7cVyvhy' 
+WHERE username = 'admin';
+"
+
+# 3. Restart the app
+docker-compose restart app
+
+# 4. Clear browser cache/cookies and try again
+# 5. Use username: admin, password: admin123
+
+# Still not working? Check app logs:
+docker-compose logs app | grep -i "auth\|error"
 ```
+
+**Common Issues:**
+- **CSRF Error**: Clear browser cookies and try again
+- **Wrong password**: Make sure you're using `admin123` (not `admin` as password)
+- **Session issues**: Restart the app container
+- **Browser cache**: Try incognito/private mode
 
 ### **Database connection failed**
 ```bash
