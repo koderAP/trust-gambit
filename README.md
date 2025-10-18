@@ -74,28 +74,18 @@ Visit **http://localhost:3000**npm installcd TrustGambit
 
 
 
-## 📚 Documentation# Setup environment# Install dependencies
+## 📚 Documentation
 
+- **[Complete Documentation](docs/DOCUMENTATION.md)** - Setup, admin guide, game mechanics, architecture
+- **[Quick Start Guide](docs/QUICKSTART.md)** - Get started quickly
+- **[Game Rules](docs/game.md)** - Detailed scoring system and examples
+- **[State Machine](docs/state-machine.md)** - Game flow and status transitions
 
+## 🛠️ Tech Stack
 
-- **[Complete Documentation](DOCUMENTATION.md)** - Setup, admin guide, game mechanics, architecturecp .env.example .envnpm install
-
-- **[Game Rules](game.md)** - Detailed scoring system and examples
-
-- **[State Machine](state-machine.md)** - Game flow and status transitions# Configure DATABASE_URL in .env
-
-
-
-## 🛠️ Tech Stack# Setup environment variables
-
-
-
-- **Frontend**: Next.js 14, React, TypeScript, Tailwind CSS# Initialize databasecp .env.example .env
-
+- **Frontend**: Next.js 14, React, TypeScript, Tailwind CSS
 - **Backend**: Next.js API Routes, NextAuth.js
-
-- **Database**: PostgreSQL + Prisma ORMnpx prisma generate# Edit .env with your database credentials
-
+- **Database**: PostgreSQL + Prisma ORM
 - **Styling**: shadcn/ui components
 
 npx prisma db push
@@ -478,11 +468,15 @@ docker-compose up
 ## 📖 Documentation
 
 Additional documentation:
-- [Game Rules](game.md)
-- [State Machine Specification](state-machine.md)
-- [State Machine Diagrams](state-machine-diagrams.md)
-- [Implementation Strategy](IMPLEMENTATION_STRATEGY.md)
-- [Single Machine Deployment (1000 users)](SINGLE_MACHINE_1000_USERS.md)
+- [Complete Documentation](docs/DOCUMENTATION.md)
+- [Quick Start Guide](docs/QUICKSTART.md)
+- [Deployment Guide](docs/DEPLOYMENT-QUICK-REF.md)
+- [Digital Ocean Deployment](docs/DIGITAL-OCEAN-DEPLOYMENT.md)
+- [Docker Deployment](docs/DOCKER-DEPLOYMENT.md)
+- [Game Rules](docs/game.md)
+- [State Machine Specification](docs/state-machine.md)
+- [Admin Auto-Seed](docs/ADMIN-AUTO-SEED.md)
+- [Image Performance Guide](docs/IMAGE-PERFORMANCE-GUIDE.md)
 
 ## 🤝 Contributing
 

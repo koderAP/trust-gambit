@@ -224,18 +224,12 @@ openssl rand -base64 24
 
 ### **3. Deploy to Cloud Platform**
 
-#### **AWS ECS/Fargate:**
+#### **DigitalOcean Droplet:**
 ```bash
-# Push image to ECR
-docker tag trustgambit-app:latest your-registry.dkr.ecr.region.amazonaws.com/trustgambit:latest
-docker push your-registry.dkr.ecr.region.amazonaws.com/trustgambit:latest
-```
-
-#### **Google Cloud Run:**
-```bash
-# Build and deploy
-gcloud builds submit --tag gcr.io/your-project/trustgambit
-gcloud run deploy trustgambit --image gcr.io/your-project/trustgambit --platform managed
+# On your server:
+git clone your-repo
+cd TrustGambit
+./scripts/deploy-to-droplet.sh
 ```
 
 #### **DigitalOcean App Platform:**
@@ -244,7 +238,7 @@ gcloud run deploy trustgambit --image gcr.io/your-project/trustgambit --platform
 # App Platform will handle the build and deployment automatically
 ```
 
-#### **Any VPS (DigitalOcean, AWS EC2, etc.):**
+#### **Any VPS with Docker:**
 ```bash
 # On your server:
 git clone your-repo

@@ -44,7 +44,7 @@ Best hosting options for 3000 concurrent users:
    - Automatic optimization
    - URL-based transformations
 
-3. **AWS CloudFront + S3**
+3. **DigitalOcean Spaces CDN**
    - Reliable at scale
    - Edge caching
    - Low cost

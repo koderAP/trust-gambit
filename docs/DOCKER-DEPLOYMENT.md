@@ -116,7 +116,7 @@ POSTGRES_PASSWORD=strong-password-here
 
 ### Deploy to Cloud Platforms
 
-#### Option 1: Docker on VPS (DigitalOcean, AWS EC2, etc.)
+#### Option 1: Docker on VPS (DigitalOcean, etc.)
 ```bash
 # On your server
 git clone your-repo

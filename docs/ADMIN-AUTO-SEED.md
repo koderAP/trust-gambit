@@ -13,9 +13,7 @@ The admin user is **automatically created** when the app starts in production. Y
 
 ### On Different Platforms
 
-**Docker/VPS**: Admin created during first health check after container starts
-
-**Vercel/Netlify/Serverless**: Admin created on first user visit or API request
+**Docker/VPS/Digital Ocean**: Admin created during first health check after container starts
 
 **No manual intervention needed!** Just deploy and visit your site.
 
@@ -71,15 +69,12 @@ environment:
 
 ### Check if admin was created:
 
-**Docker:**
+**Docker/Digital Ocean:**
 ```bash
 # Using docker exec
 docker exec -it trustgambit-db psql -U trustgambit -d trustgambit -c "SELECT username, \"createdAt\" FROM \"Admin\";"
-```
 
-**Vercel/Cloud:**
-```bash
-# Check health endpoint (also triggers initialization if needed)
+# Or check health endpoint (also triggers initialization if needed)
 curl https://your-domain.com/api/health
 ```
 
@@ -108,7 +103,7 @@ Response should include:
 # Local
 curl http://localhost:3000/api/init
 
-# Production (Vercel, etc.)
+# Production
 curl https://your-domain.com/api/init
 ```
 
@@ -131,9 +126,6 @@ Docker:
 docker logs trustgambit-app
 ```
 
-Vercel:
-- Dashboard → Deployments → Select deployment → View logs
-
 Look for:
 - `✅ Admin user created automatically`
 - `✅ Admin user already exists`
@@ -155,7 +147,7 @@ Docker:
 docker exec trustgambit-app npm run prisma db pull
 ```
 
-Vercel/Cloud: Check your database provider's dashboard for connection issues
+Check your database provider's dashboard for connection issues
 
 ### Admin login not working
 

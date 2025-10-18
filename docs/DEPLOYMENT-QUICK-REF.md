@@ -22,39 +22,6 @@ curl http://localhost:3000/api/health
 
 ---
 
-## Vercel (Serverless)
-
-### Deploy
-1. Import GitHub repo to Vercel
-2. Add environment variables:
-   ```
-   DATABASE_URL=postgresql://...
-   NEXTAUTH_URL=https://your-app.vercel.app
-   NEXTAUTH_SECRET=<generate-random>
-   AUTH_TRUST_HOST=true
-   ```
-3. Deploy!
-
-### Admin Initialization
-**Automatic:** Just visit your deployed site!
-```
-https://your-app.vercel.app
-```
-
-The first request triggers admin creation. Then login at:
-```
-https://your-app.vercel.app/admin/login
-```
-
-**Manual (optional):**
-```bash
-curl https://your-app.vercel.app/api/init
-```
-
-📖 Full guide: [VERCEL-DEPLOYMENT.md](VERCEL-DEPLOYMENT.md)
-
----
-
 ## Railway (Docker-based)
 
 ```bash
@@ -129,7 +96,7 @@ Look for: `"adminInitialized": true`
 
 | Platform | Best For | Cost | Setup Time |
 |----------|----------|------|------------|
-| **Vercel** | Quick demos, MVPs | Free | 5 min |
+| **Digital Ocean** | Production, Full control | $5-10/mo | 30 min |
 | **Railway** | Production, WebSockets | $5/mo | 10 min |
 | **Docker (VPS)** | Full control | $5-10/mo | 30 min |
 
@@ -137,10 +104,9 @@ Look for: `"adminInitialized": true`
 
 ## Quick Deploy Commands
 
-### Vercel CLI
+### Digital Ocean
 ```bash
-npm i -g vercel
-vercel --prod
+./scripts/deploy-to-droplet.sh
 ```
 
 ### Railway CLI
@@ -159,7 +125,7 @@ docker-compose up -d
 
 ## Documentation Index
 
-- 📘 [VERCEL-DEPLOYMENT.md](VERCEL-DEPLOYMENT.md) - Complete Vercel guide
+- 📘 [DIGITAL-OCEAN-DEPLOYMENT.md](DIGITAL-OCEAN-DEPLOYMENT.md) - Digital Ocean deployment
 - 📗 [DOCKER-DEPLOYMENT.md](DOCKER-DEPLOYMENT.md) - Docker setup
 - 📙 [ADMIN-AUTO-SEED.md](ADMIN-AUTO-SEED.md) - Admin seeding details
 - 📕 [QUICKSTART.md](QUICKSTART.md) - Local development
