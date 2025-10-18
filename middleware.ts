@@ -1,31 +1,15 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-// This middleware runs on every request
-// We'll use it to ensure admin is initialized on first deployment
-
-let initializationAttempted = false
-
+/**
+ * Middleware for Trust Gambit
+ * 
+ * Note: Admin initialization is handled by the /api/health endpoint
+ * which is called on first request. No need to trigger it here.
+ */
 export async function middleware(request: NextRequest) {
-  // Only attempt initialization once per deployment
-  if (!initializationAttempted) {
-    initializationAttempted = true
-    
-    // Trigger initialization in the background
-    // This doesn't block the request
-    if (process.env.NODE_ENV === 'production') {
-      try {
-        // Call our init endpoint in the background
-        const baseUrl = request.nextUrl.origin
-        fetch(`${baseUrl}/api/init`).catch((error) => {
-          console.error('Background admin initialization failed:', error)
-        })
-      } catch (error) {
-        console.error('Failed to trigger admin initialization:', error)
-      }
-    }
-  }
-
+  // Middleware can be used for auth checks, redirects, etc.
+  // Admin initialization happens via /api/health endpoint
   return NextResponse.next()
 }
 
