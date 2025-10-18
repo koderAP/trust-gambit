@@ -32,6 +32,7 @@ type UserProfile = {
     domain: string;
     question: string;
     correctAnswer: string;
+    imageUrl?: string | null;
     roundNumber: number;
     startTime: string;
     durationSeconds: number;
@@ -526,6 +527,22 @@ function DashboardContent(): JSX.Element {
                             <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
                               <h3 className="font-semibold text-lg mb-2 text-blue-900">Question:</h3>
                               <p className="text-gray-800">{profile.currentRound.question}</p>
+                              {profile.currentRound.imageUrl && (
+                                <div className="mt-3">
+                                  <img 
+                                    src={profile.currentRound.imageUrl} 
+                                    alt="Question image" 
+                                    loading="lazy"
+                                    decoding="async"
+                                    width="400"
+                                    height="300"
+                                    className="max-w-full max-h-64 rounded border border-blue-200"
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = 'none';
+                                    }}
+                                  />
+                                </div>
+                              )}
                             </div>
 
                             {hasSubmitted ? (

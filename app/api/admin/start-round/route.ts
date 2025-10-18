@@ -105,6 +105,7 @@ export async function POST(request: NextRequest) {
       let domain: string;
       let question: string;
       let correctAnswer: string;
+      let imageUrl: string | null = null;
 
       if (unusedQuestion) {
         // Use an unused global question
@@ -112,6 +113,7 @@ export async function POST(request: NextRequest) {
         domain = unusedQuestion.domain;
         question = unusedQuestion.question;
         correctAnswer = unusedQuestion.correctAnswer;
+        imageUrl = unusedQuestion.imageUrl;
       } else {
         // Fall back to dummy questions
         console.log(`No unused questions found. Creating dummy question for Round ${validatedData.roundNumber}`);
@@ -133,6 +135,7 @@ export async function POST(request: NextRequest) {
             domain: domain,
             question: question,
             correctAnswer: correctAnswer,
+            imageUrl: imageUrl,
             durationSeconds: validatedData.durationSeconds || 60,
             status: 'NOT_STARTED',
           },

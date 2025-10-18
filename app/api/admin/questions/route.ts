@@ -9,6 +9,7 @@ const questionSchema = z.object({
   domain: z.string().min(1),
   question: z.string().min(1),
   correctAnswer: z.string().min(1),
+  imageUrl: z.string().url().optional().or(z.literal('')),
 });
 
 /**
@@ -82,6 +83,7 @@ export async function POST(request: NextRequest) {
           domain: validatedData.domain,
           question: validatedData.question,
           correctAnswer: validatedData.correctAnswer,
+          imageUrl: validatedData.imageUrl || null,
         },
       });
     } else {
@@ -92,6 +94,7 @@ export async function POST(request: NextRequest) {
           domain: validatedData.domain,
           question: validatedData.question,
           correctAnswer: validatedData.correctAnswer,
+          imageUrl: validatedData.imageUrl || null,
         },
       });
     }

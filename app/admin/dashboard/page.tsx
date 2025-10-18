@@ -113,6 +113,7 @@ export default function AdminDashboard() {
     domain: 'Algorithms',
     question: '',
     correctAnswer: '',
+    imageUrl: '',
   })
   const [savingQuestion, setSavingQuestion] = useState(false)
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null)
@@ -317,6 +318,7 @@ export default function AdminDashboard() {
         domain: 'Algorithms',
         question: '',
         correctAnswer: '',
+        imageUrl: '',
       })
       setEditingQuestionId(null)
       await fetchQuestions()
@@ -1408,6 +1410,31 @@ export default function AdminDashboard() {
                     />
                   </div>
 
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Image URL (Optional)</label>
+                    <input
+                      type="url"
+                      value={newQuestion.imageUrl}
+                      onChange={(e) => setNewQuestion({ ...newQuestion, imageUrl: e.target.value })}
+                      placeholder="https://example.com/image.png"
+                      className="w-full px-3 py-2 bg-white/10 border border-white/30 rounded text-white placeholder-gray-400"
+                    />
+                    <p className="text-xs text-gray-400 mt-1">Paste a URL to an image (PNG, JPG, GIF, etc.)</p>
+                    {newQuestion.imageUrl && (
+                      <div className="mt-2">
+                        <p className="text-xs text-gray-400 mb-1">Preview:</p>
+                        <img 
+                          src={newQuestion.imageUrl} 
+                          alt="Question preview" 
+                          className="max-w-full max-h-48 rounded border border-white/20"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none'
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+
                   <div className="flex gap-3">
                     <Button
                       onClick={handleSaveQuestion}
@@ -1425,6 +1452,7 @@ export default function AdminDashboard() {
                             domain: 'Algorithms',
                             question: '',
                             correctAnswer: '',
+                            imageUrl: '',
                           })
                         }}
                         variant="outline"
@@ -1477,6 +1505,7 @@ export default function AdminDashboard() {
                                       domain: q.domain,
                                       question: q.question,
                                       correctAnswer: q.correctAnswer,
+                                      imageUrl: q.imageUrl || '',
                                     })
                                     setEditingQuestionId(q.id)
                                   }}
@@ -1496,6 +1525,15 @@ export default function AdminDashboard() {
                             )}
                           </div>
                           <p className="text-sm mb-2"><strong>Q:</strong> {q.question}</p>
+                          {q.imageUrl && (
+                            <div className="my-2">
+                              <img 
+                                src={q.imageUrl} 
+                                alt="Question image" 
+                                className="max-w-full max-h-32 rounded border border-white/20"
+                              />
+                            </div>
+                          )}
                           <p className="text-sm text-green-400"><strong>A:</strong> {q.correctAnswer}</p>
                         </div>
                       ))}

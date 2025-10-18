@@ -111,6 +111,7 @@ model Question {
   domain          String   // Algorithms, Finance, Economics, etc.
   question        String   // The question text
   correctAnswer   String   // The correct answer
+  imageUrl        String?  // Optional image URL for the question
   
   isUsed          Boolean  @default(false) // True once used in any game
   
@@ -134,6 +135,7 @@ model Round {
   domain          String   // Algorithms, Finance, Economics, etc.
   question        String   // The question text
   correctAnswer   String   // The correct answer
+  imageUrl        String?  // Optional image URL for the question
   
   status          String   @default("NOT_STARTED") // NOT_STARTED, ACTIVE, COMPLETED
   
