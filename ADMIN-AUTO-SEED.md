@@ -6,9 +6,18 @@ The admin user is **automatically created** when the app starts in production. Y
 
 ## How It Works
 
-1. **Health Check Integration**: The `/api/health` endpoint (used by Docker health checks) automatically creates the admin user on first run
-2. **Manual Initialization**: You can also call `/api/init` to manually trigger initialization
-3. **Idempotent**: Safe to run multiple times - checks if admin exists before creating
+1. **Automatic on First Request**: The admin user is created automatically when the first request hits your app
+2. **Health Check Integration**: The `/api/health` endpoint (used by Docker health checks) automatically creates the admin user on first run
+3. **Manual Initialization**: You can also call `/api/init` to manually trigger initialization (optional)
+4. **Idempotent**: Safe to run multiple times - checks if admin exists before creating
+
+### On Different Platforms
+
+**Docker/VPS**: Admin created during first health check after container starts
+
+**Vercel/Netlify/Serverless**: Admin created on first user visit or API request
+
+**No manual intervention needed!** Just deploy and visit your site.
 
 ## Default Credentials
 
@@ -62,14 +71,25 @@ environment:
 
 ### Check if admin was created:
 
+**Docker:**
 ```bash
 # Using docker exec
 docker exec -it trustgambit-db psql -U trustgambit -d trustgambit -c "SELECT username, \"createdAt\" FROM \"Admin\";"
 ```
 
+**Vercel/Cloud:**
+```bash
+# Check health endpoint (also triggers initialization if needed)
+curl https://your-domain.com/api/health
+```
+
 ### Check initialization status:
 
 ```bash
+# Local
+curl http://localhost:3000/api/health
+
+# Production
 curl https://your-domain.com/api/health
 ```
 
@@ -82,29 +102,60 @@ Response should include:
 }
 ```
 
+### Manual Trigger (if needed):
+
+```bash
+# Local
+curl http://localhost:3000/api/init
+
+# Production (Vercel, etc.)
+curl https://your-domain.com/api/init
+```
+
+This is optional - initialization happens automatically on first request.
+
 ## Troubleshooting
 
 ### Admin not created
 
-1. Check Docker logs:
+**Method 1: Automatic (Just visit your site)**
+```bash
+# The admin is created on first request - just visit:
+https://your-domain.com
+```
+
+**Method 2: Check logs**
+
+Docker:
 ```bash
 docker logs trustgambit-app
 ```
+
+Vercel:
+- Dashboard → Deployments → Select deployment → View logs
 
 Look for:
 - `✅ Admin user created automatically`
 - `✅ Admin user already exists`
 - `❌ Error ensuring admin exists:`
 
-2. Manually trigger initialization:
+**Method 3: Manually trigger**
 ```bash
+# Local
+curl http://localhost:3000/api/init
+
+# Production
 curl https://your-domain.com/api/init
 ```
 
-3. Check database connectivity:
+**Method 4: Check database connectivity**
+
+Docker:
 ```bash
 docker exec trustgambit-app npm run prisma db pull
 ```
+
+Vercel/Cloud: Check your database provider's dashboard for connection issues
 
 ### Admin login not working
 
