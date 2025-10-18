@@ -20,7 +20,7 @@ export async function ensureAdminExists() {
     }
 
     // Create default admin user
-    const adminPassword = await hash('admin123', 12)
+    const adminPassword = await hash('admin@123', 12)
     
     await prisma.admin.create({
       data: {
@@ -31,7 +31,7 @@ export async function ensureAdminExists() {
 
     console.log('✅ Admin user created automatically')
     console.log('   Username: admin')
-    console.log('   Password: admin123')
+    console.log('   Password: admin@123')
     console.log('   ⚠️  Change password after first login!')
   } catch (error) {
     console.error('❌ Error ensuring admin exists:', error)

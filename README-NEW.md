@@ -20,7 +20,7 @@ cp .env.docker.example .env
 docker-compose up -d
 
 # Access at http://localhost:3000
-# Admin credentials: admin / admin123 (auto-created)
+# Admin credentials: admin / admin@123 (auto-created)
 ```
 
 **Admin user is automatically created on startup** - no manual seeding required!
@@ -78,7 +78,7 @@ Each round, choose: **Solve**, **Delegate**, or **Pass**. Scores propagate throu
 
 Access admin panel at `/admin/login` with credentials:
 - Username: `admin`
-- Password: `admin123`
+- Password: `admin@123`
 
 ⚠️ **Change password after first login in production!**
 

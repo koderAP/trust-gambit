@@ -14,7 +14,7 @@ The admin user is **automatically created** when the app starts in production. Y
 
 ```
 Username: admin
-Password: admin123
+Password: admin@123
 ```
 
 ⚠️ **IMPORTANT**: Change the password immediately after first login in production!
@@ -48,7 +48,7 @@ const adminPassword = await hash('YOUR_NEW_PASSWORD', 12)
 Or, better yet, use an environment variable:
 
 ```typescript
-const adminPassword = await hash(process.env.ADMIN_PASSWORD || 'admin123', 12)
+const adminPassword = await hash(process.env.ADMIN_PASSWORD || 'admin@123', 12)
 ```
 
 Then add to docker-compose.yml:
