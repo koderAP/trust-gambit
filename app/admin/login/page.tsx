@@ -71,18 +71,6 @@ export default function AdminLoginPage() {
           </CardHeader>
           
           <CardContent className="pt-6">
-            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <p className="text-sm text-yellow-800 font-medium">
-                Default Credentials:
-              </p>
-              <p className="text-xs text-yellow-700 mt-1">
-                Username: <span className="font-mono font-semibold">admin</span>
-              </p>
-              <p className="text-xs text-yellow-700">
-                Password: <span className="font-mono font-semibold">admin123</span>
-              </p>
-            </div>
-
             {error && (
               <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">
                 {error}

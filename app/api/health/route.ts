@@ -1,22 +1,30 @@
 import { NextResponse } from 'next/server';
+import { ensureAdminExists } from '@/lib/initAdmin';
 
 /**
  * Health check endpoint for Docker container monitoring
+ * Also ensures admin user exists on first health check
  */
 // Force dynamic rendering for all API routes
 export const dynamic = 'force-dynamic'
 
+let adminInitialized = false;
+
 export async function GET() {
   try {
-    // Basic health check - you can add more checks here
-    // (e.g., database connectivity, Redis, etc.)
+    // Initialize admin on first health check
+    if (!adminInitialized) {
+      await ensureAdminExists();
+      adminInitialized = true;
+    }
     
     return NextResponse.json(
       { 
         status: 'healthy',
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
-        environment: process.env.NODE_ENV
+        environment: process.env.NODE_ENV,
+        adminInitialized
       },
       { status: 200 }
     );
