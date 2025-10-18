@@ -56,6 +56,16 @@ export async function POST(request: NextRequest) {
     await prisma.round.deleteMany({});
     await prisma.lobby.deleteMany({});
 
+    // Reset all questions to unused/not asked so they can be used in the new game
+    const questionsReset = await prisma.question.updateMany({
+      where: {
+        isUsed: true,
+      },
+      data: {
+        isUsed: false,
+      },
+    });
+
     // Create new game with NOT_STARTED status
     const newGame = await prisma.game.create({
       data: {
@@ -76,6 +86,7 @@ export async function POST(request: NextRequest) {
         name: newGame.name,
         status: newGame.status,
       },
+      questionsReset: questionsReset.count,
     });
   } catch (error) {
     console.error('Create new game error:', error);

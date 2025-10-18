@@ -6,7 +6,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Shield, Users, Play, LogOut, CheckCircle2, Clock, Activity, Layers, Target, Info, TrendingUp, AlertCircle, Eye } from 'lucide-react'
+import { Shield, Users, Play, LogOut, CheckCircle2, Clock, Activity, Layers, Target, Info, TrendingUp, AlertCircle, Eye, ChevronDown, ChevronUp } from 'lucide-react'
 
 type User = {
   id: string
@@ -116,6 +116,7 @@ export default function AdminDashboard() {
   })
   const [savingQuestion, setSavingQuestion] = useState(false)
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null)
+  const [showDangerZone, setShowDangerZone] = useState(false) // For collapsible danger zone
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -423,8 +424,9 @@ export default function AdminDashboard() {
                       });
                       const data = await res.json();
                       if (!res.ok) throw new Error(data.error || 'Failed to end game');
-                      setSuccess(`Game ended! ${data.usersReset} players are now waiting for lobby assignment.`);
+                      setSuccess(`Game ended! ${data.usersReset} players are now waiting for lobby assignment. ${data.questionsReset} questions reset to unused.`);
                       await fetchGameState();
+                      await fetchQuestions(); // Refresh questions to show all as unused
                     } catch (err: any) {
                       setError(err.message);
                     }
@@ -935,13 +937,18 @@ export default function AdminDashboard() {
               </Card>
             )}
 
-            {/* Post-Game Cleanup - Show ONLY when game is ENDED */}
-            {activeGame && activeGame.status === 'ENDED' && (
+            {/* Post-Game Cleanup - Show when game is ENDED or when no active game exists */}
+            {(!activeGame || activeGame.status === 'ENDED') && (
               <Card className="bg-white/10 border-green-500/50 text-white">
                 <CardHeader>
-                  <CardTitle className="text-green-400">Post-Game Cleanup</CardTitle>
+                  <CardTitle className="text-green-400">
+                    {!activeGame ? 'Start New Game' : 'Post-Game Cleanup'}
+                  </CardTitle>
                   <CardDescription className="text-gray-300">
-                    Start a fresh new game. This will archive the current game and prepare for the next competition.
+                    {!activeGame 
+                      ? 'No active game found. Create a new game to start the competition.'
+                      : 'Start a fresh new game. This will archive the current game and prepare for the next competition.'
+                    }
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -959,6 +966,7 @@ export default function AdminDashboard() {
                           if (!res.ok) throw new Error(data.error || 'Failed to create new game');
                           setSuccess('New game created successfully! All old games archived. Ready to assign lobbies.');
                           await fetchGameState();
+                          await fetchQuestions(); // Refresh questions to show all as unused
                         } catch (err: any) {
                           setError(err.message);
                         }
@@ -972,6 +980,94 @@ export default function AdminDashboard() {
                 </CardContent>
               </Card>
             )}
+
+            {/* Spacer */}
+            <div className="h-8"></div>
+
+            {/* Danger Zone - Wipe Database (Collapsible) */}
+            <Card className="bg-red-950/50 border-red-500/50 text-white">
+              <CardHeader 
+                className="cursor-pointer hover:bg-red-900/20 transition-colors"
+                onClick={() => setShowDangerZone(!showDangerZone)}
+              >
+                <CardTitle className="text-red-400 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="h-5 w-5" />
+                    ⚠️ DANGER ZONE - Database Wipe
+                  </div>
+                  {showDangerZone ? (
+                    <ChevronUp className="h-5 w-5" />
+                  ) : (
+                    <ChevronDown className="h-5 w-5" />
+                  )}
+                </CardTitle>
+                <CardDescription className="text-gray-300">
+                  {showDangerZone ? 'Click to hide' : 'Click to reveal dangerous operations'}
+                </CardDescription>
+              </CardHeader>
+              
+              {showDangerZone && (
+                <CardContent className="space-y-4 pt-2">
+                  <div className="bg-red-900/30 border border-red-600/50 rounded-lg p-4">
+                    <p className="text-sm text-red-200 font-semibold mb-2">⚠️ This action will delete:</p>
+                    <ul className="text-xs text-red-300 space-y-1 ml-4 list-disc">
+                      <li>All registered users</li>
+                      <li>All games, lobbies, and rounds</li>
+                      <li>All submissions and scores</li>
+                      <li>All game data (Admin user is preserved)</li>
+                      <li>Questions will be reset to unused</li>
+                    </ul>
+                    <p className="text-xs text-red-200 font-bold mt-3">
+                      ⛔ This action is IRREVERSIBLE!
+                    </p>
+                  </div>
+                  <Button
+                    onClick={async () => {
+                      const confirmation = prompt(
+                        '⚠️ DANGER: Complete Database Wipe\n\n' +
+                        'This will permanently delete:\n' +
+                        '• All users (except admin)\n' +
+                        '• All games and game data\n' +
+                        '• All lobbies, rounds, submissions, scores\n\n' +
+                        'This action is IRREVERSIBLE!\n\n' +
+                        'Type "WIPE ALL DATA" (without quotes) to confirm:'
+                      );
+
+                      if (confirmation === 'WIPE ALL DATA') {
+                        setError('');
+                        setSuccess('');
+                        try {
+                          const res = await fetch('/api/admin/wipe-database', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ confirmation: 'WIPE_ALL_DATA' }),
+                          });
+                          const data = await res.json();
+                          if (!res.ok) throw new Error(data.error || 'Failed to wipe database');
+                          setSuccess(
+                            `Database wiped successfully! ` +
+                            `Deleted: ${data.deleted.users} users, ${data.deleted.games} games, ` +
+                            `${data.deleted.lobbies} lobbies, ${data.deleted.rounds} rounds, ` +
+                            `${data.deleted.submissions} submissions, ${data.deleted.roundScores} scores. ` +
+                            `Reset ${data.reset.questions} questions to unused.`
+                          );
+                          await fetchGameState();
+                          await fetchQuestions();
+                        } catch (err: any) {
+                          setError(err.message);
+                        }
+                      } else if (confirmation !== null) {
+                        alert('Wipe cancelled. Confirmation text did not match.');
+                      }
+                    }}
+                    className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-6 text-lg border-2 border-red-400"
+                  >
+                    <AlertCircle className="mr-2 h-5 w-5" />
+                    🗑️ WIPE DATABASE
+                  </Button>
+                </CardContent>
+              )}
+            </Card>
           </TabsContent>
 
           {/* Active Game Tab */}

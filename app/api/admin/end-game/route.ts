@@ -63,11 +63,22 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Reset all questions to unused/not asked so they can be used in the next game
+    const questionsReset = await prisma.question.updateMany({
+      where: {
+        isUsed: true,
+      },
+      data: {
+        isUsed: false,
+      },
+    });
+
     return NextResponse.json({
       message: 'Game ended successfully. All players are now waiting for next lobby assignment.',
       gameId: activeGame.id,
       usersReset: result.count,
       playersWaitingForLobby: result.count,
+      questionsReset: questionsReset.count,
     });
   } catch (error) {
     console.error('End game error:', error);
