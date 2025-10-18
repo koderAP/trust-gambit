@@ -11,6 +11,9 @@ const startRoundSchema = z.object({
   durationSeconds: z.number().default(60),
 });
 
+// Force dynamic rendering for all API routes
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

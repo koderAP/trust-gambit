@@ -16,6 +16,9 @@ const questionSchema = z.object({
  * GET /api/admin/questions
  * Get all global questions
  */
+// Force dynamic rendering for all API routes
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     const session = await auth();

@@ -13,6 +13,9 @@ const endGlobalRoundSchema = z.object({
  * Ends ALL currently active rounds across all lobbies in the game simultaneously
  * Triggers delegation graph calculation for each round
  */
+// Force dynamic rendering for all API routes
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     // Check admin authentication

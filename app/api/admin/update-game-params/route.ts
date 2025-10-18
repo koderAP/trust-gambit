@@ -14,6 +14,9 @@ const updateGameParamsSchema = z.object({
  * POST /api/admin/update-game-params
  * Update scoring parameters for an existing game
  */
+// Force dynamic rendering for all API routes
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     // Check admin authentication

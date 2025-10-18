@@ -10,6 +10,9 @@ const exitGameSchema = z.object({
  * POST /api/user/exit-game
  * Allows user to exit the game and return to waiting state
  */
+// Force dynamic rendering for all API routes
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

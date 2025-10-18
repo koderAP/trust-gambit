@@ -3,6 +3,9 @@ import { NextResponse } from 'next/server';
 /**
  * Health check endpoint for Docker container monitoring
  */
+// Force dynamic rendering for all API routes
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     // Basic health check - you can add more checks here

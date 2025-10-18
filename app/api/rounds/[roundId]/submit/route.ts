@@ -9,6 +9,9 @@ const submissionSchema = z.object({
   delegateTo: z.string().optional(),
 });
 
+// Force dynamic rendering for all API routes
+export const dynamic = 'force-dynamic'
+
 export async function POST(
   request: NextRequest,
   { params }: { params: { roundId: string } }

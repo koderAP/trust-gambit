@@ -15,6 +15,9 @@ const startGlobalRoundSchema = z.object({
  * Starts a specific round number across ALL lobbies in the game simultaneously
  * Uses pre-configured round data from configure-rounds
  */
+// Force dynamic rendering for all API routes
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     // Check admin authentication

@@ -11,6 +11,9 @@ const kickPlayerSchema = z.object({
  * POST /api/admin/kick-player
  * Remove a user from their lobby and reset their lobby status
  */
+// Force dynamic rendering for all API routes
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     // Check admin authentication

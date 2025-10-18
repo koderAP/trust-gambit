@@ -7,6 +7,9 @@ import { prisma } from '@/lib/prisma';
  * Ends the current game and resets all players to waiting for lobby state
  * Does NOT create a new game - just cleans up the current one
  */
+// Force dynamic rendering for all API routes
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     // Check admin authentication

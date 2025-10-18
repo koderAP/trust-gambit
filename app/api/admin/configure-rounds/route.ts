@@ -23,6 +23,9 @@ const configureRoundsSchema = z.object({
  * Configure all rounds for a game (20 for Stage 1, 8 for Stage 2)
  * This should be done during game setup, before rounds actually start
  */
+// Force dynamic rendering for all API routes
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     // Check admin authentication

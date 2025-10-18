@@ -11,6 +11,9 @@ const startGameSchema = z.object({
   defaultDuration: z.number().min(10).max(600).default(60),
 })
 
+// Force dynamic rendering for all API routes
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: Request) {
   try {
     const session = await auth()

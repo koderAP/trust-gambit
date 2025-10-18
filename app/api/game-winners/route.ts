@@ -5,6 +5,9 @@ import { prisma } from '@/lib/prisma';
  * GET /api/game-winners
  * Fetch top 3 winners from the ended game
  */
+// Force dynamic rendering for all API routes
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     // Find the most recent ended game

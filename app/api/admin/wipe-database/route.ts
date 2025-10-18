@@ -8,6 +8,9 @@ import { prisma } from '@/lib/prisma';
  * ⚠️ DANGER: This is irreversible! Use only for testing cleanup.
  * Admin user is preserved.
  */
+// Force dynamic rendering for all API routes
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     // Check admin authentication

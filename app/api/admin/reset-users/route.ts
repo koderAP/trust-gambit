@@ -7,6 +7,9 @@ import { prisma } from '@/lib/prisma';
  * Removes all users from lobbies and resets their lobby request status
  * Should be used after game ends to prepare for next game
  */
+// Force dynamic rendering for all API routes
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     // Check admin authentication

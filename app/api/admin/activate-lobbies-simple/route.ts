@@ -12,6 +12,9 @@ const activateLobbiesSchema = z.object({
  * Simply changes lobby status from WAITING to ACTIVE
  * Does NOT create rounds or change game status
  */
+// Force dynamic rendering for all API routes
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     // Check admin authentication

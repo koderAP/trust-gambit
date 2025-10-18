@@ -11,6 +11,9 @@ const finishStage1Schema = z.object({
  * POST /api/admin/finish-stage-1
  * Finishes Stage 1 and creates Stage 2 lobbies with top 2 players from each Stage 1 lobby
  */
+// Force dynamic rendering for all API routes
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     // Check admin authentication

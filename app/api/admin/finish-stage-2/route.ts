@@ -11,6 +11,9 @@ const finishStage2Schema = z.object({
  * POST /api/admin/finish-stage-2
  * Finishes Stage 2 and ends the game
  */
+// Force dynamic rendering for all API routes
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     // Check admin authentication

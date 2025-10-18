@@ -8,6 +8,9 @@ type DomainRatingInput = {
   reason: string
 }
 
+// Force dynamic rendering for all API routes
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: Request) {
   try {
     const { userId, domainRatings } = await request.json() as {

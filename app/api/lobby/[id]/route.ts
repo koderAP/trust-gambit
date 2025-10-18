@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+// Force dynamic rendering for all API routes
+export const dynamic = 'force-dynamic'
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -13,16 +16,22 @@ export async function GET(
           select: {
             id: true,
             name: true,
-            domain: true,
-            rating: true,
+            email: true,
+            domainRatings: {
+              select: {
+                domain: true,
+                rating: true,
+              },
+            },
           },
         },
-        games: {
-          orderBy: { createdAt: 'desc' },
-          take: 1,
+        game: {
           include: {
             rounds: {
-              where: { status: 'ACTIVE' },
+              where: { 
+                status: 'ACTIVE',
+                lobbyId: params.id,
+              },
               take: 1,
             },
           },

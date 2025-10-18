@@ -6,6 +6,9 @@ import { prisma } from '@/lib/prisma';
  * POST /api/admin/create-new-game
  * Creates a fresh new game (after previous game ended)
  */
+// Force dynamic rendering for all API routes
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     // Check admin authentication

@@ -6,6 +6,9 @@ import { prisma } from '@/lib/prisma';
  * POST /api/admin/reset-lobbies
  * Resets all lobbies and removes users from them
  */
+// Force dynamic rendering for all API routes
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     // Check admin authentication

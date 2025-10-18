@@ -5,6 +5,9 @@ import { prisma } from '@/lib/prisma';
  * GET /api/lobbies/[lobbyId]/leaderboard
  * Get leaderboard with cumulative scores for all players in a lobby
  */
+// Force dynamic rendering for all API routes
+export const dynamic = 'force-dynamic'
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { lobbyId: string } }
