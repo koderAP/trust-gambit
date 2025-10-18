@@ -17,6 +17,8 @@ const startGlobalRoundSchema = z.object({
  */
 // Force dynamic rendering for all API routes
 export const dynamic = 'force-dynamic'
+// Increase timeout for large games (700+ users)
+export const maxDuration = 60 // 60 seconds max
 
 export async function POST(request: NextRequest) {
   try {
@@ -108,7 +110,6 @@ export async function POST(request: NextRequest) {
       let domain: string;
       let question: string;
       let correctAnswer: string;
-      let imageUrl: string | null = null;
 
       if (unusedQuestion) {
         // Use an unused global question
@@ -116,7 +117,6 @@ export async function POST(request: NextRequest) {
         domain = unusedQuestion.domain;
         question = unusedQuestion.question;
         correctAnswer = unusedQuestion.correctAnswer;
-        imageUrl = unusedQuestion.imageUrl;
       } else {
         // Fall back to dummy questions
         console.log(`No unused questions found. Creating dummy question for Round ${validatedData.roundNumber}`);
@@ -128,24 +128,41 @@ export async function POST(request: NextRequest) {
         correctAnswer = 'Dummy answer';
       }
       
-      const roundCreates = game.lobbies.map(lobby =>
-        prisma.round.create({
-          data: {
-            gameId: validatedData.gameId,
-            lobbyId: lobby.id,
-            roundNumber: validatedData.roundNumber,
-            stage: stage,
-            domain: domain,
-            question: question,
-            correctAnswer: correctAnswer,
-            imageUrl: imageUrl,
-            durationSeconds: validatedData.durationSeconds || 60,
-            status: 'NOT_STARTED',
-          },
-        })
-      );
+      console.log(`Creating ${game.lobbies.length} rounds...`);
+      const createStart = Date.now();
       
-      configuredRounds = await Promise.all(roundCreates);
+      // Use createMany for bulk insert (much faster for many lobbies)
+      const roundsData = game.lobbies.map(lobby => ({
+        gameId: validatedData.gameId,
+        lobbyId: lobby.id,
+        roundNumber: validatedData.roundNumber,
+        stage: stage,
+        domain: domain,
+        question: question,
+        correctAnswer: correctAnswer,
+        durationSeconds: validatedData.durationSeconds || 60,
+        status: 'NOT_STARTED',
+      }));
+      
+      await prisma.round.createMany({
+        data: roundsData,
+        skipDuplicates: true,
+      });
+      
+      console.log(`✅ Bulk created ${roundsData.length} rounds in ${Date.now() - createStart}ms`);
+      
+      // Fetch the created rounds
+      configuredRounds = await prisma.round.findMany({
+        where: {
+          gameId: validatedData.gameId,
+          roundNumber: validatedData.roundNumber,
+          stage: stage,
+          status: 'NOT_STARTED',
+          lobbyId: {
+            in: game.lobbies.map(l => l.id),
+          },
+        },
+      });
 
       // Mark the global question as used
       if (unusedQuestion) {
@@ -165,22 +182,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Start all rounds simultaneously
+    // Start all rounds simultaneously using bulk update (much faster for many lobbies)
     const startTime = new Date();
+    const updateStart = Date.now();
     
-    const updatePromises = configuredRounds.map(round =>
-      prisma.round.update({
-        where: { id: round.id },
-        data: {
-          status: 'ACTIVE',
-          startTime: startTime,
-          // Apply duration override if provided
-          ...(validatedData.durationSeconds && { durationSeconds: validatedData.durationSeconds }),
+    console.log(`🚀 Starting ${configuredRounds.length} rounds across ${game.lobbies.length} lobbies...`);
+    
+    // Get all round IDs to update
+    const roundIds = configuredRounds.map(r => r.id);
+    
+    // Bulk update all rounds at once instead of individual promises
+    // For very large games (50+ lobbies), this is much faster than individual updates
+    const result = await prisma.round.updateMany({
+      where: {
+        id: {
+          in: roundIds,
         },
-      })
-    );
+      },
+      data: {
+        status: 'ACTIVE',
+        startTime: startTime,
+        // Apply duration override if provided
+        ...(validatedData.durationSeconds && { durationSeconds: validatedData.durationSeconds }),
+      },
+    });
 
-    await Promise.all(updatePromises);
+    console.log(`✅ Bulk started ${result.count} rounds in ${Date.now() - updateStart}ms`);
 
     // Update game current round
     await prisma.game.update({

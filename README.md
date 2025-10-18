@@ -1,508 +1,422 @@
-# Trust Gambit# Trust Gambit# Trust Gambit
-
-
+# Trust Gambit
 
 **A strategic game theory competition where trust, delegation, and problem-solving converge.**
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue)](https://www.postgresql.org/)
+[![Redis](https://img.shields.io/badge/Redis-7-red)](https://redis.io/)
 
+## 🎮 Overview
 
-## 🎮 What is Trust Gambit?**A strategic game theory competition where trust, delegation, and problem-solving converge.**A game theory webapp that explores trust dynamics through strategic gameplay. Players navigate 28 rounds across 2 stages, making decisions to **Solve**, **Delegate**, or **Pass** on questions while building trust networks.
+Trust Gambit is a multiplayer competition platform that explores trust dynamics through strategic gameplay. Players navigate multiple rounds across diverse knowledge domains, making critical decisions to **Solve**, **Delegate**, or **Pass** on questions while building trust networks.
 
+### Game Structure
 
+- **Stage 1**: 120 players in 8 pools of 15 (20 rounds) → Top 2 from each pool advance
+- **Stage 2**: 16 finalists compete (8 rounds) → Top 3 winners
 
-A multiplayer competition where 120+ players navigate 28 rounds across 10 knowledge domains. Success depends not just on solving problems, but on building trust networks and strategic delegation.
+### Core Mechanics
 
+Each round, players choose one of three actions:
+- **Solve**: Attempt the problem directly (+1 correct, -1 incorrect)
+- **Delegate**: Trust another player to solve (scores propagate via delegation chains)
+- **Pass**: Abstain from the round (0 points)
 
-
-- **Stage 1**: 120 players in 8 pools of 15 (20 rounds) → Top 2 advance## 🎮 What is Trust Gambit?## 🚀 Quick Start
-
-- **Stage 2**: 16 finalists compete (8 rounds) → Top 3 win
-
-
-
-Each round, choose: **Solve**, **Delegate**, or **Pass**. Scores propagate through delegation chains with bonuses for trust and penalties for cycles.
-
-A multiplayer competition where 120+ players navigate 28 rounds across 10 knowledge domains. Success depends not just on solving problems, but on building trust networks and strategic delegation.### Prerequisites
+**Key Features**:
+- Scores propagate through delegation chains with distance-based decay
+- Trust bonuses for players who receive many delegations and solve correctly
+- Penalties for delegation cycles
+- Real-time WebSocket updates for live gameplay
+- Complex graph-based scoring algorithm
 
 ## 🚀 Quick Start
 
+### Prerequisites
 
+- Node.js 18+ and npm 9+
+- PostgreSQL 15+
+- Redis 7+ (optional, for production caching)
+- Docker & Docker Compose (for containerized deployment)
+
+### Local Development
 
 ```bash
+# Clone the repository
+git clone https://github.com/koderAP/trust-gambit.git
+cd trust-gambit
 
-# Install dependencies- **Stage 1**: 120 players in 8 pools of 15 (20 rounds) → Top 2 advance- Node.js 18+ and npm 9+
-
+# Install dependencies
 npm install
 
-- **Stage 2**: 16 finalists compete (8 rounds) → Top 3 win- PostgreSQL 14+
-
 # Setup environment
-
-cp .env.example .env- Redis 7+ (optional, for production)
-
-# Configure DATABASE_URL in .env
-
-Each round, choose: **Solve**, **Delegate**, or **Pass**. Scores propagate through delegation chains with bonuses for trust and penalties for cycles.
+cp .env.example .env
+# Configure DATABASE_URL, NEXTAUTH_SECRET, etc. in .env
 
 # Initialize database
+npx prisma generate
+npx prisma migrate deploy
 
-npx prisma generate### Installation
+# Seed questions (optional)
+npx prisma db seed
 
-npx prisma db push
-
-## 🚀 Quick Start
-
-# Seed demo data (optional)
-
-npx tsx scripts/seed-dummy-players.ts```bash
-
-
-
-# Run development server```bash# Clone the repository
-
+# Run development server
 npm run dev
+```
 
-```# Install dependenciesgit clone <your-repo-url>
+Visit `http://localhost:3000` to see the application.
 
+### Docker Deployment (Production)
 
+```bash
+# Build and start all services (5 app instances + nginx + postgres + redis)
+docker-compose up -d --scale app=5
 
-Visit **http://localhost:3000**npm installcd TrustGambit
+# Check health
+curl http://localhost/api/health
 
+# View logs
+docker-compose logs -f app
+```
 
+See [DEPLOYMENT.md](./docs/DEPLOYMENT.md) for detailed production deployment instructions.
 
-**Default Admin**: `admin` / `admin123`
+## 🏗️ Architecture
 
+```
+┌─────────────────────────────────────────────────────────────┐
+│                         nginx (Load Balancer)                │
+│                    Rate Limiting & Routing                   │
+└──────┬──────────────────────────────────────────────────────┘
+       │
+       ├─────┬─────┬─────┬─────┐
+       ▼     ▼     ▼     ▼     ▼
+    ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐
+    │App│ │App│ │App│ │App│ │App│  Next.js 14 (Standalone)
+    │ 1 │ │ 2 │ │ 3 │ │ 4 │ │ 5 │  WebSocket support
+    └─┬─┘ └─┬─┘ └─┬─┘ └─┬─┘ └─┬─┘
+      │     │     │     │     │
+      └─────┴─────┴─────┴─────┘
+              │         │
+              ▼         ▼
+        ┌──────────┐ ┌───────┐
+        │PostgreSQL│ │ Redis │
+        │    15    │ │   7   │
+        └──────────┘ └───────┘
+```
 
+### Tech Stack
+
+**Frontend**:
+- Next.js 14 (App Router)
+- React 18
+- TypeScript 5
+- Tailwind CSS
+- shadcn/ui components
+- Socket.io client (real-time updates)
+
+**Backend**:
+- Next.js API Routes
+- NextAuth.js (authentication)
+- Prisma ORM
+- Socket.io (WebSocket server)
+- XState (state machine)
+
+**Database & Cache**:
+- PostgreSQL 15 (primary data store)
+- Redis 7 (caching & rate limiting)
+
+**Infrastructure**:
+- Docker & Docker Compose
+- nginx (load balancing, rate limiting)
+- Horizontal scaling (5 app instances)
+
+## 📁 Project Structure
+
+```
+trust-gambit/
+├── app/                      # Next.js 14 app directory
+│   ├── api/                  # API routes
+│   │   ├── auth/            # Authentication endpoints
+│   │   ├── admin/           # Admin panel endpoints
+│   │   ├── game-winners/    # Winner management
+│   │   ├── lobbies/         # Lobby operations
+│   │   ├── profile/         # User profiles
+│   │   ├── rounds/          # Round management
+│   │   └── user/            # User operations
+│   ├── admin/               # Admin dashboard pages
+│   ├── dashboard/           # Player dashboard
+│   ├── lobby/               # Game lobby pages
+│   ├── login/               # Authentication pages
+│   └── register/            # Registration pages
+├── components/              # React components
+│   ├── ui/                  # shadcn/ui components
+│   ├── DelegationGraphVisualization.tsx
+│   ├── socket-provider.tsx
+│   └── providers.tsx
+├── lib/                     # Shared utilities
+│   ├── auth.ts              # NextAuth configuration
+│   ├── prisma.ts            # Prisma client & pooling
+│   ├── redis.ts             # Redis client & caching
+│   ├── rateLimit.ts         # Rate limiting logic
+│   ├── circuitBreaker.ts    # Circuit breaker pattern
+│   ├── calculateDelegationGraph.ts
+│   ├── graph/               # Graph processing & scoring
+│   ├── socket/              # Socket.io server
+│   └── state-machines/      # XState game machine
+├── prisma/                  # Database schema & migrations
+│   ├── schema.prisma
+│   ├── seed.ts
+│   └── migrations/
+├── scripts/                 # Utility scripts
+│   ├── seed-users.js        # Bulk user seeding
+│   ├── stress-test.ts       # Load testing
+│   ├── clean-for-new-game.ts
+│   └── check-game-status.ts
+├── docs/                    # Documentation
+│   ├── API.md               # API endpoint documentation
+│   ├── DEPLOYMENT.md        # Deployment guide
+│   ├── game.md              # Game mechanics
+│   └── state-machine.md     # State machine logic
+├── docker-compose.yml       # Docker orchestration
+├── Dockerfile              # Container definition
+├── nginx.conf              # Load balancer config
+└── package.json            # Dependencies
+```
+
+## 🎯 Key Features
+
+### For Players
+
+- **Self-Rating System**: Rate your expertise across 10 domains (Algorithms, Finance, Economics, Statistics, Probability, ML, Crypto, Biology, Indian History, Game Theory)
+- **Real-Time Gameplay**: Live updates via WebSocket, see delegation graphs instantly
+- **Strategic Decisions**: Choose between solving, delegating, or passing each round
+- **Trust Networks**: Build reputation by solving correctly and receiving delegations
+- **Visual Analytics**: Interactive delegation graph visualization
+- **Leaderboards**: Track your standing in real-time
+
+### For Admins
+
+- **Game Management**: Create, start, pause, and end games
+- **Round Control**: Configure and start rounds with custom parameters
+- **Question Management**: Upload questions with domain tags and images
+- **User Management**: View, manage, and seed users
+- **Live Monitoring**: Real-time dashboard with game state and player stats
+- **Bulk Operations**: Efficient handling of 700+ players across 50+ lobbies
+
+### Performance & Scalability
+
+- **High Concurrency**: Handles 16-17 registrations/second sustained
+- **Horizontal Scaling**: 5 app instances with nginx load balancing
+- **Connection Pooling**: 60 connections per instance, 200 total to PostgreSQL
+- **Rate Limiting**: Token bucket algorithm, configurable per endpoint
+- **Caching**: Redis-backed caching with TTL for frequent queries
+- **Circuit Breakers**: Graceful degradation on database/Redis failures
+- **Bulk Operations**: Optimized for large games (700+ players, 50+ lobbies)
+- **Extended Timeouts**: 60-second API routes for large-scale operations
 
 ## 📚 Documentation
 
-- **[Complete Documentation](docs/DOCUMENTATION.md)** - Setup, admin guide, game mechanics, architecture
-- **[Quick Start Guide](docs/QUICKSTART.md)** - Get started quickly
-- **[Game Rules](docs/game.md)** - Detailed scoring system and examples
-- **[State Machine](docs/state-machine.md)** - Game flow and status transitions
+- **[API Reference](./docs/API.md)** - Complete API endpoint documentation
+- **[Deployment Guide](./docs/DEPLOYMENT.md)** - Production deployment instructions
+- **[Game Mechanics](./docs/game.md)** - Detailed game rules and scoring
+- **[State Machine](./docs/state-machine.md)** - Game state flow and transitions
+- **[Architecture](./docs/ARCHITECTURE-DIAGRAM.md)** - System architecture diagrams
+- **[Performance](./docs/HIGH-CONCURRENCY-GUIDE.md)** - Concurrency and optimization
 
-## 🛠️ Tech Stack
+## 🔧 Development
 
-- **Frontend**: Next.js 14, React, TypeScript, Tailwind CSS
-- **Backend**: Next.js API Routes, NextAuth.js
-- **Database**: PostgreSQL + Prisma ORM
-- **Styling**: shadcn/ui components
+### Environment Variables
 
-npx prisma db push
-
-## 📊 Game Flow (Admin)
-
-# Setup database
-
-```
-
-1. Create/Assign Lobbies → 2. Start Rounds (Stage 1) → 3. Finish Stage 1# Seed demo data (optional)npm run db:push
-
-   ↓
-
-4. Activate Stage 2 Lobbies → 5. Start Rounds (Stage 2) → 6. Finish Stage 2npx tsx scripts/seed-dummy-players.ts
-
-   ↓
-
-7. Game Ended → 8. Create New Game# Run development server
-
-```
-
-# Run development servernpm run dev
-
-## 🎯 Scoring Formula
-
-npm run dev```
-
-| Action | Score |
-
-|--------|-------|```
-
-| Solve correctly | +1 |
-
-| Solve incorrectly | -1 |Visit [http://localhost:3000](http://localhost:3000)
-
-| Pass | 0 |
-
-| Delegate to correct solver (distance k) | 1 + λᵏ |Visit **http://localhost:3000**
-
-| Delegate to pass or wrong solver (distance k) | -1 - λᵏ |
-
-| In delegation cycle | -1 - γ |## 📁 Project Structure
-
-| Trust bonus (k delegators, you solve correctly) | +β·k |
-
-**Default Admin**: `admin` / `admin123`
-
-**Default**: λ=0.5, β=0.1, γ=0.2
-
-```
-
-### Examples
-
-## 📚 DocumentationTrustGambit/
-
-- **Bob → Alice (Alice solves correctly)**: Bob gets 1 + λ = 1.5
-
-- **Carol → Dave (Dave answers wrong)**: Carol gets -1 - λ = -1.5├── app/                          # Next.js App Router
-
-- **Frank → Grace (Grace passes)**: Frank gets -1 - λ = -1.5
-
-- **[Complete Documentation](DOCUMENTATION.md)** - Setup, admin guide, game mechanics, architecture│   ├── api/                      # API Routes
-
-## 🔧 Useful Scripts
-
-- **[Game Rules](game.md)** - Detailed scoring system and examples│   │   ├── auth/
+Create a `.env` file with the following:
 
 ```bash
-
-# Check system state- **[State Machine](state-machine.md)** - Game flow and status transitions│   │   │   ├── register/route.ts # User registration
-
-npx tsx scripts/check-system-state.ts
-
-│   │   │   └── login/route.ts    # User login
-
-# View all games
-
-npx tsx scripts/check-all-games.ts## 🛠️ Tech Stack│   │   ├── lobby/
-
-
-
-# Clean up for new game│   │   │   └── [id]/route.ts     # Lobby management
-
-npx tsx scripts/clean-for-new-game.ts
-
-```- **Frontend**: Next.js 14, React, TypeScript, Tailwind CSS│   │   └── rounds/
-
-
-
-## 📝 License- **Backend**: Next.js API Routes, NextAuth.js│   │       └── [roundId]/
-
-
-
-This project was developed for the TechGC Problem Statement by IGTS.- **Database**: PostgreSQL + Prisma ORM│   │           └── submit/route.ts # Round submissions
-
-
-
----- **Styling**: shadcn/ui components│   ├── register/page.tsx         # Registration page
-
-
-
-For complete documentation, see **[DOCUMENTATION.md](DOCUMENTATION.md)**│   ├── lobby/[id]/page.tsx       # Lobby waiting room (TODO)
-
-
-## 📊 Game Flow (Admin)│   ├── game/[id]/page.tsx        # Game round interface (TODO)
-
-│   ├── results/[id]/page.tsx     # Results/leaderboard (TODO)
-
-```│   ├── admin/page.tsx            # Admin dashboard (TODO)
-
-1. Create/Assign Lobbies → 2. Start Rounds (Stage 1) → 3. Finish Stage 1│   ├── layout.tsx                # Root layout
-
-   ↓│   ├── page.tsx                  # Homepage
-
-4. Activate Stage 2 Lobbies → 5. Start Rounds (Stage 2) → 6. Finish Stage 2│   └── globals.css               # Global styles
-
-   ↓│
-
-7. Game Ended → 8. Create New Game├── components/                   # React components
-
-```│   ├── ui/                       # shadcn/ui components
-
-│   │   ├── button.tsx
-
-## 🎯 Scoring Formula│   │   ├── input.tsx
-
-│   │   ├── card.tsx
-
-| Action | Score |│   │   ├── label.tsx
-
-|--------|-------|│   │   └── progress.tsx
-
-| Solve correctly | +1 |│   ├── game/                     # Game components (TODO)
-
-| Solve incorrectly | -1 |│   │   ├── RoundDisplay.tsx
-
-| Pass | 0 |│   │   ├── ActionButtons.tsx
-
-| Delegate to correct solver (distance k) | λᵏ |│   │   └── Timer.tsx
-
-| Delegate to wrong solver (distance k) | -1 - λᵏ |│   └── graph/                    # Graph visualization (TODO)
-
-| In delegation cycle | -1 - γ |│       └── TrustGraph.tsx
-
-| Trust bonus (k delegators, you solve correctly) | +β·k |│
-
-├── lib/                          # Core logic
-
-**Default**: λ=0.5, β=0.1, γ=0.2│   ├── graph/                    # Graph processing
-
-│   │   ├── processor.ts          # Cycle detection, distances
-
-## 🔧 Useful Scripts│   │   └── scoring.ts            # Scoring algorithm
-
-│   ├── state-machines/           # XState machines
-
-```bash│   │   └── gameMachine.ts        # Game & round state machines
-
-# Check system state│   ├── socket/                   # WebSocket handling
-
-npx tsx scripts/check-system-state.ts│   │   └── server.ts             # Socket.io server
-
-│   ├── prisma.ts                 # Prisma client
-
-# View all games│   └── utils.ts                  # Utility functions
-
-npx tsx scripts/check-all-games.ts│
-
-├── prisma/
-
-# Clean up for new game│   └── schema.prisma             # Database schema
-
-npx tsx scripts/clean-for-new-game.ts│
-
-```├── public/                       # Static assets
-
-│
-
-## 📝 License├── .env.example                  # Environment template
-
-├── package.json
-
-This project was developed for the TechGC Problem Statement by IGTS.├── tsconfig.json
-
-├── tailwind.config.js
-
----├── next.config.js
-
-└── README.md
-
-For complete documentation, see **[DOCUMENTATION.md](DOCUMENTATION.md)**```
-
-
-## 🎮 Game Rules
-
-### Overview
-- **120 players** per lobby
-- **28 rounds** total (20 in Stage 1, 8 in Stage 2)
-- **3 actions** per round: Solve, Delegate, or Pass
-
-### Actions
-
-1. **Solve** - Answer the question yourself
-   - ✅ Correct: Full points (λ = 0.5)
-   - ❌ Wrong: Zero points
-
-2. **Delegate** - Trust another player
-   - ✅ If chain leads to correct solver: Partial points (β = 0.3, decreases with distance)
-   - ❌ If chain fails or forms cycle: Zero points
-   - 🎁 Build trust relationships (γ = 0.2)
-
-3. **Pass** - Skip the question
-   - Safe option, no points
-
-### Scoring Formula
-
-```
-Total Score = λ (solve) + β (delegate) + γ (trust)
-
-Where:
-- λ = 0.5 (solving correctly)
-- β = 0.3 × 0.9^distance (delegating to correct solver)
-- γ = 0.2 (trust bonus)
+# Database
+DATABASE_URL="postgresql://user:password@localhost:5432/trustgambit"
+
+# NextAuth
+NEXTAUTH_SECRET="your-secret-key-here"
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_TRUST_HOST="true"
+
+# Redis (optional)
+REDIS_URL="redis://localhost:6379"
+
+# Game Configuration
+GAME_STAGE_1_ROUNDS=20
+GAME_STAGE_2_ROUNDS=8
 ```
 
-### Cycles
+### Database Commands
 
-⚠️ **Critical Rule**: If delegation forms a cycle (A→B→C→A), everyone in the cycle gets **zero points** for that round!
+```bash
+# Generate Prisma client
+npx prisma generate
 
-## 🗄️ Database Schema
+# Run migrations
+npx prisma migrate dev
 
-### Key Models
+# Deploy migrations (production)
+npx prisma migrate deploy
 
-- **User** - Player information (name, email, domain, rating)
-- **Lobby** - Groups of up to 120 players
-- **Game** - One complete game session (28 rounds)
-- **Round** - Individual question/round
-- **Submission** - User's action per round
-- **RoundScore** - Calculated scores per user per round
-- **TrustEdge** - Trust relationships between users
+# Open Prisma Studio
+npx prisma studio
 
-## 🔧 Technology Stack
+# Seed database
+npx prisma db seed
 
-### Frontend
-- **Next.js 14** - React framework with App Router
-- **TypeScript 5** - Type safety
-- **Tailwind CSS** - Styling
-- **shadcn/ui** - UI components
-- **React Flow** - Graph visualization
+# Reset database
+npx prisma migrate reset
+```
 
-### Backend
-- **Next.js API Routes** - REST API
-- **Socket.io** - WebSocket real-time updates
-- **Prisma ORM** - Database access
-- **PostgreSQL** - Primary database
-- **Redis** - Caching & sessions (optional)
+### Useful Scripts
 
-### State Management
-- **XState** - State machines for game flow
-- **Zustand** - Client state (TODO)
+```bash
+# Development
+npm run dev              # Start dev server
+npm run build            # Build for production
+npm run start            # Start production server
 
-## 📡 API Endpoints
+# Database
+npm run db:push          # Push schema changes
+npm run db:seed          # Seed questions
+
+# Testing
+npm run test             # Run tests (if configured)
+npm run stress-test      # Run load tests
+
+# Utilities
+npm run check-status     # Check game status
+npm run clean-game       # Clean for new game
+npm run seed-users       # Bulk seed users
+```
+
+### Admin Seeding
+
+First user to register becomes admin automatically. Or manually create admin:
+
+```bash
+# Using script
+npm run seed-admin
+
+# Using Prisma Studio
+npx prisma studio
+# Navigate to User table, set role="ADMIN"
+```
+
+## 🚦 API Overview
+
+For complete API documentation, see [docs/API.md](./docs/API.md).
 
 ### Authentication
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - Login user
 
-### Lobbies
+- `POST /api/auth/register` - Register new user
+- `POST /api/auth/login` - Login (NextAuth)
+- `GET /api/auth/session` - Get session
+
+### Game Management
+
+- `GET /api/health` - System health check
+- `POST /api/admin/create-new-game` - Create game
+- `POST /api/admin/start-game` - Start game
+- `POST /api/admin/start-round` - Start new round
+- `POST /api/admin/end-current-round` - End active round
 - `GET /api/lobby/[id]` - Get lobby details
 
-### Rounds
-- `POST /api/rounds/[roundId]/submit` - Submit action
-- `GET /api/rounds/[roundId]/submit` - Get submissions
+### User Actions
 
-### Admin (TODO)
-- `POST /api/admin/game/start` - Start game
-- `POST /api/admin/round/start` - Start round
-- `POST /api/admin/round/end` - End round
+- `POST /api/profile/complete` - Complete profile with domain ratings
+- `POST /api/rounds/start` - Submit round action (solve/delegate/pass)
+- `GET /api/user/exit-game` - Exit current game
 
-## 🔌 WebSocket Events
+### Admin Operations
 
-### Client → Server
-- `join:lobby` - Join lobby room
-- `join:game` - Join game room
-- `round:submit` - Submit round action
-- `admin:start_round` - Admin starts round
-- `admin:end_round` - Admin ends round
-
-### Server → Client
-- `lobby:status` - Lobby status update
-- `lobby:user_joined` - New user joined
-- `round:started` - Round has started
-- `round:submission` - New submission received
-- `round:timer_update` - Timer sync
-- `round:ended` - Round has ended
-
-## 🎯 Development Roadmap
-
-### ✅ Completed
-- [x] Project setup (Next.js, TypeScript, Tailwind)
-- [x] Database schema (Prisma)
-- [x] Graph processing engine (cycle detection, scoring)
-- [x] XState machines (game & round flows)
-- [x] Socket.io server setup
-- [x] API routes (auth, lobby, submissions)
-- [x] UI components (shadcn/ui)
-- [x] Homepage
-- [x] Registration page
-
-### 🚧 In Progress
-- [ ] Lobby waiting room page
-- [ ] Game round interface
-- [ ] Trust graph visualization
-- [ ] Results/leaderboard page
-- [ ] Admin dashboard
-
-### 📝 TODO
-- [ ] Login page
-- [ ] Socket.io client integration
-- [ ] Real-time round updates
-- [ ] Timer synchronization
-- [ ] User profile page
-- [ ] Game history
-- [ ] Email notifications
-- [ ] Unit tests
-- [ ] E2E tests
-- [ ] Deployment scripts
+- `GET /api/admin/users` - List all users
+- `GET /api/admin/questions` - Manage questions
+- `POST /api/admin/activate-lobbies` - Activate lobbies for game
+- `POST /api/admin/finish-stage-1` - Progress to stage 2
 
 ## 🧪 Testing
 
-```bash
-# Run tests (TODO)
-npm test
+### Load Testing
 
-# Run E2E tests (TODO)
-npm run test:e2e
+```bash
+# Register 20 users per second
+npm run stress-test -- --rate 20
+
+# Full registration flow (registration + profile)
+ts-node scripts/stress-test-full-registration.ts
 ```
 
-## 📊 Performance
+### Health Check
 
-Target capacity: **1000 concurrent users**
+```bash
+curl http://localhost:3000/api/health
+# or with docker
+curl http://localhost/api/health
+```
 
-Expected performance:
-- Response time: 180ms avg, 420ms P95
-- WebSocket latency: <50ms
-- Success rate: 99.8%
-
-## 🔒 Security
-
-- ✅ Password hashing (bcrypt)
-- ✅ Input validation (Zod)
-- ✅ SQL injection prevention (Prisma)
-- ✅ XSS protection (React escaping)
-- ✅ CSRF protection (Next.js built-in)
-- ⏳ Rate limiting (TODO)
-- ⏳ Session management (TODO)
-
-## 🚀 Deployment
+## 🐳 Docker
 
 ### Development
-```bash
-npm run dev
-```
 
-### Production
-```bash
-# Build
-npm run build
-
-# Start
-npm start
-```
-
-### Docker (TODO)
 ```bash
 docker-compose up
 ```
 
-## 📖 Documentation
+### Production (5 Instances)
 
-Additional documentation:
-- [Complete Documentation](docs/DOCUMENTATION.md)
-- [Quick Start Guide](docs/QUICKSTART.md)
-- [Deployment Guide](docs/DEPLOYMENT-QUICK-REF.md)
-- [Digital Ocean Deployment](docs/DIGITAL-OCEAN-DEPLOYMENT.md)
-- [Docker Deployment](docs/DOCKER-DEPLOYMENT.md)
-- [Game Rules](docs/game.md)
-- [State Machine Specification](docs/state-machine.md)
-- [Admin Auto-Seed](docs/ADMIN-AUTO-SEED.md)
-- [Image Performance Guide](docs/IMAGE-PERFORMANCE-GUIDE.md)
+```bash
+# Build
+docker-compose build app
+
+# Start with 5 replicas
+docker-compose up -d --scale app=5
+
+# View logs
+docker-compose logs -f app
+
+# Check specific instance
+docker logs trustgambit-app-1
+```
+
+### Monitoring
+
+```bash
+# All containers
+docker-compose ps
+
+# Resource usage
+docker stats
+
+# Database connections
+docker exec -it trustgambit-db psql -U trustgambit -c "SELECT count(*) FROM pg_stat_activity;"
+```
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## 📄 License
 
-MIT License
-
-## 👥 Authors
-
-Trust Gambit Team
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
-Built with:
-- [Next.js](https://nextjs.org/)
-- [Prisma](https://www.prisma.io/)
-- [Socket.io](https://socket.io/)
-- [XState](https://xstate.js.org/)
-- [shadcn/ui](https://ui.shadcn.com/)
-- [Tailwind CSS](https://tailwindcss.com/)
+- Built for TechGC Competition by IGTS
+- Inspired by game theory and trust network research
+- Community contributions and feedback
+
+## 📞 Support
+
+- **Issues**: [GitHub Issues](https://github.com/koderAP/trust-gambit/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/koderAP/trust-gambit/discussions)
+- **Email**: support@trustgambit.com
 
 ---
 
-**Need help?** Open an issue or contact the development team.
+**Made with ❤️ for strategic gameplay and trust dynamics research**

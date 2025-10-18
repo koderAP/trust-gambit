@@ -13,7 +13,13 @@
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "stress-test": "tsx scripts/run-stress-test.ts",
+    "stress-test:db": "tsx scripts/stress-test-db-writes.ts",
+    "stress-test:registration": "tsx scripts/stress-test-full-registration.ts",
+    "monitor": "./scripts/monitor-traffic.sh",
+    "check-system": "tsx scripts/check-system-state.ts",
+    "check-game": "tsx scripts/check-game-status.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",
@@ -34,6 +40,7 @@
     "graphology": "^0.25.4",
     "graphology-shortest-path": "^2.0.2",
     "ioredis": "^5.4.0",
+    "lru-cache": "^11.2.2",
     "lucide-react": "^0.447.0",
     "next": "^14.2.0",
     "next-auth": "^5.0.0-beta.25",

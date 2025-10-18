@@ -956,18 +956,18 @@ function DashboardContent(): JSX.Element {
           
           {/* Round Results Modal */}
           <SimpleModal open={!!viewingRound} onOpenChange={open => setViewingRound(open ? viewingRound : null)}>
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold">Round {viewingRound?.round?.roundNumber} Results</h2>
+            <div className="space-y-3">
+              <h2 className="text-xl font-bold">Round {viewingRound?.round?.roundNumber} Results</h2>
               
               {viewingRound && (
                 <>
                   <Card>
-                    <CardHeader>
-                      <CardTitle>Question</CardTitle>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base">Question</CardTitle>
                     </CardHeader>
-                    <CardContent>
-                      <p className="font-medium mb-2">{viewingRound.round.question}</p>
-                      <p className="text-sm text-green-600">
+                    <CardContent className="pb-3">
+                      <p className="font-medium mb-2 text-sm">{viewingRound.round.question}</p>
+                      <p className="text-xs text-green-600">
                         <strong>Correct Answer:</strong> {viewingRound.round.correctAnswer}
                       </p>
                     </CardContent>
@@ -975,18 +975,18 @@ function DashboardContent(): JSX.Element {
 
                   {viewingRound.userScore && (
                     <Card className="border-primary">
-                      <CardHeader>
-                        <CardTitle>Your Score</CardTitle>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-base">Your Score</CardTitle>
                       </CardHeader>
-                      <CardContent>
-                        <div className="text-3xl font-bold text-primary">
+                      <CardContent className="pb-3">
+                        <div className="text-2xl font-bold text-primary">
                           {viewingRound.userScore.score.toFixed(2)} points
                         </div>
                         {viewingRound.userScore.inCycle && (
-                          <p className="text-sm text-red-600 mt-2">⚠️ You were part of a delegation cycle</p>
+                          <p className="text-xs text-red-600 mt-1">⚠️ You were part of a delegation cycle</p>
                         )}
                         {viewingRound.userScore.distanceFromSolver !== null && (
-                          <p className="text-sm text-muted-foreground mt-2">
+                          <p className="text-xs text-muted-foreground mt-1">
                             Distance from solver: {viewingRound.userScore.distanceFromSolver}
                           </p>
                         )}
@@ -995,8 +995,8 @@ function DashboardContent(): JSX.Element {
                   )}
 
                   <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center justify-between">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="flex items-center justify-between text-base">
                         <span>Delegation Graph</span>
                         <Button
                           size="sm"
@@ -1006,31 +1006,31 @@ function DashboardContent(): JSX.Element {
                             // Open graph in new tab
                             window.open(`/graph-view?roundId=${viewingRound.round.id}`, '_blank')
                           }}
-                          className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
+                          className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs"
                         >
-                          <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="mr-1 h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                           </svg>
                           View Interactive Graph
                         </Button>
                       </CardTitle>
-                      <CardDescription>
+                      <CardDescription className="text-xs">
                         {viewingRound.graph.nodes.length} players, {viewingRound.graph.edges.length} delegations
                       </CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="pb-3">
                       {/* List View - Default */}
-                      <div className="space-y-2 max-h-96 overflow-y-auto">
+                      <div className="space-y-2 max-h-64 overflow-y-auto">
                         {viewingRound.graph.nodes.map((node: any) => (
                           <div
                             key={node.id}
-                            className={`p-3 border rounded-lg transition-all ${
+                            className={`p-2 border rounded-lg transition-all ${
                               node.isCurrentUser ? 'border-primary bg-primary/5 shadow-md' : 'border-gray-200 hover:shadow-md'
                             } ${node.inCycle ? 'bg-red-50 border-red-300' : ''}`}
                           >
                             <div className="flex justify-between items-center">
                               <div className="flex-1">
-                                <p className="font-medium">
+                                <p className="font-medium text-sm">
                                   {node.name} {node.isCurrentUser && '(You)'}
                                   {node.inCycle && <span className="ml-2 text-xs text-red-600">⚠️ In cycle</span>}
                                 </p>
@@ -1056,7 +1056,7 @@ function DashboardContent(): JSX.Element {
                                 </p>
                               </div>
                               <div className="text-right ml-4">
-                                <p className={`text-lg font-bold ${node.score >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                <p className={`text-base font-bold ${node.score >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                   {node.score >= 0 ? '+' : ''}{node.score.toFixed(2)}
                                 </p>
                               </div>
@@ -1066,12 +1066,12 @@ function DashboardContent(): JSX.Element {
                       </div>
                       
                       {/* Help Text */}
-                      <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                        <p className="text-sm text-blue-800 flex items-center gap-2">
-                          <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                      <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p className="text-xs text-blue-800 flex items-center gap-2">
+                          <svg className="h-4 w-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                           </svg>
-                          Click <strong>"View Interactive Graph"</strong> button above to see the full network visualization in a new tab
+                          <span>Click <strong>"View Interactive Graph"</strong> above to see the full network visualization in a new tab</span>
                         </p>
                       </div>
                     </CardContent>
