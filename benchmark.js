@@ -1,6 +1,5 @@
 import http from 'k6/http';
 import { check, sleep, group } from 'k6';
-import { randomString } from 'k6/x/random';
 
 // --------------------------------------------------------------------------------
 // 							CONFIGURATION
@@ -39,7 +38,7 @@ export default function () {
 
   // --- SCENARIO 1: User Onboarding (Runs once per user) ---
   group('User Onboarding', function () {
-    // Generate unique credentials for each virtual user.
+    // Generate unique credentials for each virtual user using built-in k6 variables.
     const uniqueId = `${__VU}-${__ITER}`;
     const email = `user_${uniqueId}@test.com`;
     const password = `password_${uniqueId}`;

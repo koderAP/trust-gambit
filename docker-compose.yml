@@ -131,7 +131,7 @@ services:
       # IMPORTANT: Set NEXTAUTH_URL to your public domain in production!
       # Local: http://localhost:3000
       # Production: https://yourdomain.com
-      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+      NEXTAUTH_URL: http://142.93.213.0
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-your-super-secret-key-change-this-in-production}
       AUTH_TRUST_HOST: "true"
       
