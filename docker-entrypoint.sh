@@ -9,8 +9,9 @@ echo "⏳ Waiting for database to be ready..."
 max_retries=30
 retry_count=0
 
+# Test database connection with a simple node script
 while [ $retry_count -lt $max_retries ]; do
-  if npx prisma db execute --stdin <<< "SELECT 1" > /dev/null 2>&1; then
+  if node -e "const { PrismaClient } = require('@prisma/client'); const prisma = new PrismaClient(); prisma.\$connect().then(() => { prisma.\$disconnect(); process.exit(0); }).catch(() => process.exit(1));" > /dev/null 2>&1; then
     echo "✅ Database is ready!"
     break
   fi
