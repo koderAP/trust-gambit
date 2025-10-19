@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 
 /**
  * GET /api/game-winners
- * Fetch top 3 winners from the ended game
+ * Fetch top 10 winners from the ended game
  */
 // Force dynamic rendering for all API routes
 export const dynamic = 'force-dynamic'
@@ -52,14 +52,14 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Sort by total score descending and get top 3
-    const top3 = allPlayers
+    // Sort by total score descending and get top 10
+    const top10 = allPlayers
       .sort((a, b) => b.totalScore - a.totalScore)
-      .slice(0, 3);
+      .slice(0, 10);
 
     return NextResponse.json({
       gameEnded: true,
-      winners: top3,
+      winners: top10,
       endedAt: endedGame.endedAt,
     });
   } catch (error) {

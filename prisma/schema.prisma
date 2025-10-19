@@ -156,6 +156,8 @@ model Round {
   @@index([gameId])
   @@index([lobbyId])
   @@index([status])
+  @@index([lobbyId, status])  // ✅ NEW: For finding active rounds in a lobby
+  @@index([gameId, status])   // ✅ NEW: For finding active rounds in a game
 }
 
 // Submission model - user's action for a round
@@ -179,6 +181,8 @@ model Submission {
   @@index([roundId])
   @@index([userId])
   @@index([delegateTo])
+  @@index([roundId, action])  // ✅ NEW: For filtering submissions by round and action type
+  @@index([roundId, userId])  // ✅ NEW: Compound index for common query pattern
 }
 
 // RoundScore model - scoring results for each user in a round
@@ -205,6 +209,8 @@ model RoundScore {
   @@unique([roundId, userId])
   @@index([roundId])
   @@index([userId])
+  @@index([userId, totalScore])  // ✅ NEW: For leaderboard queries (sort by score)
+  @@index([roundId, userId])      // ✅ NEW: Compound index for lookups
 }
 
 // TrustEdge model - tracks trust relationships between users

@@ -13,18 +13,39 @@ export async function GET(
   { params }: { params: { lobbyId: string } }
 ) {
   try {
-    const lobby = await prisma.lobby.findUnique({
-      where: { id: params.lobbyId },
-      include: {
-        users: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
+    // ✅ OPTIMIZED: Single query to get all data at once
+    const [lobby, allScores] = await Promise.all([
+      prisma.lobby.findUnique({
+        where: { id: params.lobbyId },
+        include: {
+          users: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
           },
         },
-      },
-    });
+      }),
+      
+      // ✅ Fetch ALL scores in a single query instead of N queries
+      prisma.roundScore.findMany({
+        where: {
+          round: {
+            lobbyId: params.lobbyId,
+            status: 'COMPLETED', // Only count completed rounds
+          },
+        },
+        include: {
+          round: {
+            select: {
+              roundNumber: true,
+              status: true,
+            },
+          },
+        },
+      }),
+    ]);
 
     if (!lobby) {
       return NextResponse.json(
@@ -33,49 +54,39 @@ export async function GET(
       );
     }
 
-    // Get all round scores for users in this lobby
-    const userScores = await Promise.all(
-      lobby.users.map(async (user) => {
-        // Get all scores for this user in rounds belonging to this lobby
-        const scores = await prisma.roundScore.findMany({
-          where: {
-            userId: user.id,
-            round: {
-              lobbyId: params.lobbyId,
-              status: 'COMPLETED', // Only count completed rounds
-            },
-          },
-          include: {
-            round: {
-              select: {
-                roundNumber: true,
-                status: true,
-              },
-            },
-          },
-        });
+    // ✅ Group scores by userId in memory (fast!)
+    const scoresByUser = new Map<string, typeof allScores>();
+    for (const score of allScores) {
+      if (!scoresByUser.has(score.userId)) {
+        scoresByUser.set(score.userId, []);
+      }
+      scoresByUser.get(score.userId)!.push(score);
+    }
 
-        // Calculate cumulative score
-        const cumulativeScore = scores.reduce((sum, score) => sum + score.totalScore, 0);
-        
-        // Count rounds participated
-        const roundsPlayed = scores.length;
+    // ✅ Build leaderboard from grouped data
+    const userScores = lobby.users.map((user) => {
+      const scores = scoresByUser.get(user.id) || [];
+      
+      // Calculate cumulative score
+      const cumulativeScore = scores.reduce((sum, score) => sum + score.totalScore, 0);
+      
+      // Count rounds participated
+      const roundsPlayed = scores.length;
 
-        return {
-          userId: user.id,
-          name: user.name,
-          email: user.email,
-          cumulativeScore,
-          roundsPlayed,
-          scores: scores.map(s => ({
-            roundNumber: s.round.roundNumber,
-            score: s.totalScore,
-            inCycle: s.inCycle,
-            distanceFromSolver: s.distanceFromSolver,
-          })),
-        };
-      })
-    );
+      return {
+        userId: user.id,
+        name: user.name,
+        email: user.email,
+        cumulativeScore,
+        roundsPlayed,
+        scores: scores.map(s => ({
+          roundNumber: s.round.roundNumber,
+          score: s.totalScore,
+          inCycle: s.inCycle,
+          distanceFromSolver: s.distanceFromSolver,
+        })),
+      };
+    });
 
     // Sort by cumulative score (descending)
     const leaderboard = userScores.sort((a, b) => b.cumulativeScore - a.cumulativeScore);

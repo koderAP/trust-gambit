@@ -56,30 +56,36 @@ export async function POST(request: Request) {
       )
     }
 
-    // Delete existing domain ratings for this user (if any)
-    await prisma.domainRating.deleteMany({
-      where: { userId },
-    })
+    // ✅ USE TRANSACTION - Ensures all-or-nothing atomicity
+    // If any operation fails, all changes are rolled back
+    const result = await prisma.$transaction(async (tx) => {
+      // Delete existing domain ratings for this user (if any)
+      await tx.domainRating.deleteMany({
+        where: { userId },
+      })
 
-    // Create new domain ratings
-    await prisma.domainRating.createMany({
-      data: domainRatings.map(dr => ({
-        userId,
-        domain: dr.domain,
-        rating: dr.rating,
-        reason: dr.reason || null,
-      })),
-    })
+      // Create new domain ratings
+      await tx.domainRating.createMany({
+        data: domainRatings.map(dr => ({
+          userId,
+          domain: dr.domain,
+          rating: dr.rating,
+          reason: dr.reason || null,
+        })),
+      })
 
-    // Update user's profileComplete status
-    await prisma.user.update({
-      where: { id: userId },
-      data: { profileComplete: true },
+      // Update user's profileComplete status
+      const updatedUser = await tx.user.update({
+        where: { id: userId },
+        data: { profileComplete: true },
+      })
+
+      return updatedUser
     })
 
     return NextResponse.json({
       message: 'Profile completed successfully',
-      userId,
+      userId: result.id,
     })
   } catch (error) {
     console.error('Profile completion error:', error)

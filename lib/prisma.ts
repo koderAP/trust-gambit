@@ -8,20 +8,50 @@ const globalForPrisma = globalThis as unknown as {
  * Optimized Prisma Client Configuration for High Concurrency
  * Handles 300+ req/sec burst traffic
  */
+
+// ✅ Configure connection pool in DATABASE_URL
+function getOptimizedDatabaseUrl(): string {
+  const baseUrl = process.env.DATABASE_URL || '';
+  
+  // Parse URL to add connection pool parameters
+  try {
+    const url = new URL(baseUrl);
+    
+    // Add connection pool settings if not already present
+    if (!url.searchParams.has('connection_limit')) {
+      // 20 connections per app instance
+      // With 5 instances: 5 × 20 = 100 total connections
+      // Leaves 100 connections for admin/migrations (PostgreSQL max: 200)
+      url.searchParams.set('connection_limit', '20');
+    }
+    
+    if (!url.searchParams.has('pool_timeout')) {
+      // Wait up to 10 seconds for a connection from the pool
+      url.searchParams.set('pool_timeout', '10');
+    }
+    
+    if (!url.searchParams.has('connect_timeout')) {
+      // Wait up to 10 seconds to establish initial connection
+      url.searchParams.set('connect_timeout', '10');
+    }
+    
+    return url.toString();
+  } catch (error) {
+    // If URL parsing fails, return original
+    console.warn('Failed to parse DATABASE_URL, using original:', error);
+    return baseUrl;
+  }
+}
+
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
     datasources: {
       db: {
-        url: process.env.DATABASE_URL,
+        url: getOptimizedDatabaseUrl(),
       },
     },
-    // Connection pool optimization
-    // Default: connection_limit=10
-    // For 300 req/sec: Need higher pool size
-    // Formula: (concurrent_requests / avg_request_duration_ms) * safety_factor
-    // 300 req/sec * 0.1s avg duration * 2 safety = 60 connections
   })
 
 // Optimize for serverless and high concurrency

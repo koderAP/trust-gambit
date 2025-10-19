@@ -395,46 +395,79 @@ function DashboardContent(): JSX.Element {
             {/* Winner Announcement Banner */}
             {showWinners && gameWinners && (
               <div className="max-w-7xl mx-auto mb-6">
-                <Card className="bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-500 border-4 border-yellow-600 shadow-2xl">
+                <Card className="bg-gradient-to-br from-yellow-400/95 via-amber-400/95 to-orange-400/95 border-4 border-yellow-500 shadow-2xl">
                   <CardHeader>
-                    <CardTitle className="text-center text-white text-3xl flex items-center justify-center gap-3">
-                      <Trophy className="h-10 w-10" />
-                      🎉 Game Completed! Top 3 Winners 🎉
-                      <Trophy className="h-10 w-10" />
+                    <CardTitle className="text-center text-gray-900 text-3xl flex items-center justify-center gap-3 font-extrabold">
+                      <Trophy className="h-10 w-10 text-gray-900" />
+                      🎉 Game Completed! Top 10 Winners 🎉
+                      <Trophy className="h-10 w-10 text-gray-900" />
                     </CardTitle>
+                    <CardDescription className="text-center text-gray-800 text-base font-semibold">
+                      Final rankings based on cumulative Stage 2 scores
+                    </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {gameWinners.winners.map((winner: any, index: number) => (
-                      <div
-                        key={winner.userId}
-                        className={`flex items-center justify-between p-4 rounded-lg ${
-                          index === 0
-                            ? 'bg-yellow-200 border-4 border-yellow-600'
-                            : index === 1
-                            ? 'bg-gray-200 border-4 border-gray-400'
-                            : 'bg-orange-200 border-4 border-orange-400'
-                        }`}
-                      >
-                        <div className="flex items-center gap-4">
-                          <span className="text-4xl font-bold">
-                            {index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}
-                          </span>
-                          <div>
-                            <p className="text-xl font-bold text-gray-900">{winner.userName}</p>
-                            <p className="text-sm text-gray-700">
-                              {index === 0 ? '1st Place' : index === 1 ? '2nd Place' : '3rd Place'}
-                            </p>
+                    {/* Top 3 - Large Cards with Medals */}
+                    <div className="space-y-3 mb-4">
+                      {gameWinners.winners.slice(0, 3).map((winner: any, index: number) => (
+                        <div
+                          key={winner.userId}
+                          className={`flex items-center justify-between p-5 rounded-lg border-3 shadow-lg ${
+                            index === 0
+                              ? 'bg-yellow-100 border-4 border-yellow-600'
+                              : index === 1
+                              ? 'bg-gray-100 border-4 border-gray-500'
+                              : 'bg-orange-100 border-4 border-orange-500'
+                          }`}
+                        >
+                          <div className="flex items-center gap-4">
+                            <span className="text-5xl font-bold">
+                              {index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}
+                            </span>
+                            <div>
+                              <p className="text-xl font-bold text-gray-900">{winner.userName}</p>
+                              <p className="text-sm text-gray-700 font-semibold">
+                                {index === 0 ? '1st Place' : index === 1 ? '2nd Place' : '3rd Place'}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-3xl font-bold text-gray-900">{winner.totalScore.toFixed(2)}</p>
+                            <p className="text-sm text-gray-700 font-semibold">points</p>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-2xl font-bold text-gray-900">{winner.totalScore}</p>
-                          <p className="text-sm text-gray-700">points</p>
+                      ))}
+                    </div>
+
+                    {/* Ranks 4-10 - Compact List */}
+                    {gameWinners.winners.length > 3 && (
+                      <div className="border-t-2 border-yellow-600 pt-4">
+                        <h3 className="text-lg font-bold mb-3 text-gray-900">Ranks 4-10</h3>
+                        <div className="space-y-2">
+                          {gameWinners.winners.slice(3, 10).map((winner: any, index: number) => (
+                            <div
+                              key={winner.userId}
+                              className="flex items-center justify-between p-3 rounded-lg bg-white/70 border-2 border-yellow-500/50 shadow"
+                            >
+                              <div className="flex items-center gap-3">
+                                <span className="text-lg font-bold text-gray-700 w-10">
+                                  #{index + 4}
+                                </span>
+                                <p className="font-semibold text-gray-900">{winner.userName}</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-xl font-bold text-gray-900">{winner.totalScore.toFixed(2)}</p>
+                                <p className="text-xs text-gray-700">points</p>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
-                    ))}
+                    )}
+
                     <Button
                       onClick={() => setShowWinners(false)}
-                      className="w-full mt-4 bg-white text-yellow-700 hover:bg-yellow-50"
+                      className="w-full mt-4 bg-gray-900 text-yellow-400 hover:bg-gray-800 font-bold text-lg"
                     >
                       Close
                     </Button>

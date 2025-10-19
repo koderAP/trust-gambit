@@ -150,87 +150,117 @@ export async function calculateDelegationGraph(roundId: string) {
     }
   }
 
-  // Calculate scores
+  // ✅ OPTIMIZED: Build delegator count map once (O(n) instead of O(n²))
+  const delegatorCount = new Map<string, number>();
   for (const [userId, node] of nodes) {
+    if (node.delegateTo) {
+      delegatorCount.set(node.delegateTo, (delegatorCount.get(node.delegateTo) || 0) + 1);
+    }
+  }
+
+  // ✅ OPTIMIZED: Memoization for score calculation
+  const scoreCache = new Map<string, number>();
+  const distanceCache = new Map<string, number>();
+
+  function calculateScoreMemoized(userId: string, visitedInChain: Set<string> = new Set()): { score: number, distance: number | null } {
+    // Check cache
+    if (scoreCache.has(userId)) {
+      return { 
+        score: scoreCache.get(userId)!,
+        distance: distanceCache.get(userId) || null
+      };
+    }
+
+    const node = nodes.get(userId);
+    if (!node) return { score: 0, distance: null };
+
+    // Detect cycles in this calculation path
+    if (visitedInChain.has(userId)) {
+      node.inCycle = true;
+      const score = -1 - gamma;
+      scoreCache.set(userId, score);
+      return { score, distance: null };
+    }
+
+    visitedInChain.add(userId);
+    let score = 0;
+    let distance: number | null = null;
+
     if (node.inCycle) {
       // Nodes in cycles get -1 - γ
-      node.score = -1 - gamma;
-      console.log(`  ${userId}: In cycle, score = ${node.score}`);
+      score = -1 - gamma;
+      console.log(`  ${userId}: In cycle, score = ${score}`);
     } else if (node.action === 'SOLVE') {
       if (node.isCorrect) {
         // Correct answer: +1
-        node.score = 1;
-        node.distanceFromSolver = 0;
+        score = 1;
+        distance = 0;
         
-        // Add trust bonus (β per direct delegator)
-        const delegators = Array.from(nodes.values()).filter(n => n.delegateTo === userId);
-        const trustBonus = beta * delegators.length;
-        node.score += trustBonus;
+        // ✅ OPTIMIZED: Use pre-calculated delegator count (O(1) instead of O(n))
+        const delegators = delegatorCount.get(userId) || 0;
+        const trustBonus = beta * delegators;
+        score += trustBonus;
         
-        console.log(`  ${userId}: Correct solve, base=1, delegators=${delegators.length}, trust bonus=${trustBonus}, total=${node.score}`);
+        console.log(`  ${userId}: Correct solve, base=1, delegators=${delegators}, trust bonus=${trustBonus}, total=${score}`);
       } else {
         // Incorrect answer: -1
-        node.score = -1;
-        node.distanceFromSolver = 0;
-        console.log(`  ${userId}: Incorrect solve, score = ${node.score}`);
+        score = -1;
+        distance = 0;
+        console.log(`  ${userId}: Incorrect solve, score = ${score}`);
       }
     } else if (node.action === 'PASS') {
       // Pass without delegating: 0
-      node.score = 0;
-      console.log(`  ${userId}: Passed, score = ${node.score}`);
+      score = 0;
+      console.log(`  ${userId}: Passed, score = ${score}`);
     } else if (node.action === 'DELEGATE' && node.delegateTo) {
-      // Find the end of the delegation chain
-      let current = node.delegateTo;
-      let distance = 1;
-      const chain = [userId, current];
-      
-      while (current && nodes.has(current)) {
-        const target = nodes.get(current)!;
+      // ✅ OPTIMIZED: Use recursion with memoization
+      const target = nodes.get(node.delegateTo);
+      if (!target) {
+        score = -1 - lambda;
+      } else {
+        // Recursive call with memoization
+        const targetResult = calculateScoreMemoized(node.delegateTo, new Set(visitedInChain));
+        distance = (targetResult.distance !== null) ? targetResult.distance + 1 : 1;
         
         if (target.inCycle) {
-          // Delegating to someone in a cycle
-          node.score = -1 - Math.pow(gamma, distance + 1);
-          console.log(`  ${userId}: Delegates to cycle at distance ${distance}, score = ${node.score}`);
-          break;
-        }
-        
-        if (target.action === 'SOLVE') {
-          // Reached a solver
-          node.distanceFromSolver = distance;
+          score = -1 - Math.pow(gamma, distance);
+          console.log(`  ${userId}: Delegates to cycle at distance ${distance}, score = ${score}`);
+        } else if (target.action === 'SOLVE') {
           if (target.isCorrect) {
-            // If terminus scored +1: score = 1 + λᵏ
-            node.score = 1 + Math.pow(lambda, distance);
+            score = 1 + Math.pow(lambda, distance);
           } else {
-            // If terminus scored -1: score = -1 - λᵏ
-            node.score = -1 - Math.pow(lambda, distance);
+            score = -1 - Math.pow(lambda, distance);
           }
-          console.log(`  ${userId}: Delegates to ${target.isCorrect ? 'correct' : 'incorrect'} solver at distance ${distance}, score = ${node.score}`);
-          break;
-        }
-        
-        if (target.action === 'PASS') {
-          // Delegation chain ends in PASS (terminus scored 0): score = -1 - λᵏ
-          node.score = -1 - Math.pow(lambda, distance);
-          console.log(`  ${userId}: Delegates to pass at distance ${distance}, score = ${node.score}`);
-          break;
-        }
-        
-        if (target.action === 'DELEGATE' && target.delegateTo) {
-          if (chain.includes(target.delegateTo)) {
-            // Cycle detected in chain
-            node.inCycle = true;
-            node.score = -1 - gamma;
-            console.log(`  ${userId}: Found cycle in delegation chain, score = ${node.score}`);
-            break;
-          }
-          current = target.delegateTo;
-          distance++;
-          chain.push(current);
+          console.log(`  ${userId}: Delegates to ${target.isCorrect ? 'correct' : 'incorrect'} solver at distance ${distance}, score = ${score}`);
+        } else if (target.action === 'PASS') {
+          score = -1 - Math.pow(lambda, distance);
+          console.log(`  ${userId}: Delegates to pass at distance ${distance}, score = ${score}`);
         } else {
-          break;
+          // Delegation chain - score already calculated recursively
+          if (targetResult.distance !== null) {
+            score = 1 + Math.pow(lambda, distance);
+          } else {
+            score = -1 - Math.pow(lambda, distance);
+          }
         }
       }
     }
+
+    // Cache the results
+    scoreCache.set(userId, score);
+    if (distance !== null) {
+      distanceCache.set(userId, distance);
+    }
+
+    node.score = score;
+    node.distanceFromSolver = distance;
+
+    return { score, distance };
+  }
+
+  // Calculate scores with memoization
+  for (const [userId] of nodes) {
+    calculateScoreMemoized(userId);
   }
 
   // Save scores to database

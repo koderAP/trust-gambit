@@ -6,6 +6,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { SimpleModal } from '@/components/ui/simple-modal'
 import { Shield, Users, Play, LogOut, CheckCircle2, Clock, Activity, Layers, Target, Info, TrendingUp, AlertCircle, Eye, ChevronDown, ChevronUp } from 'lucide-react'
 
 type User = {
@@ -98,6 +99,14 @@ export default function AdminDashboard() {
   const [success, setSuccess] = useState('')
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   
+  // Round results modal state
+  const [selectedRoundResults, setSelectedRoundResults] = useState<any>(null)
+  const [loadingRoundResults, setLoadingRoundResults] = useState(false)
+  
+  // Game winners state
+  const [gameWinners, setGameWinners] = useState<any>(null)
+  const [loadingWinners, setLoadingWinners] = useState(false)
+  
   // Game parameters state
   const [lambda, setLambda] = useState<number>(0.5)
   const [beta, setBeta] = useState<number>(0.1)
@@ -147,6 +156,14 @@ export default function AdminDashboard() {
     }
   }, [gameState?.activeGame?.id])
 
+  // Fetch winners when game status changes to ENDED
+  useEffect(() => {
+    const activeGame = gameState?.activeGame
+    if (activeGame?.status === 'ENDED') {
+      fetchGameWinners()
+    }
+  }, [gameState?.activeGame?.status])
+
   const fetchGameState = async () => {
     try {
       const res = await fetch('/api/admin/game-state')
@@ -162,6 +179,44 @@ export default function AdminDashboard() {
       setError(err.message)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchRoundResults = async (roundId: string) => {
+    setLoadingRoundResults(true)
+    try {
+      const res = await fetch(`/api/rounds/${roundId}/results`)
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to fetch round results')
+      }
+
+      setSelectedRoundResults(data)
+    } catch (err: any) {
+      console.error('Error fetching round results:', err)
+      setError(err.message)
+    } finally {
+      setLoadingRoundResults(false)
+    }
+  }
+
+  const fetchGameWinners = async () => {
+    setLoadingWinners(true)
+    try {
+      const res = await fetch('/api/game-winners')
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to fetch winners')
+      }
+
+      setGameWinners(data)
+    } catch (err: any) {
+      console.error('Error fetching winners:', err)
+      setError(err.message)
+    } finally {
+      setLoadingWinners(false)
     }
   }
 
@@ -966,6 +1021,122 @@ export default function AdminDashboard() {
               </Card>
             )}
 
+            {/* Game Winners Section - Show when game is ENDED */}
+            {activeGame && activeGame.status === 'ENDED' && (
+              <Card className="bg-gray-800/50 border-yellow-500/30">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-2xl text-yellow-400">
+                    <TrendingUp className="h-6 w-6 text-yellow-400" />
+                    🏆 Global Top 10 Winners
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Top 10 players ranked by cumulative Stage 2 scores
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {loadingWinners ? (
+                    <div className="text-center py-8">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500 mx-auto"></div>
+                      <p className="mt-4 text-gray-400">Loading winners...</p>
+                    </div>
+                  ) : gameWinners?.gameEnded && gameWinners.winners && gameWinners.winners.length > 0 ? (
+                    <div className="space-y-4">
+                      {gameWinners.endedAt && (
+                        <p className="text-sm text-gray-400 mb-4">
+                          Game ended: {new Date(gameWinners.endedAt).toLocaleString()}
+                        </p>
+                      )}
+                      
+                      {/* Top 3 - Large Cards with Medals */}
+                      <div className="space-y-3 mb-6">
+                        {gameWinners.winners.slice(0, 3).map((winner: any, idx: number) => (
+                          <div 
+                            key={winner.userId}
+                            className={`p-5 rounded-lg border ${
+                              idx === 0 
+                                ? 'bg-yellow-900/20 border-yellow-600/50' 
+                                : idx === 1
+                                ? 'bg-gray-700/30 border-gray-500/50'
+                                : 'bg-orange-900/20 border-orange-600/50'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-4">
+                                <div className={`text-4xl font-bold ${
+                                  idx === 0 
+                                    ? 'text-yellow-400' 
+                                    : idx === 1
+                                    ? 'text-gray-300'
+                                    : 'text-orange-400'
+                                }`}>
+                                  {idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉'}
+                                </div>
+                                <div>
+                                  <p className="text-xl font-bold text-gray-100">{winner.userName}</p>
+                                  <p className="text-xs text-gray-500 font-mono">ID: {winner.userId}</p>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-3xl font-bold text-gray-100">{winner.totalScore.toFixed(2)}</p>
+                                <p className="text-sm text-gray-400">points</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Ranks 4-10 - Compact List */}
+                      {gameWinners.winners.length > 3 && (
+                        <div className="border-t border-gray-700 pt-4">
+                          <h3 className="text-lg font-semibold mb-3 text-gray-300">Ranks 4-10</h3>
+                          <div className="space-y-2">
+                            {gameWinners.winners.slice(3, 10).map((winner: any, idx: number) => (
+                              <div 
+                                key={winner.userId}
+                                className="p-3 rounded-lg bg-gray-800/40 border border-gray-700/50 hover:bg-gray-800/60 transition-colors"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-3">
+                                    <div className="text-lg font-bold text-gray-400 w-8">
+                                      #{idx + 4}
+                                    </div>
+                                    <div>
+                                      <p className="font-semibold text-gray-200">{winner.userName}</p>
+                                      <p className="text-xs text-gray-500 font-mono">{winner.userId}</p>
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="text-xl font-bold text-gray-100">{winner.totalScore.toFixed(2)}</p>
+                                    <p className="text-xs text-gray-500">points</p>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="mt-6 p-4 bg-blue-900/20 border border-blue-700/50 rounded-lg">
+                        <p className="text-sm text-blue-300">
+                          <strong>Note:</strong> Scores shown are cumulative totals from all Stage 2 rounds across all lobbies.
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-gray-400">No winners data available.</p>
+                      <Button
+                        onClick={fetchGameWinners}
+                        className="mt-4 bg-yellow-600 hover:bg-yellow-700"
+                      >
+                        Refresh Winners
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             {/* Post-Game Cleanup - Show when game is ENDED or when no active game exists */}
             {(!activeGame || activeGame.status === 'ENDED') && (
               <Card className="bg-white/10 border-green-500/50 text-white">
@@ -1250,47 +1421,65 @@ export default function AdminDashboard() {
 
                 {/* Rounds List */}
                 {activeGame.rounds.length > 0 && (
-                  <Card className="bg-white/10 border-white/20 text-white">
-                    <CardHeader>
-                      <CardTitle>Rounds ({activeGame.rounds.length})</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2 max-h-96 overflow-y-auto">
-                        {activeGame.rounds.map((round) => (
-                          <div key={round.id} className="p-3 bg-white/5 rounded-lg">
-                            <div className="flex items-center justify-between gap-3">
-                              <div className="flex-1">
-                                <p className="font-medium">Round {round.roundNumber} - {round.domain}</p>
-                                <p className="text-xs text-gray-400 mt-1">{round.question}</p>
-                                <p className="text-xs text-gray-500 mt-1">
-                                  Lobby: {round.lobbyId || 'All'} | Submissions: {round.submissionsCount}
-                                  {round.startTime && (
-                                    <span className="ml-2">
-                                      Started: {new Date(round.startTime).toLocaleTimeString()}
-                                    </span>
-                                  )}
-                                </p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <div className={`px-3 py-1 rounded-full text-xs whitespace-nowrap ${
-                                  round.status === 'ACTIVE' ? 'bg-green-500/20 text-green-400' :
-                                  round.status === 'COMPLETED' ? 'bg-blue-500/20 text-blue-400' :
-                                  'bg-gray-500/20 text-gray-400'
-                                }`}>
-                                  {round.status}
+                  <>
+                    {/* All Rounds List */}
+                    <Card className="bg-white/10 border-white/20 text-white">
+                      <CardHeader>
+                        <CardTitle>All Rounds ({activeGame.rounds.length})</CardTitle>
+                        <CardDescription className="text-gray-300">
+                          Complete list of all rounds (Active, Completed, and Pending)
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2 max-h-96 overflow-y-auto">
+                          {activeGame.rounds.map((round) => (
+                            <div key={round.id} className="p-3 bg-white/5 rounded-lg">
+                              <div className="flex items-center justify-between gap-3">
+                                <div className="flex-1">
+                                  <p className="font-medium">Round {round.roundNumber} - {round.domain}</p>
+                                  <p className="text-xs text-gray-400 mt-1">{round.question}</p>
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    Lobby: {round.lobbyId || 'All'} | Submissions: {round.submissionsCount}
+                                    {round.startTime && (
+                                      <span className="ml-2">
+                                        Started: {new Date(round.startTime).toLocaleTimeString()}
+                                      </span>
+                                    )}
+                                  </p>
                                 </div>
-                                {round.scoresCalculated && (
-                                  <div className="px-2 py-1 bg-purple-500/20 text-purple-400 rounded text-xs">
-                                    ✓ Scored
+                                <div className="flex items-center gap-2">
+                                  <div className={`px-3 py-1 rounded-full text-xs whitespace-nowrap ${
+                                    round.status === 'ACTIVE' ? 'bg-green-500/20 text-green-400' :
+                                    round.status === 'COMPLETED' ? 'bg-blue-500/20 text-blue-400' :
+                                    'bg-gray-500/20 text-gray-400'
+                                  }`}>
+                                    {round.status}
                                   </div>
-                                )}
+                                  {round.scoresCalculated && (
+                                    <div className="px-2 py-1 bg-purple-500/20 text-purple-400 rounded text-xs">
+                                      ✓ Scored
+                                    </div>
+                                  )}
+                                  {round.status === 'COMPLETED' && (
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => fetchRoundResults(round.id)}
+                                      className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10"
+                                      title="View round results"
+                                    >
+                                      <Eye className="h-4 w-4 mr-1" />
+                                      Results
+                                    </Button>
+                                  )}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
                 )}
               </>
             ) : (
@@ -1687,6 +1876,137 @@ export default function AdminDashboard() {
             </Card>
           </div>
         )}
+
+        {/* Round Results Modal */}
+        <SimpleModal 
+          open={selectedRoundResults !== null} 
+          onOpenChange={() => setSelectedRoundResults(null)}
+        >
+          {loadingRoundResults ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+              <p className="mt-4 text-gray-600">Loading round results...</p>
+            </div>
+          ) : selectedRoundResults && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  Round {selectedRoundResults.round.roundNumber} Results
+                </h2>
+                <p className="text-sm text-gray-600">
+                  {selectedRoundResults.round.domain} | Status: <span className="font-semibold">{selectedRoundResults.round.status}</span>
+                </p>
+              </div>
+
+              {/* Question and Answer */}
+              <Card className="bg-gray-50">
+                <CardHeader>
+                  <CardTitle className="text-lg">Question</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-gray-900">{selectedRoundResults.round.question}</p>
+                  <div className="pt-2 border-t border-gray-200">
+                    <p className="text-sm font-semibold text-green-700">
+                      Correct Answer: {selectedRoundResults.round.correctAnswer}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Submissions Summary */}
+              <Card className="bg-gray-50">
+                <CardHeader>
+                  <CardTitle className="text-lg">Submissions ({selectedRoundResults.graph.nodes.length})</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 max-h-96 overflow-y-auto">
+                    {selectedRoundResults.graph.nodes
+                      .sort((a: any, b: any) => b.score - a.score)
+                      .map((node: any) => (
+                        <div 
+                          key={node.id} 
+                          className={`p-3 rounded-lg border ${
+                            node.action === 'SOLVE' && node.isCorrect 
+                              ? 'bg-green-50 border-green-200' 
+                              : node.action === 'DELEGATE' 
+                              ? 'bg-blue-50 border-blue-200'
+                              : 'bg-gray-50 border-gray-200'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <p className="font-medium text-gray-900">{node.name}</p>
+                              <div className="flex items-center gap-3 mt-1">
+                                <span className={`text-xs px-2 py-1 rounded ${
+                                  node.action === 'SOLVE' ? 'bg-green-100 text-green-800' :
+                                  node.action === 'DELEGATE' ? 'bg-blue-100 text-blue-800' :
+                                  'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {node.action}
+                                </span>
+                                {node.action === 'SOLVE' && (
+                                  <span className="text-xs text-gray-600">
+                                    Answer: <span className={node.isCorrect ? 'text-green-700 font-semibold' : 'text-red-700'}>
+                                      {node.answer}
+                                    </span>
+                                  </span>
+                                )}
+                                {node.action === 'DELEGATE' && node.delegateTo && (
+                                  <span className="text-xs text-gray-600">
+                                    Delegated to: {selectedRoundResults.graph.nodes.find((n: any) => n.id === node.delegateTo)?.name || node.delegateTo}
+                                  </span>
+                                )}
+                                {node.inCycle && (
+                                  <span className="text-xs px-2 py-1 rounded bg-yellow-100 text-yellow-800">
+                                    ⚠️ In Cycle
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-lg font-bold text-gray-900">{node.score.toFixed(2)}</p>
+                              <p className="text-xs text-gray-500">points</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Delegation Graph */}
+              {selectedRoundResults.graph.edges.length > 0 && (
+                <Card className="bg-gray-50">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Delegation Chains ({selectedRoundResults.graph.edges.length})</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {selectedRoundResults.graph.edges.map((edge: any, idx: number) => {
+                        const fromNode = selectedRoundResults.graph.nodes.find((n: any) => n.id === edge.from)
+                        const toNode = selectedRoundResults.graph.nodes.find((n: any) => n.id === edge.to)
+                        return (
+                          <div key={idx} className="flex items-center gap-2 p-2 bg-white rounded border border-gray-200">
+                            <span className="text-sm text-gray-900 font-medium">{fromNode?.name || edge.from}</span>
+                            <span className="text-gray-400">→</span>
+                            <span className="text-sm text-gray-900 font-medium">{toNode?.name || edge.to}</span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              <Button 
+                onClick={() => setSelectedRoundResults(null)} 
+                className="w-full"
+              >
+                Close
+              </Button>
+            </div>
+          )}
+        </SimpleModal>
       </div>
     </div>
   )
