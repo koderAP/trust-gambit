@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { getSocketServer } from '@/lib/socket/server'
 
 // POST /api/admin/activate-lobbies
 // Force dynamic rendering for all API routes
@@ -44,16 +43,6 @@ export async function POST(request: NextRequest) {
         currentRound: 0  // Start at 0, admin will start round 1 manually
       }
     })
-
-    // Broadcast to all connected clients via Socket.IO
-    try {
-      const socketServer = getSocketServer()
-      socketServer.notifyLobbiesActivated(game.id, game.lobbies.map(l => l.id))
-      socketServer.notifyGameStatusChanged(game.id, 'STAGE_1_ACTIVE', 1)
-      console.log(`[Socket.IO] Broadcasted lobby activation for ${updatedLobbies.count} lobbies`)
-    } catch (error) {
-      console.warn('[Socket.IO] Could not broadcast lobby activation:', error)
-    }
 
     return NextResponse.json({ 
       success: true, 

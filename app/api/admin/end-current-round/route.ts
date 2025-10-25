@@ -3,7 +3,6 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { calculateDelegationGraph } from '@/lib/calculateDelegationGraph';
 import { z } from 'zod';
-import { getSocketServer } from '@/lib/socket/server';
 
 const endGlobalRoundSchema = z.object({
   gameId: z.string(),
@@ -129,25 +128,6 @@ export async function POST(request: NextRequest) {
       (sum, round) => sum + (round.lobbyId ? (lobbyMap.get(round.lobbyId) || 0) : 0),
       0
     );
-
-    // Broadcast round end to all connected clients via Socket.IO
-    try {
-      const socketServer = getSocketServer()
-      
-      // Notify each lobby about their round ending
-      for (const round of activeRounds) {
-        socketServer.notifyRoundEnded(round.id, validatedData.gameId, round.lobbyId, {
-          roundNumber: round.roundNumber,
-          stage: round.stage,
-          endTime: endTime.toISOString(),
-          submissionsCount: round.submissions.length,
-        })
-      }
-      
-      console.log(`[Socket.IO] Broadcasted round end to ${activeRounds.length} lobbies`)
-    } catch (error) {
-      console.warn('[Socket.IO] Could not broadcast round end:', error)
-    }
 
     return NextResponse.json({
       message: `All active rounds ended successfully`,

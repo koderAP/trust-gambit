@@ -8,7 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { SimpleModal } from '@/components/ui/simple-modal'
 import { Shield, Users, Play, LogOut, CheckCircle2, Clock, Activity, Layers, Target, Info, TrendingUp, AlertCircle, Eye, ChevronDown, ChevronUp } from 'lucide-react'
-import { useSocket, joinRoom } from '@/hooks/useSocket'
 
 type User = {
   id: string
@@ -93,7 +92,6 @@ type GameState = {
 export default function AdminDashboard() {
   const router = useRouter()
   const { data: session, status } = useSession()
-  const { socket, isConnected } = useSocket() // Add socket hook
   const [gameState, setGameState] = useState<GameState | null>(null)
   const [loading, setLoading] = useState(true)
   const [startingGame, setStartingGame] = useState(false)
@@ -170,81 +168,6 @@ export default function AdminDashboard() {
       fetchGameWinners()
     }
   }, [gameState?.activeGame?.status])
-
-  // Socket.IO event listeners for real-time updates
-  useEffect(() => {
-    if (!socket || !isConnected) return
-
-    console.log('[Admin Dashboard] Setting up Socket.IO listeners')
-
-    // Join game room if there's an active game
-    if (gameState?.activeGame?.id) {
-      joinRoom('game', gameState.activeGame.id)
-    }
-
-    // Listen for lobby assignments
-    const handleLobbiesAssigned = (data: any) => {
-      console.log('[Socket.IO] Lobbies assigned:', data)
-      setSuccess(`${data.lobbiesCreated} lobbies created with ${data.playersAssigned} players!`)
-      fetchGameState() // Refresh full state
-    }
-
-    // Listen for lobby activation
-    const handleLobbiesActivated = (data: any) => {
-      console.log('[Socket.IO] Lobbies activated:', data)
-      setSuccess(`${data.lobbyIds?.length || 0} lobbies activated!`)
-      fetchGameState() // Refresh full state
-    }
-
-    // Listen for game status changes
-    const handleGameStatusChanged = (data: any) => {
-      console.log('[Socket.IO] Game status changed:', data)
-      fetchOverviewStats() // Refresh stats only
-    }
-
-    // Listen for round start
-    const handleRoundStarted = (data: any) => {
-      console.log('[Socket.IO] Round started:', data)
-      setSuccess(`Round ${data.roundNumber} started across all lobbies!`)
-      fetchGameState() // Refresh full state to show active rounds
-    }
-
-    // Listen for round end
-    const handleRoundEnded = (data: any) => {
-      console.log('[Socket.IO] Round ended:', data)
-      if (data.autoEnded) {
-        setSuccess(`Round ${data.roundNumber} ended automatically (timer expired)`)
-      } else {
-        setSuccess(`Round ${data.roundNumber} ended`)
-      }
-      fetchGameState() // Refresh full state
-    }
-
-    // Listen for scores calculated
-    const handleScoresCalculated = (data: any) => {
-      console.log('[Socket.IO] Scores calculated:', data)
-      setSuccess('Round scores calculated successfully!')
-      fetchGameState() // Refresh to show calculated scores
-    }
-
-    // Attach all event listeners
-    socket.on('admin:lobbies_assigned', handleLobbiesAssigned)
-    socket.on('admin:lobbies_activated', handleLobbiesActivated)
-    socket.on('game:status_changed', handleGameStatusChanged)
-    socket.on('round:started', handleRoundStarted)
-    socket.on('round:ended', handleRoundEnded)
-    socket.on('round:scores_calculated', handleScoresCalculated)
-
-    // Cleanup listeners on unmount or when socket changes
-    return () => {
-      socket.off('admin:lobbies_assigned', handleLobbiesAssigned)
-      socket.off('admin:lobbies_activated', handleLobbiesActivated)
-      socket.off('game:status_changed', handleGameStatusChanged)
-      socket.off('round:started', handleRoundStarted)
-      socket.off('round:ended', handleRoundEnded)
-      socket.off('round:scores_calculated', handleScoresCalculated)
-    }
-  }, [socket, isConnected, gameState?.activeGame?.id])
 
   const fetchGameState = async () => {
     try {

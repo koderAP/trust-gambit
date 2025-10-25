@@ -6,7 +6,6 @@
  */
 
 import { prisma } from './prisma'
-import { getSocketServer } from './socket/server'
 import { calculateDelegationGraph } from './calculateDelegationGraph'
 
 const CHECK_INTERVAL_MS = 10000 // Check every 10 seconds
@@ -40,20 +39,6 @@ async function endExpiredRound(roundId: string, gameId: string, lobbyId: string 
     } catch (graphError) {
       console.error(`[Auto-End] ❌ Failed to calculate delegation graph for round ${roundId}:`, graphError)
       // Don't throw - round is already ended, graph calculation failure shouldn't stop auto-end
-    }
-    
-    // Broadcast via Socket.IO
-    try {
-      const socketServer = getSocketServer()
-      socketServer.notifyRoundEnded(roundId, gameId, lobbyId, {
-        roundNumber,
-        endTime: endTime.toISOString(),
-        reason: 'TIME_EXPIRED',
-        autoEnded: true,
-      })
-      console.log(`[Auto-End] [Socket.IO] Broadcasted auto-end event for round ${roundId}`)
-    } catch (socketError) {
-      console.warn(`[Auto-End] Could not broadcast socket event:`, socketError)
     }
     
     return round

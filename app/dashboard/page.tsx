@@ -7,7 +7,6 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { CheckCircle2, Clock, Users, Trophy } from 'lucide-react'
-import { useSocket, joinRoom } from '@/hooks/useSocket'
 
 type UserProfile = {
   id: string;
@@ -52,10 +51,6 @@ function DashboardContent(): JSX.Element {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  
-  // Socket.IO integration
-  const { socket, isConnected } = useSocket();
-  const [socketNotification, setSocketNotification] = useState<string>('');
   
   // Round submission state
   const [selectedAction, setSelectedAction] = useState<'SOLVE' | 'DELEGATE' | 'PASS' | null>(null);
@@ -236,114 +231,6 @@ function DashboardContent(): JSX.Element {
     }
   }, [profile?.lobby, previousRounds]); // Refresh when previous rounds change
 
-  // Socket.IO event listeners for real-time updates
-  useEffect(() => {
-    if (!socket || !isConnected || !userId) return;
-
-    console.log('[Dashboard] Setting up Socket.IO listeners for user:', userId);
-
-    // Join appropriate rooms based on user's lobby/game
-    if (profile?.lobby?.id) {
-      joinRoom('lobby', profile.lobby.id);
-      console.log('[Dashboard] Joined lobby room:', profile.lobby.id);
-    }
-
-    // Listen for round start events
-    const handleRoundStarted = (data: any) => {
-      console.log('[Socket.IO] Round started:', data);
-      setSocketNotification(`🚀 Round ${data.roundNumber} has started! Question: ${data.question}`);
-      
-      // Refresh profile to get the new round data
-      if (userId) {
-        fetch(`/api/profile/${userId}`)
-          .then(res => res.json())
-          .then(data => {
-            if (!data.error) {
-              setProfile(data);
-              setHasSubmitted(false); // Reset submission status for new round
-              setSelectedAction(null);
-              setAnswer('');
-              setDelegateTo('');
-            }
-          })
-          .catch(console.error);
-      }
-    };
-
-    // Listen for round end events (manual or auto-end)
-    const handleRoundEnded = (data: any) => {
-      console.log('[Socket.IO] Round ended:', data);
-      
-      if (data.autoEnded) {
-        setSocketNotification(`⏱️ Round ${data.roundNumber} has ended (time expired)`);
-      } else {
-        setSocketNotification(`✅ Round ${data.roundNumber} has ended`);
-      }
-      
-      // Refresh profile to update round status
-      if (userId) {
-        fetch(`/api/profile/${userId}`)
-          .then(res => res.json())
-          .then(data => {
-            if (!data.error) {
-              setProfile(data);
-            }
-          })
-          .catch(console.error);
-      }
-
-      // Refresh previous rounds list
-      if (profile?.lobby?.id) {
-        fetch(`/api/lobbies/${profile.lobby.id}/rounds`)
-          .then(res => res.json())
-          .then(data => {
-            if (data.rounds) {
-              setPreviousRounds(data.rounds.filter((r: any) => r.status === 'COMPLETED'));
-            }
-          })
-          .catch(console.error);
-      }
-    };
-
-    // Listen for scores calculated
-    const handleScoresCalculated = (data: any) => {
-      console.log('[Socket.IO] Scores calculated:', data);
-      setSocketNotification('📊 Scores have been calculated!');
-      
-      // Refresh leaderboard
-      if (profile?.lobby?.id) {
-        fetch(`/api/lobbies/${profile.lobby.id}/leaderboard`)
-          .then(res => res.json())
-          .then(data => {
-            if (data.leaderboard) {
-              setLeaderboard(data.leaderboard);
-            }
-          })
-          .catch(console.error);
-      }
-    };
-
-    // Attach event listeners
-    socket.on('round:started', handleRoundStarted);
-    socket.on('round:ended', handleRoundEnded);
-    socket.on('scores:calculated', handleScoresCalculated);
-
-    // Cleanup on unmount
-    return () => {
-      socket.off('round:started', handleRoundStarted);
-      socket.off('round:ended', handleRoundEnded);
-      socket.off('scores:calculated', handleScoresCalculated);
-    };
-  }, [socket, isConnected, userId, profile?.lobby?.id]);
-
-  // Auto-hide socket notification after 5 seconds
-  useEffect(() => {
-    if (socketNotification) {
-      const timer = setTimeout(() => setSocketNotification(''), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [socketNotification]);
-
   const handleViewResults = async (roundId: string) => {
     try {
       const res = await fetch(`/api/rounds/${roundId}/results?userId=${userId}`);
@@ -506,19 +393,6 @@ function DashboardContent(): JSX.Element {
         <>
           <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-6 px-4">
             <div className="max-w-7xl mx-auto">
-              {/* Socket.IO Connection Status */}
-              {isConnected && (
-                <div className="mb-4 p-2 bg-green-100 border border-green-300 rounded text-green-800 text-sm text-center">
-                  🟢 Connected - Real-time updates enabled
-                </div>
-              )}
-              
-              {/* Socket Notification Banner */}
-              {socketNotification && (
-                <div className="mb-4 p-4 bg-blue-100 border border-blue-300 rounded-lg text-blue-900 font-medium animate-pulse">
-                  {socketNotification}
-                </div>
-              )}
             </div>
 
             {/* Winner Announcement Banner */}

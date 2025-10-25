@@ -129,27 +129,37 @@ Round Ended ✅ (within 10 seconds of expiration)
 ## Known Limitations
 
 ### Real-Time Updates (Socket.IO)
-**Status:** Not implemented - polling used instead
+**Status:** ❌ Removed - incomplete implementation was causing performance issues
 
-**Attempted Implementation:**
+**What Was Attempted:**
 - Created custom Next.js server with Socket.IO (`server.js`, `lib/socket/server.ts`)
 - Added Socket.IO client hooks (`hooks/useSocket.ts`)
 - Configured nginx proxy for WebSocket support
+- Integrated event listeners in dashboards
 
-**Issues Encountered:**
-- Next.js standalone build generates its own `server.js`, overwriting custom server
-- Docker container runs Next.js standalone server instead of custom server
-- CORS configuration conflicts with nginx reverse proxy
+**Why It Was Removed (October 25, 2025):**
+- **Performance Issue**: Socket.IO client tried to connect on every page load, causing login slowdowns
+- **Server Issue**: Next.js standalone build overwrites custom server.js
+- **Partial Implementation**: Code existed but server never initialized (connection timeouts)
+- **CORS Issues**: Configuration conflicts with nginx reverse proxy
 
 **Current Solution:**
-- Admin dashboard polls `/api/admin/game-state` every 5 seconds for stats
-- User dashboard uses manual refresh or page reload
-- Manual "Refresh" buttons for detailed data
+- Admin dashboard: Polls `/api/admin/game-state` every 5 seconds for overview stats
+- Admin dashboard: Manual "Refresh" buttons for detailed data (Users, Lobbies, Game tabs)
+- User dashboard: Manual refresh or page reload to see updates
+- Round auto-end: Background service still works (checks every 10 seconds)
+
+**Benefits of Removal:**
+- ✅ Faster page loads (no connection timeout delays)
+- ✅ Faster login (no Socket.IO connection attempts)
+- ✅ Cleaner codebase (no incomplete features)
+- ✅ Standard Next.js server (simpler deployment)
 
 **Future Consideration:**
-- Use Next.js API routes with Server-Sent Events (SSE)
-- Implement WebSocket support outside of Next.js server
-- Consider using managed real-time services (Pusher, Ably, etc.)
+- Use Next.js API routes with Server-Sent Events (SSE) for real-time updates
+- Implement WebSocket support via separate service (not Next.js server)
+- Consider managed real-time services (Pusher, Ably, Supabase Realtime)
+- Add polling-based "auto-refresh" toggle for user dashboards
 
 ---
 
