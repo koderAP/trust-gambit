@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
+import { getSocketServer } from '@/lib/socket/server';
 
 const startGlobalRoundSchema = z.object({
   gameId: z.string(),
@@ -217,6 +218,27 @@ export async function POST(request: NextRequest) {
         currentStage: stage,
       },
     });
+
+    // Broadcast round start to all connected clients via Socket.IO
+    try {
+      const socketServer = getSocketServer()
+      
+      // Notify each lobby about their round
+      for (const round of configuredRounds) {
+        socketServer.notifyRoundStarted(round.id, validatedData.gameId, round.lobbyId, {
+          roundNumber: round.roundNumber,
+          stage: round.stage,
+          domain: round.domain,
+          question: round.question,
+          durationSeconds: round.durationSeconds,
+          startTime: startTime.toISOString(),
+        })
+      }
+      
+      console.log(`[Socket.IO] Broadcasted round start to ${configuredRounds.length} lobbies`)
+    } catch (error) {
+      console.warn('[Socket.IO] Could not broadcast round start:', error)
+    }
 
     return NextResponse.json({
       message: `Round ${validatedData.roundNumber} started across all lobbies`,

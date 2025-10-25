@@ -27,7 +27,7 @@ Each round, players choose one of three actions:
 - Scores propagate through delegation chains with distance-based decay
 - Trust bonuses for players who receive many delegations and solve correctly
 - Penalties for delegation cycles
-- Real-time WebSocket updates for live gameplay
+- Admin dashboard with polling-based updates
 - Complex graph-based scoring algorithm
 
 ## 🚀 Quick Start
@@ -93,7 +93,7 @@ See [DEPLOYMENT.md](./docs/DEPLOYMENT.md) for detailed production deployment ins
        ▼     ▼     ▼     ▼     ▼
     ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐
     │App│ │App│ │App│ │App│ │App│  Next.js 14 (Standalone)
-    │ 1 │ │ 2 │ │ 3 │ │ 4 │ │ 5 │  WebSocket support
+    │ 1 │ │ 2 │ │ 3 │ │ 4 │ │ 5 │
     └─┬─┘ └─┬─┘ └─┬─┘ └─┬─┘ └─┬─┘
       │     │     │     │     │
       └─────┴─────┴─────┴─────┘
@@ -113,13 +113,11 @@ See [DEPLOYMENT.md](./docs/DEPLOYMENT.md) for detailed production deployment ins
 - TypeScript 5
 - Tailwind CSS
 - shadcn/ui components
-- Socket.io client (real-time updates)
 
 **Backend**:
 - Next.js API Routes
 - NextAuth.js (authentication)
 - Prisma ORM
-- Socket.io (WebSocket server)
 - XState (state machine)
 
 **Database & Cache**:
@@ -152,7 +150,6 @@ trust-gambit/
 ├── components/              # React components
 │   ├── ui/                  # shadcn/ui components
 │   ├── DelegationGraphVisualization.tsx
-│   ├── socket-provider.tsx
 │   └── providers.tsx
 ├── lib/                     # Shared utilities
 │   ├── auth.ts              # NextAuth configuration
@@ -161,8 +158,8 @@ trust-gambit/
 │   ├── rateLimit.ts         # Rate limiting logic
 │   ├── circuitBreaker.ts    # Circuit breaker pattern
 │   ├── calculateDelegationGraph.ts
+│   ├── roundAutoEnd.ts      # Auto-end expired rounds
 │   ├── graph/               # Graph processing & scoring
-│   ├── socket/              # Socket.io server
 │   └── state-machines/      # XState game machine
 ├── prisma/                  # Database schema & migrations
 │   ├── schema.prisma
@@ -189,11 +186,10 @@ trust-gambit/
 ### For Players
 
 - **Self-Rating System**: Rate your expertise across 10 domains (Algorithms, Finance, Economics, Statistics, Probability, ML, Crypto, Biology, Indian History, Game Theory)
-- **Real-Time Gameplay**: Live updates via WebSocket, see delegation graphs instantly
 - **Strategic Decisions**: Choose between solving, delegating, or passing each round
 - **Trust Networks**: Build reputation by solving correctly and receiving delegations
 - **Visual Analytics**: Interactive delegation graph visualization
-- **Leaderboards**: Track your standing in real-time
+- **Leaderboards**: Track your standing with manual refresh
 
 ### For Admins
 
@@ -201,7 +197,7 @@ trust-gambit/
 - **Round Control**: Configure and start rounds with custom parameters
 - **Question Management**: Upload questions with domain tags and images
 - **User Management**: View, manage, and seed users
-- **Live Monitoring**: Real-time dashboard with game state and player stats
+- **Live Monitoring**: Dashboard with polling-based updates (every 5 seconds)
 - **Bulk Operations**: Efficient handling of 700+ players across 50+ lobbies
 
 ### Performance & Scalability

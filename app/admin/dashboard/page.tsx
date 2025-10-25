@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { SimpleModal } from '@/components/ui/simple-modal'
 import { Shield, Users, Play, LogOut, CheckCircle2, Clock, Activity, Layers, Target, Info, TrendingUp, AlertCircle, Eye, ChevronDown, ChevronUp } from 'lucide-react'
+import { useSocket, joinRoom } from '@/hooks/useSocket'
 
 type User = {
   id: string
@@ -92,6 +93,7 @@ type GameState = {
 export default function AdminDashboard() {
   const router = useRouter()
   const { data: session, status } = useSession()
+  const { socket, isConnected } = useSocket() // Add socket hook
   const [gameState, setGameState] = useState<GameState | null>(null)
   const [loading, setLoading] = useState(true)
   const [startingGame, setStartingGame] = useState(false)
@@ -128,6 +130,11 @@ export default function AdminDashboard() {
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null)
   const [showDangerZone, setShowDangerZone] = useState(false) // For collapsible danger zone
 
+  // Tab refresh states
+  const [refreshingUsers, setRefreshingUsers] = useState(false)
+  const [refreshingLobbies, setRefreshingLobbies] = useState(false)
+  const [refreshingGame, setRefreshingGame] = useState(false)
+
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/admin/login')
@@ -142,8 +149,8 @@ export default function AdminDashboard() {
     if (status === 'authenticated') {
       fetchGameState()
       
-      // Refresh game state every 5 seconds
-      const interval = setInterval(fetchGameState, 5000)
+      // Refresh only overview stats every 5 seconds
+      const interval = setInterval(fetchOverviewStats, 5000)
       return () => clearInterval(interval)
     }
   }, [status, session, router])
@@ -164,6 +171,81 @@ export default function AdminDashboard() {
     }
   }, [gameState?.activeGame?.status])
 
+  // Socket.IO event listeners for real-time updates
+  useEffect(() => {
+    if (!socket || !isConnected) return
+
+    console.log('[Admin Dashboard] Setting up Socket.IO listeners')
+
+    // Join game room if there's an active game
+    if (gameState?.activeGame?.id) {
+      joinRoom('game', gameState.activeGame.id)
+    }
+
+    // Listen for lobby assignments
+    const handleLobbiesAssigned = (data: any) => {
+      console.log('[Socket.IO] Lobbies assigned:', data)
+      setSuccess(`${data.lobbiesCreated} lobbies created with ${data.playersAssigned} players!`)
+      fetchGameState() // Refresh full state
+    }
+
+    // Listen for lobby activation
+    const handleLobbiesActivated = (data: any) => {
+      console.log('[Socket.IO] Lobbies activated:', data)
+      setSuccess(`${data.lobbyIds?.length || 0} lobbies activated!`)
+      fetchGameState() // Refresh full state
+    }
+
+    // Listen for game status changes
+    const handleGameStatusChanged = (data: any) => {
+      console.log('[Socket.IO] Game status changed:', data)
+      fetchOverviewStats() // Refresh stats only
+    }
+
+    // Listen for round start
+    const handleRoundStarted = (data: any) => {
+      console.log('[Socket.IO] Round started:', data)
+      setSuccess(`Round ${data.roundNumber} started across all lobbies!`)
+      fetchGameState() // Refresh full state to show active rounds
+    }
+
+    // Listen for round end
+    const handleRoundEnded = (data: any) => {
+      console.log('[Socket.IO] Round ended:', data)
+      if (data.autoEnded) {
+        setSuccess(`Round ${data.roundNumber} ended automatically (timer expired)`)
+      } else {
+        setSuccess(`Round ${data.roundNumber} ended`)
+      }
+      fetchGameState() // Refresh full state
+    }
+
+    // Listen for scores calculated
+    const handleScoresCalculated = (data: any) => {
+      console.log('[Socket.IO] Scores calculated:', data)
+      setSuccess('Round scores calculated successfully!')
+      fetchGameState() // Refresh to show calculated scores
+    }
+
+    // Attach all event listeners
+    socket.on('admin:lobbies_assigned', handleLobbiesAssigned)
+    socket.on('admin:lobbies_activated', handleLobbiesActivated)
+    socket.on('game:status_changed', handleGameStatusChanged)
+    socket.on('round:started', handleRoundStarted)
+    socket.on('round:ended', handleRoundEnded)
+    socket.on('round:scores_calculated', handleScoresCalculated)
+
+    // Cleanup listeners on unmount or when socket changes
+    return () => {
+      socket.off('admin:lobbies_assigned', handleLobbiesAssigned)
+      socket.off('admin:lobbies_activated', handleLobbiesActivated)
+      socket.off('game:status_changed', handleGameStatusChanged)
+      socket.off('round:started', handleRoundStarted)
+      socket.off('round:ended', handleRoundEnded)
+      socket.off('round:scores_calculated', handleScoresCalculated)
+    }
+  }, [socket, isConnected, gameState?.activeGame?.id])
+
   const fetchGameState = async () => {
     try {
       const res = await fetch('/api/admin/game-state')
@@ -179,6 +261,48 @@ export default function AdminDashboard() {
       setError(err.message)
     } finally {
       setLoading(false)
+    }
+  }
+
+  // Fetch only overview stats (lightweight - doesn't fetch users/lobbies/rounds)
+  const fetchOverviewStats = async () => {
+    try {
+      // Use lightweight stats-only endpoint
+      const res = await fetch('/api/admin/stats')
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to fetch stats')
+      }
+
+      // Update ONLY stats and minimal activeGame info
+      // This is truly lightweight - no users, lobbies, or rounds data fetched
+      setGameState((prevState) => {
+        if (!prevState) {
+          // Initial load - need full data, so fetch it
+          fetchGameState()
+          return prevState
+        }
+        
+        // Partial update: ONLY stats and basic game status
+        return {
+          stats: data.stats, // Update stats (5 numbers only)
+          allUsers: prevState.allUsers, // Keep existing users (not fetched)
+          activeGame: prevState.activeGame ? {
+            ...prevState.activeGame,
+            // Only update minimal fields from lightweight endpoint
+            status: data.activeGame?.status || prevState.activeGame.status,
+            currentRound: data.activeGame?.currentRound || prevState.activeGame.currentRound,
+            currentStage: data.activeGame?.currentStage || prevState.activeGame.currentStage,
+            // Keep expensive data unchanged (not fetched from stats endpoint)
+            lobbies: prevState.activeGame.lobbies,
+            rounds: prevState.activeGame.rounds,
+          } : data.activeGame,
+        }
+      })
+    } catch (err: any) {
+      console.error('Error fetching overview stats:', err)
+      // Don't show error for background refresh
     }
   }
 
@@ -462,7 +586,7 @@ export default function AdminDashboard() {
             <Shield className="h-8 w-8 text-yellow-500" />
             <div>
               <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
-              <p className="text-gray-300 text-sm">Trust Gambit Game Control - Auto-refresh every 5s</p>
+              <p className="text-gray-300 text-sm">Overview stats auto-refresh every 5s • Use tab refresh buttons for detailed data</p>
             </div>
           </div>
           <div className="flex gap-2">
@@ -1272,6 +1396,29 @@ export default function AdminDashboard() {
 
           {/* Active Game Tab */}
           <TabsContent value="game" className="space-y-4">
+            {/* Refresh Button for Active Game Tab */}
+            <div className="flex justify-end">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={async () => {
+                  setRefreshingGame(true)
+                  try {
+                    await fetchGameState()
+                    setSuccess('Active game data refreshed')
+                  } catch (err: any) {
+                    setError('Failed to refresh game data')
+                  } finally {
+                    setRefreshingGame(false)
+                  }
+                }}
+                disabled={refreshingGame}
+                className="text-white border-white/30 hover:bg-white/10"
+              >
+                {refreshingGame ? '⟳ Refreshing...' : '⟳ Refresh'}
+              </Button>
+            </div>
+
             {activeGame ? (
               <>
                 <Card className="bg-white/10 border-white/20 text-white">
@@ -1493,6 +1640,29 @@ export default function AdminDashboard() {
 
           {/* Lobbies Tab */}
           <TabsContent value="lobbies" className="space-y-4">
+            {/* Refresh Button for Lobbies Tab */}
+            <div className="flex justify-end">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={async () => {
+                  setRefreshingLobbies(true)
+                  try {
+                    await fetchGameState()
+                    setSuccess('Lobbies refreshed')
+                  } catch (err: any) {
+                    setError('Failed to refresh lobbies')
+                  } finally {
+                    setRefreshingLobbies(false)
+                  }
+                }}
+                disabled={refreshingLobbies}
+                className="text-white border-white/30 hover:bg-white/10"
+              >
+                {refreshingLobbies ? '⟳ Refreshing...' : '⟳ Refresh'}
+              </Button>
+            </div>
+
             {activeGame && activeGame.lobbies.length > 0 ? (
               activeGame.lobbies.map((lobby) => (
                 <Card key={lobby.id} className="bg-white/10 border-white/20 text-white">
@@ -1763,8 +1933,29 @@ export default function AdminDashboard() {
           {/* All Users Tab */}
           <TabsContent value="users" className="space-y-4">
             <Card className="bg-white/10 border-white/20 text-white">
-              <CardHeader>
-                <CardTitle>All Registered Users ({users.length})</CardTitle>
+              <CardHeader className="flex items-center justify-between">
+                <div>
+                  <CardTitle>All Registered Users ({users.length})</CardTitle>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={async () => {
+                    setRefreshingUsers(true)
+                    try {
+                      await fetchGameState()
+                      setSuccess('Users list refreshed')
+                    } catch (err: any) {
+                      setError('Failed to refresh users')
+                    } finally {
+                      setRefreshingUsers(false)
+                    }
+                  }}
+                  disabled={refreshingUsers}
+                  className="text-white border-white/30 hover:bg-white/10"
+                >
+                  {refreshingUsers ? '⟳ Refreshing...' : '⟳ Refresh'}
+                </Button>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 max-h-[600px] overflow-y-auto">

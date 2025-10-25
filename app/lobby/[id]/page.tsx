@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Users, Clock, Play } from 'lucide-react'
+import { useSocket, joinRoom } from '@/hooks/useSocket'
 
 interface User {
   id: string
@@ -28,12 +29,14 @@ export default function LobbyPage() {
   const params = useParams()
   const router = useRouter()
   const lobbyId = params.id as string
+  const { socket, isConnected } = useSocket()
 
   const [lobby, setLobby] = useState<Lobby | null>(null)
   const [loading, setLoading] = useState(true)
+  const [notification, setNotification] = useState<string>('')
 
-  useEffect(() => {
-    // Fetch lobby data
+  // Fetch lobby data
+  const fetchLobby = () => {
     fetch(`/api/lobby/${lobbyId}`)
       .then(res => res.json())
       .then(data => {
@@ -44,22 +47,94 @@ export default function LobbyPage() {
         console.error('Error fetching lobby:', err)
         setLoading(false)
       })
+  }
 
-    // Socket.io disabled until real-time features are implemented
-    // Will use polling/refresh for now
+  useEffect(() => {
+    fetchLobby()
     
-    // Polling for lobby updates every 5 seconds
-    const pollInterval = setInterval(() => {
-      fetch(`/api/lobby/${lobbyId}`)
-        .then(res => res.json())
-        .then(data => setLobby(data))
-        .catch(err => console.error('Error polling lobby:', err))
-    }, 5000)
+    // Fallback polling (reduced frequency since Socket.IO provides real-time updates)
+    const pollInterval = setInterval(fetchLobby, 30000) // 30 seconds instead of 5
 
     return () => {
       clearInterval(pollInterval)
     }
-  }, [lobbyId, router])
+  }, [lobbyId])
+
+  // Socket.IO event listeners
+  useEffect(() => {
+    if (!socket || !isConnected) return
+
+    console.log('[Lobby] Setting up Socket.IO listeners')
+
+    // Join lobby room
+    joinRoom('lobby', lobbyId)
+
+    // Listen for lobby activation
+    const handleLobbyActivated = (data: any) => {
+      console.log('[Socket.IO] Lobby activated:', data)
+      setNotification('🎮 Lobby activated! Game is ready to start.')
+      fetchLobby() // Refresh lobby data
+    }
+
+    // Listen for lobby user joined
+    const handleUserJoined = (data: any) => {
+      console.log('[Socket.IO] User joined:', data)
+      fetchLobby() // Refresh to show new user
+    }
+
+    // Listen for round start
+    const handleRoundStarted = (data: any) => {
+      console.log('[Socket.IO] Round started:', data)
+      setNotification(`🚀 Round ${data.roundNumber} started! Question: ${data.question}`)
+      // Could redirect to game page or show round interface
+      setTimeout(() => {
+        // Auto-redirect to game page if needed
+        if (lobby?.games?.[0]?.id) {
+          router.push(`/game/${lobby.games[0].id}`)
+        }
+      }, 2000)
+    }
+
+    // Listen for round end
+    const handleRoundEnded = (data: any) => {
+      console.log('[Socket.IO] Round ended:', data)
+      if (data.autoEnded) {
+        setNotification(`⏱️ Round ${data.roundNumber} ended (time expired)`)
+      } else {
+        setNotification(`✅ Round ${data.roundNumber} ended`)
+      }
+    }
+
+    // Listen for game status changes
+    const handleGameStatusChanged = (data: any) => {
+      console.log('[Socket.IO] Game status changed:', data)
+      fetchLobby() // Refresh lobby data
+    }
+
+    // Attach listeners
+    socket.on('lobby:activated', handleLobbyActivated)
+    socket.on('lobby:user_joined', handleUserJoined)
+    socket.on('round:started', handleRoundStarted)
+    socket.on('round:ended', handleRoundEnded)
+    socket.on('game:status_changed', handleGameStatusChanged)
+
+    // Cleanup
+    return () => {
+      socket.off('lobby:activated', handleLobbyActivated)
+      socket.off('lobby:user_joined', handleUserJoined)
+      socket.off('round:started', handleRoundStarted)
+      socket.off('round:ended', handleRoundEnded)
+      socket.off('game:status_changed', handleGameStatusChanged)
+    }
+  }, [socket, isConnected, lobbyId])
+
+  // Auto-hide notification after 5 seconds
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => setNotification(''), 5000)
+      return () => clearTimeout(timer)
+    }
+  }, [notification])
 
   if (loading) {
     return (
@@ -94,6 +169,20 @@ export default function LobbyPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <div className="container mx-auto max-w-4xl py-8">
+        {/* Socket.IO Connection Status */}
+        {isConnected && (
+          <div className="mb-4 p-2 bg-green-100 border border-green-300 rounded text-green-800 text-sm text-center">
+            🟢 Connected - Real-time updates enabled
+          </div>
+        )}
+        
+        {/* Notification Banner */}
+        {notification && (
+          <div className="mb-4 p-4 bg-blue-100 border border-blue-300 rounded-lg text-blue-900 font-medium animate-pulse">
+            {notification}
+          </div>
+        )}
+
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">{lobby.name}</h1>
           <p className="text-gray-600">Waiting for players to join...</p>

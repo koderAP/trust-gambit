@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import Providers from '@/components/providers'
+import '@/startup' // Initialize app services (admin user, round auto-end, etc.)
 
 const inter = Inter({ subsets: ['latin'] })
 

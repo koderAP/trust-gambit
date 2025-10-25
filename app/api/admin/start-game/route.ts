@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { getSocketServer } from '@/lib/socket/server'
 
 // Schema for game parameters
 const startGameSchema = z.object({
@@ -153,6 +154,18 @@ export async function POST(request: Request) {
         name: lobby.name,
         playerCount: lobbyUsers.length,
       })
+    }
+
+    // Broadcast to all connected clients via Socket.IO
+    try {
+      const socketServer = getSocketServer()
+      socketServer.notifyLobbiesAssigned(game.id, {
+        lobbiesCreated: lobbiesCreated.length,
+        playersAssigned: shuffledUsers.length,
+      })
+      console.log(`[Socket.IO] Broadcasted lobby assignment to game:${game.id}`)
+    } catch (error) {
+      console.warn('[Socket.IO] Could not broadcast lobby assignment (server may not be initialized):', error)
     }
 
     return NextResponse.json({

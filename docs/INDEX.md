@@ -53,6 +53,14 @@ Welcome to the Trust Gambit documentation! This directory contains comprehensive
    - Infrastructure layout
    - Technology choices
 
+7. **[IMPLEMENTATION-NOTES.md](./IMPLEMENTATION-NOTES.md)** - Implementation Notes & Optimizations
+   - Admin dashboard optimizations
+   - Performance fixes (N+1 queries, transactions)
+   - Round auto-end feature
+   - Known limitations (Socket.IO real-time updates)
+   - Testing and monitoring scripts
+   - Deployment checklist
+
 ## 🚀 Getting Started
 
 ### New to Trust Gambit?

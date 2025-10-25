@@ -8,9 +8,16 @@ export class SocketServer {
   constructor(httpServer: HTTPServer) {
     this.io = new SocketIOServer(httpServer, {
       cors: {
-        origin: process.env.APP_URL || 'http://localhost:3000',
+        origin: [
+          'http://localhost:3000',
+          'http://localhost',
+          'http://localhost:80',
+          process.env.APP_URL || 'http://localhost:3000'
+        ],
         methods: ['GET', 'POST'],
+        credentials: true,
       },
+      transports: ['websocket', 'polling'],
     });
 
     this.setupHandlers();
@@ -28,12 +35,15 @@ export class SocketServer {
         // Send current lobby status
         const lobby = await prisma.lobby.findUnique({
           where: { id: lobbyId },
-          include: { users: true, games: { orderBy: { createdAt: 'desc' }, take: 1 } },
+          include: { 
+            users: true, 
+            game: true 
+          },
         });
         
         socket.emit('lobby:status', lobby);
         this.io.to(`lobby:${lobbyId}`).emit('lobby:user_joined', {
-          userCount: lobby?.users.length || 0,
+          userCount: lobby?.currentUsers || 0,
         });
       });
 
@@ -162,6 +172,57 @@ export class SocketServer {
   // Broadcast to specific lobby
   broadcastToLobby(lobbyId: string, event: string, data: any) {
     this.io.to(`lobby:${lobbyId}`).emit(event, data);
+  }
+
+  // Broadcast to all connected clients (admin actions)
+  broadcastToAll(event: string, data: any) {
+    this.io.emit(event, data);
+  }
+
+  // Admin action broadcasts
+  notifyLobbiesAssigned(gameId: string, data: { lobbiesCreated: number; playersAssigned: number }) {
+    this.io.to(`game:${gameId}`).emit('admin:lobbies_assigned', data);
+    this.broadcastToAll('admin:lobbies_assigned', { ...data, gameId });
+  }
+
+  notifyLobbiesActivated(gameId: string, lobbyIds: string[]) {
+    this.io.to(`game:${gameId}`).emit('admin:lobbies_activated', { lobbyIds });
+    lobbyIds.forEach(lobbyId => {
+      this.io.to(`lobby:${lobbyId}`).emit('lobby:activated', { lobbyId });
+    });
+  }
+
+  notifyRoundStarted(roundId: string, gameId: string, lobbyId: string | null, data: any) {
+    this.io.to(`game:${gameId}`).emit('round:started', { roundId, ...data });
+    if (lobbyId) {
+      this.io.to(`lobby:${lobbyId}`).emit('round:started', { roundId, ...data });
+    }
+  }
+
+  notifyRoundEnded(roundId: string, gameId: string, lobbyId: string | null, data: any) {
+    this.io.to(`game:${gameId}`).emit('round:ended', { roundId, ...data });
+    if (lobbyId) {
+      this.io.to(`lobby:${lobbyId}`).emit('round:ended', { roundId, ...data });
+    }
+  }
+
+  notifyScoresCalculated(roundId: string, gameId: string, lobbyId: string | null) {
+    this.io.to(`game:${gameId}`).emit('round:scores_calculated', { roundId });
+    if (lobbyId) {
+      this.io.to(`lobby:${lobbyId}`).emit('round:scores_calculated', { roundId });
+    }
+  }
+
+  notifyGameStatusChanged(gameId: string, status: string, stage?: number) {
+    this.io.to(`game:${gameId}`).emit('game:status_changed', { gameId, status, stage });
+    this.broadcastToAll('game:status_changed', { gameId, status, stage });
+  }
+
+  notifyPlayerKicked(userId: string, lobbyId: string | null, gameId: string) {
+    if (lobbyId) {
+      this.io.to(`lobby:${lobbyId}`).emit('player:kicked', { userId });
+    }
+    this.io.to(`game:${gameId}`).emit('player:kicked', { userId });
   }
 }
 

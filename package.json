@@ -4,9 +4,9 @@
   "private": true,
   "description": "Trust Gambit - A game theory webapp for studying trust dynamics",
   "scripts": {
-    "dev": "next dev",
+    "dev": "tsx server.ts",
     "build": "next build",
-    "start": "next start",
+    "start": "NODE_ENV=production node server.js",
     "lint": "next lint",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
