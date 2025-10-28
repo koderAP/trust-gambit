@@ -169,9 +169,11 @@ export default function AdminDashboard() {
     }
   }, [gameState?.activeGame?.status])
 
+  // OPTIMIZED: Fetch initial data without heavy submissions/scores
   const fetchGameState = async () => {
     try {
-      const res = await fetch('/api/admin/game-state')
+      // Use optimized endpoint - exclude users initially, no submissions/scores
+      const res = await fetch('/api/admin/game-state?includeUsers=false&includeSubmissions=false&includeScores=false')
       const data = await res.json()
 
       if (!res.ok) {
@@ -184,6 +186,121 @@ export default function AdminDashboard() {
       setError(err.message)
     } finally {
       setLoading(false)
+    }
+  }
+
+  // OPTIMIZED: Lightweight refresh - only stats
+  const refreshStats = async () => {
+    try {
+      const res = await fetch('/api/admin/stats')
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to fetch stats')
+      }
+
+      // Update ONLY stats and minimal activeGame info
+      setGameState((prevState) => {
+        if (!prevState) {
+          return prevState
+        }
+        
+        return {
+          stats: data.stats,
+          allUsers: prevState.allUsers,
+          activeGame: prevState.activeGame ? {
+            ...prevState.activeGame,
+            status: data.activeGame?.status || prevState.activeGame.status,
+            currentRound: data.activeGame?.currentRound || prevState.activeGame.currentRound,
+            currentStage: data.activeGame?.currentStage || prevState.activeGame.currentStage,
+            lobbies: prevState.activeGame.lobbies,
+            rounds: prevState.activeGame.rounds,
+          } : data.activeGame,
+        }
+      })
+    } catch (err: any) {
+      console.error('Error fetching stats:', err)
+    }
+  }
+
+  // OPTIMIZED: Refresh lobbies only
+  const refreshLobbies = async () => {
+    try {
+      const res = await fetch('/api/admin/lobbies')
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to fetch lobbies')
+      }
+
+      setGameState((prevState) => {
+        if (!prevState?.activeGame) return prevState
+        
+        return {
+          ...prevState,
+          activeGame: {
+            ...prevState.activeGame,
+            lobbies: data.lobbies,
+            totalLobbies: data.lobbies.length
+          }
+        }
+      })
+    } catch (err: any) {
+      console.error('Error fetching lobbies:', err)
+    }
+  }
+
+  // OPTIMIZED: Refresh rounds only
+  const refreshRounds = async () => {
+    try {
+      // Note: scoresCalculated flag is always included by the API
+      const res = await fetch('/api/admin/rounds')
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to fetch rounds')
+      }
+
+      setGameState((prevState) => {
+        if (!prevState?.activeGame) return prevState
+        
+        return {
+          ...prevState,
+          activeGame: {
+            ...prevState.activeGame,
+            rounds: data.rounds,
+            totalRounds: data.rounds.length,
+            currentRound: data.currentRound,
+            currentStage: data.currentStage,
+            status: data.gameStatus
+          }
+        }
+      })
+    } catch (err: any) {
+      console.error('Error fetching rounds:', err)
+    }
+  }
+
+  // OPTIMIZED: Refresh users only
+  const refreshUsers = async () => {
+    try {
+      const res = await fetch('/api/admin/users/detailed')
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to fetch users')
+      }
+
+      setGameState((prevState) => {
+        if (!prevState) return prevState
+        
+        return {
+          ...prevState,
+          allUsers: data.users
+        }
+      })
+    } catch (err: any) {
+      console.error('Error fetching users:', err)
     }
   }
 
@@ -292,8 +409,8 @@ export default function AdminDashboard() {
 
       setSuccess(`Lobbies assigned! Created ${data.lobbiesCreated} lobbies with ${data.playersAssigned} players. Use "Activate Lobbies" button to make them ready.`)
       
-      // Refresh game state
-      await fetchGameState()
+      // OPTIMIZED: Only refresh stats and lobbies (not users or rounds)
+      await Promise.all([refreshStats(), refreshLobbies()])
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -326,8 +443,8 @@ export default function AdminDashboard() {
 
       setSuccess(`Stage 1 completed! ${data.qualifiedPlayers} players promoted to ${data.stage2Lobbies} Stage 2 lobbies.`)
       
-      // Refresh game state
-      await fetchGameState()
+      // OPTIMIZED: Refresh stats and lobbies (stage change affects lobbies)
+      await Promise.all([refreshStats(), refreshLobbies()])
     } catch (err: any) {
       setError(err.message)
     }
@@ -358,8 +475,8 @@ export default function AdminDashboard() {
 
       setSuccess(`Stage 2 completed! Game ended. Winner: ${data.winner?.name || 'TBD'}`)
       
-      // Refresh game state
-      await fetchGameState()
+      // OPTIMIZED: Refresh stats and rounds (game ended)
+      await Promise.all([refreshStats(), refreshRounds()])
     } catch (err: any) {
       setError(err.message)
     }
@@ -475,7 +592,8 @@ export default function AdminDashboard() {
       }
 
       setSuccess(`${data.userName} has been removed from ${data.lobbyName}`)
-      await fetchGameState() // Refresh to show updated lobby status
+      // OPTIMIZED: Refresh stats and lobbies (player removed from lobby)
+      await Promise.all([refreshStats(), refreshLobbies()])
     } catch (err: any) {
       setError(err.message)
     }
@@ -529,6 +647,7 @@ export default function AdminDashboard() {
                       const data = await res.json();
                       if (!res.ok) throw new Error(data.error || 'Failed to end game');
                       setSuccess(`Game ended! ${data.usersReset} players are now waiting for lobby assignment. ${data.questionsReset} questions reset to unused.`);
+                      // OPTIMIZED: Refresh game state and questions
                       await fetchGameState();
                       await fetchQuestions(); // Refresh questions to show all as unused
                     } catch (err: any) {
@@ -798,7 +917,8 @@ export default function AdminDashboard() {
                             const data = await res.json();
                             if (!res.ok) throw new Error(data.error || 'Failed to activate lobbies');
                             setSuccess(`${data.lobbiesActivated} lobbies activated!`);
-                            await fetchGameState();
+                            // OPTIMIZED: Refresh stats and lobbies only
+                            await Promise.all([refreshStats(), refreshLobbies()]);
                           } catch (err: any) {
                             setError(err.message);
                           }
@@ -824,7 +944,8 @@ export default function AdminDashboard() {
                             const data = await res.json();
                             if (!res.ok) throw new Error(data.error || 'Failed to consolidate lobbies');
                             setSuccess(`Consolidated ${data.oldLobbies} lobbies into ${data.newLobbies} lobby/lobbies with ${data.totalPlayers} players!`);
-                            await fetchGameState();
+                            // OPTIMIZED: Refresh stats and lobbies (lobby structure changed)
+                            await Promise.all([refreshStats(), refreshLobbies()]);
                           } catch (err: any) {
                             setError(err.message);
                           }
@@ -855,7 +976,8 @@ export default function AdminDashboard() {
                           const data = await res.json();
                           if (!res.ok) throw new Error(data.error || 'Failed to activate lobbies');
                           setSuccess('Lobbies activated and Stage 1 ready!');
-                          await fetchGameState();
+                          // OPTIMIZED: Refresh stats and lobbies
+                          await Promise.all([refreshStats(), refreshLobbies()]);
                         } catch (err: any) {
                           setError(err.message);
                         }
@@ -899,7 +1021,8 @@ export default function AdminDashboard() {
                           const data = await res.json();
                           if (!res.ok) throw new Error(data.error || 'Failed to activate lobbies');
                           setSuccess('Stage 2 lobbies activated! Ready to start rounds.');
-                          await fetchGameState();
+                          // OPTIMIZED: Refresh stats and lobbies
+                          await Promise.all([refreshStats(), refreshLobbies()]);
                         } catch (err: any) {
                           setError(err.message);
                         }
@@ -949,7 +1072,8 @@ export default function AdminDashboard() {
                               const data = await res.json();
                               if (!res.ok) throw new Error(data.error || 'Failed to end round');
                               setSuccess(`Round ${activeGame.currentRound} ended! ${data.roundsEnded} rounds closed, ${data.submissions.total} submissions received, scoring calculated.`);
-                              await fetchGameState();
+                              // OPTIMIZED: Refresh stats and rounds (round ended, scores calculated)
+                              await Promise.all([refreshStats(), refreshRounds()]);
                             } catch (err: any) {
                               setError(err.message);
                             }
@@ -1011,7 +1135,8 @@ export default function AdminDashboard() {
                               if (!res.ok) throw new Error(data.error || 'Failed to start round');
                               setSuccess(`Round ${nextRoundNumber} started! ${data.lobbiesAffected} lobbies active, ${data.durationSeconds}s timer, domain: ${data.domain}`);
                               setRoundDurationOverride(null); // Reset override
-                              await fetchGameState();
+                              // OPTIMIZED: Refresh stats and rounds (new round started)
+                              await Promise.all([refreshStats(), refreshRounds()]);
                             } catch (err: any) {
                               setError(err.message);
                             }
@@ -1212,6 +1337,7 @@ export default function AdminDashboard() {
                           const data = await res.json();
                           if (!res.ok) throw new Error(data.error || 'Failed to create new game');
                           setSuccess('New game created successfully! All old games archived. Ready to assign lobbies.');
+                          // OPTIMIZED: Fetch fresh game state
                           await fetchGameState();
                           await fetchQuestions(); // Refresh questions to show all as unused
                         } catch (err: any) {
@@ -1298,6 +1424,7 @@ export default function AdminDashboard() {
                             `${data.deleted.submissions} submissions, ${data.deleted.roundScores} scores. ` +
                             `Reset ${data.reset.questions} questions to unused.`
                           );
+                          // OPTIMIZED: Fresh fetch after wipe
                           await fetchGameState();
                           await fetchQuestions();
                         } catch (err: any) {
@@ -1327,7 +1454,8 @@ export default function AdminDashboard() {
                 onClick={async () => {
                   setRefreshingGame(true)
                   try {
-                    await fetchGameState()
+                    // OPTIMIZED: Refresh rounds only for game tab
+                    await refreshRounds()
                     setSuccess('Active game data refreshed')
                   } catch (err: any) {
                     setError('Failed to refresh game data')
@@ -1469,7 +1597,8 @@ export default function AdminDashboard() {
                             const data = await res.json();
                             if (!res.ok) throw new Error(data.error || 'Failed to update parameters');
                             setSuccess(`Game parameters updated! λ=${data.lambda}, β=${data.beta}, γ=${data.gamma}`);
-                            await fetchGameState();
+                            // OPTIMIZED: Refresh stats only (params are metadata)
+                            await refreshStats();
                           } catch (err: any) {
                             setError(err.message);
                           } finally {
@@ -1571,7 +1700,8 @@ export default function AdminDashboard() {
                 onClick={async () => {
                   setRefreshingLobbies(true)
                   try {
-                    await fetchGameState()
+                    // OPTIMIZED: Refresh lobbies only
+                    await refreshLobbies()
                     setSuccess('Lobbies refreshed')
                   } catch (err: any) {
                     setError('Failed to refresh lobbies')
@@ -1866,7 +1996,8 @@ export default function AdminDashboard() {
                   onClick={async () => {
                     setRefreshingUsers(true)
                     try {
-                      await fetchGameState()
+                      // OPTIMIZED: Refresh users only
+                      await refreshUsers()
                       setSuccess('Users list refreshed')
                     } catch (err: any) {
                       setError('Failed to refresh users')

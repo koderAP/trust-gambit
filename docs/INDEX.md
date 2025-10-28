@@ -48,6 +48,56 @@ Welcome to the Trust Gambit documentation! This directory contains comprehensive
    - State persistence
 
 6. **[ARCHITECTURE-DIAGRAM.md](./ARCHITECTURE-DIAGRAM.md)** - System Architecture
+   - Component interactions
+   - Data flow diagrams
+   - Tech stack overview
+   - Scaling considerations
+
+### Admin API Optimization (NEW!)
+
+7. **[ADMIN-API-README.md](./ADMIN-API-README.md)** - Admin API Overview ⚡ START HERE
+   - Overview of API segmentation
+   - Quick start guide
+   - Performance improvements summary
+   - Index to all admin API docs
+
+8. **[ADMIN-API-QUICK-REFERENCE.md](./ADMIN-API-QUICK-REFERENCE.md)** - Quick Reference
+   - Which endpoint to use when
+   - Common usage patterns
+   - Query parameter matrix
+   - Performance targets
+
+9. **[ADMIN-API-BEFORE-AFTER.md](./ADMIN-API-BEFORE-AFTER.md)** - Performance Comparison
+   - Real-world before/after scenarios
+   - Code examples and comparisons
+   - Network traffic analysis
+   - Complete session breakdown
+
+10. **[ADMIN-API-SEGMENTATION.md](./ADMIN-API-SEGMENTATION.md)** - Complete API Docs
+    - All endpoints explained in detail
+    - Full query parameter documentation
+    - Response schemas
+    - Usage examples and recommendations
+
+11. **[ADMIN-API-ARCHITECTURE-DIAGRAM.md](./ADMIN-API-ARCHITECTURE-DIAGRAM.md)** - Visual Architecture
+    - Before/after architecture diagrams
+    - Data flow visualizations
+    - Network traffic comparisons
+    - Database query optimization
+
+12. **[ADMIN-DASHBOARD-MIGRATION.md](./ADMIN-DASHBOARD-MIGRATION.md)** - Migration Guide
+    - How to update the dashboard
+    - Complete component examples
+    - Best practices
+    - Performance metrics
+
+13. **[ADMIN-API-SUMMARY.md](./ADMIN-API-SUMMARY.md)** - Implementation Summary
+    - Architecture benefits
+    - Files created/modified
+    - Migration path
+    - Metrics to monitor
+
+### Technical Deep Dives (Continued)
    - Component diagrams
    - Data flow
    - Infrastructure layout
