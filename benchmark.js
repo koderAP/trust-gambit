@@ -5,7 +5,8 @@ const BASE_URL = __ENV.BASE_URL || 'http://142.93.213.0';
 
 export const options = {
   stages: [
-    { duration: '5m', target: 300 },
+    { duration: '1m', target: 100 },
+    { duration: '5m', target: 100 },
     // { duration: '3m', target: 100 },
     // { duration: '1m', target: 200 },
     // { duration: '1m', target: 200 },

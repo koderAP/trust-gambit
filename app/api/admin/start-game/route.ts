@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { cacheInvalidatePattern } from '@/lib/redis'
 import { z } from 'zod'
 
 // Schema for game parameters
@@ -147,6 +148,11 @@ export async function POST(request: Request) {
           lobbyId: lobby.id,
         },
       })
+
+      // Invalidate cache for all assigned users (parallel for performance)
+      await Promise.all(
+        lobbyUsers.map(user => cacheInvalidatePattern(`profile:${user.id}*`))
+      );
 
       lobbiesCreated.push({
         id: lobby.id,

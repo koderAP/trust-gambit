@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { cacheGet, cacheSet } from '@/lib/redis'
 
 // Force dynamic rendering for all API routes
 export const dynamic = 'force-dynamic'
@@ -18,6 +19,22 @@ export async function GET(
       )
     }
 
+    // Try cache first (5 second TTL for balance between freshness and performance)
+    const cacheKey = `profile:${userId}`;
+    const cached = await cacheGet(cacheKey);
+    
+    if (cached) {
+      return NextResponse.json(cached, {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+          'X-Cache': 'HIT',
+        }
+      });
+    }
+
+    // Cache miss - fetch from database
     const user = await prisma.user.findUnique({
       where: { id: userId },
       include: {
@@ -66,10 +83,24 @@ export async function GET(
       if (round) currentRound = round
     }
 
-    return NextResponse.json({
+    const response = {
       ...userWithoutPassword,
       lobby: lobbyInfo,
       currentRound,
+    };
+
+    // Cache for 5 seconds (balance between freshness and performance)
+    // Important: Shorter TTL = better UX (faster updates)
+    // With smart cache invalidation, critical changes are instant anyway
+    await cacheSet(cacheKey, response, 5);
+
+    return NextResponse.json(response, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'X-Cache': 'MISS',
+      }
     })
   } catch (error) {
     console.error('Profile fetch error:', error)

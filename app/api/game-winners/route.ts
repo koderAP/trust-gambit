@@ -61,6 +61,12 @@ export async function GET(request: NextRequest) {
       gameEnded: true,
       winners: top10,
       endedAt: endedGame.endedAt,
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      }
     });
   } catch (error) {
     console.error('Fetch winners error:', error);

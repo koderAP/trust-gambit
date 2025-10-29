@@ -19,15 +19,15 @@ function getOptimizedDatabaseUrl(): string {
     
     // Add connection pool settings if not already present
     if (!url.searchParams.has('connection_limit')) {
-      // 20 connections per app instance
-      // With 5 instances: 5 × 20 = 100 total connections
-      // Leaves 100 connections for admin/migrations (PostgreSQL max: 200)
-      url.searchParams.set('connection_limit', '20');
+      // Increased from 20 to 50 for 300+ concurrent users
+      // PostgreSQL default max: 100-200 connections
+      // Reserve ~50 for admin operations and migrations
+      url.searchParams.set('connection_limit', '50');
     }
     
     if (!url.searchParams.has('pool_timeout')) {
-      // Wait up to 10 seconds for a connection from the pool
-      url.searchParams.set('pool_timeout', '10');
+      // Increased from 10 to 20 seconds for high load scenarios
+      url.searchParams.set('pool_timeout', '20');
     }
     
     if (!url.searchParams.has('connect_timeout')) {

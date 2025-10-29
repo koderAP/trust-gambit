@@ -86,12 +86,45 @@ function DashboardContent(): JSX.Element {
         }
         const fetchProfile = async () => {
           try {
-            const res = await fetch(`/api/profile/${userId}`);
+            const res = await fetch(`/api/profile/${userId}`, {
+              cache: 'no-store',
+              headers: {
+                'Cache-Control': 'no-cache'
+              }
+            });
             const data = await res.json();
             if (!res.ok) {
               throw new Error(data.error || 'Failed to load profile');
             }
-            setProfile(data);
+            
+            // Only update if there are meaningful changes
+            setProfile(prev => {
+              if (!prev) return data;
+              
+              // Compare key fields to detect changes
+              const lobbyChanged = prev.lobby?.id !== data.lobby?.id;
+              const roundChanged = prev.currentRound?.id !== data.currentRound?.id;
+              const roundStatusChanged = prev.currentRound?.status !== data.currentRound?.status;
+              const profileCompleteChanged = prev.profileComplete !== data.profileComplete;
+              const lobbyRequestedChanged = prev.lobbyRequested !== data.lobbyRequested;
+              
+              // If nothing important changed, keep previous state to preserve timer
+              if (!lobbyChanged && !roundChanged && !roundStatusChanged && 
+                  !profileCompleteChanged && !lobbyRequestedChanged) {
+                console.log('[Dashboard] No changes detected, preserving state');
+                return prev;
+              }
+              
+              console.log('[Dashboard] Changes detected:', {
+                lobbyChanged,
+                roundChanged,
+                roundStatusChanged,
+                profileCompleteChanged,
+                lobbyRequestedChanged
+              });
+              
+              return data;
+            });
           } catch (err: any) {
             setError(err.message);
           } finally {
@@ -99,7 +132,53 @@ function DashboardContent(): JSX.Element {
           }
         };
         fetchProfile();
-      }, [userId]);
+        
+        // Adaptive polling: Adjust frequency based on user state
+        // This reduces load during idle periods while maintaining fast updates when active
+        let intervalId: NodeJS.Timeout;
+        
+        const scheduleNextPoll = () => {
+          if (!profile) {
+            intervalId = setTimeout(() => {
+              fetchProfile();
+              scheduleNextPoll();
+            }, 5000 + Math.random() * 2000); // 5-7s initial
+            return;
+          }
+          
+          let delay: number;
+          
+          // FAST polling (3s): User has active round - needs real-time updates
+          if (profile.currentRound?.status === 'ACTIVE') {
+            delay = 3000 + Math.random() * 1000; // 3-4s
+            console.log('[Dashboard] Active round - fast polling (3-4s)');
+          }
+          // MEDIUM polling (8s): User in lobby but no active round
+          else if (profile.lobby && !profile.currentRound) {
+            delay = 8000 + Math.random() * 2000; // 8-10s
+            console.log('[Dashboard] In lobby, waiting - medium polling (8-10s)');
+          }
+          // SLOW polling (15s): No lobby yet - waiting for assignment
+          else if (!profile.lobby) {
+            delay = 15000 + Math.random() * 3000; // 15-18s
+            console.log('[Dashboard] No lobby - slow polling (15-18s)');
+          }
+          // DEFAULT (5s): Other states
+          else {
+            delay = 5000 + Math.random() * 2000; // 5-7s
+            console.log('[Dashboard] Default polling (5-7s)');
+          }
+          
+          intervalId = setTimeout(() => {
+            fetchProfile();
+            scheduleNextPoll();
+          }, delay);
+        };
+        
+        scheduleNextPoll();
+        
+        return () => clearTimeout(intervalId);
+      }, [userId, profile?.lobby, profile?.currentRound?.status]);
 
   useEffect(() => {
     if (viewProfileId) {
@@ -190,46 +269,130 @@ function DashboardContent(): JSX.Element {
   // Check if user has already submitted for current round
   useEffect(() => {
     if (profile?.currentRound && userId) {
-      fetch(`/api/rounds/${profile.currentRound.id}/submission?userId=${userId}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.submission) {
-            setHasSubmitted(true);
+      const roundId = profile.currentRound.id;
+      const checkSubmission = () => {
+        fetch(`/api/rounds/${roundId}/submission?userId=${userId}`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache'
           }
         })
-        .catch(console.error);
+          .then(res => res.json())
+          .then(data => {
+            setHasSubmitted(prev => {
+              const newValue = !!data.submission;
+              if (prev !== newValue) {
+                console.log('[Dashboard] Submission status changed:', newValue);
+                return newValue;
+              }
+              return prev;
+            });
+          })
+          .catch(console.error);
+      };
+      
+      checkSubmission();
+      
+      // Adaptive: Only poll fast if round is active and user hasn't submitted
+      // After submission, no need to keep checking
+      const shouldPollFast = profile.currentRound.status === 'ACTIVE' && !hasSubmitted;
+      const interval = shouldPollFast ? 2000 + Math.random() * 1000 : 10000; // 2-3s if active, 10s if submitted
+      
+      const submissionInterval = setInterval(checkSubmission, interval);
+      
+      return () => clearInterval(submissionInterval);
+    } else {
+      // Reset submission status when no active round
+      setHasSubmitted(false);
     }
-  }, [profile?.currentRound, userId]);
+  }, [profile?.currentRound, userId, hasSubmitted]);
 
   // Fetch previous rounds for this lobby
   useEffect(() => {
     if (profile?.lobby && userId) {
-      fetch(`/api/lobbies/${profile.lobby.id}/rounds`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.rounds) {
-            setPreviousRounds(data.rounds.filter((r: any) => r.status === 'COMPLETED'));
+      const lobbyId = profile.lobby.id;
+      const fetchRounds = () => {
+        fetch(`/api/lobbies/${lobbyId}/rounds`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache'
           }
         })
-        .catch(console.error);
+          .then(res => res.json())
+          .then(data => {
+            if (data.rounds) {
+              setPreviousRounds(prev => {
+                const newRounds = data.rounds.filter((r: any) => r.status === 'COMPLETED');
+                
+                // Only update if rounds count changed or round statuses changed
+                if (!prev || prev.length !== newRounds.length || 
+                    JSON.stringify(prev.map((r: any) => r.id)) !== JSON.stringify(newRounds.map((r: any) => r.id))) {
+                  console.log('[Dashboard] Rounds updated:', newRounds.length, 'completed rounds');
+                  return newRounds;
+                }
+                
+                return prev;
+              });
+            }
+          })
+          .catch(console.error);
+      };
+      
+      fetchRounds();
+      
+      // Adaptive: Poll faster if active round (might end soon), slower if waiting
+      const hasActiveRound = profile.currentRound?.status === 'ACTIVE';
+      const interval = hasActiveRound ? 5000 + Math.random() * 2000 : 10000 + Math.random() * 3000;
+      
+      const roundsInterval = setInterval(fetchRounds, interval);
+      
+      return () => clearInterval(roundsInterval);
     }
-  }, [profile?.lobby, userId]);
+  }, [profile?.lobby, userId, profile?.currentRound?.status]);
 
   // Fetch leaderboard for this lobby
   useEffect(() => {
     if (profile?.lobby) {
-      setLeaderboardLoading(true);
-      fetch(`/api/lobbies/${profile.lobby.id}/leaderboard`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.leaderboard) {
-            setLeaderboard(data.leaderboard);
+      const lobbyId = profile.lobby.id;
+      const fetchLeaderboard = () => {
+        setLeaderboardLoading(true);
+        fetch(`/api/lobbies/${lobbyId}/leaderboard`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache'
           }
         })
-        .catch(console.error)
-        .finally(() => setLeaderboardLoading(false));
+          .then(res => res.json())
+          .then(data => {
+            if (data.leaderboard) {
+              setLeaderboard(prev => {
+                // Only update if leaderboard actually changed
+                if (!prev || prev.length !== data.leaderboard.length ||
+                    JSON.stringify(prev.map((p: any) => ({ id: p.userId, score: p.cumulativeScore }))) !== 
+                    JSON.stringify(data.leaderboard.map((p: any) => ({ id: p.userId, score: p.cumulativeScore })))) {
+                  console.log('[Dashboard] Leaderboard updated');
+                  return data.leaderboard;
+                }
+                return prev;
+              });
+            }
+          })
+          .catch(console.error)
+          .finally(() => setLeaderboardLoading(false));
+      };
+      
+      fetchLeaderboard();
+      
+      // Adaptive: Poll faster if round recently ended (scores being calculated)
+      // Poll slower if no recent activity
+      const hasRecentRounds = previousRounds && previousRounds.length > 0;
+      const interval = hasRecentRounds ? 8000 + Math.random() * 2000 : 15000 + Math.random() * 3000;
+      
+      const leaderboardInterval = setInterval(fetchLeaderboard, interval);
+      
+      return () => clearInterval(leaderboardInterval);
     }
-  }, [profile?.lobby, previousRounds]); // Refresh when previous rounds change
+  }, [profile?.lobby, previousRounds]);
 
   const handleViewResults = async (roundId: string) => {
     try {

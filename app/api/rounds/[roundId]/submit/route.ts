@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma, withRetry } from '@/lib/prisma';
 import { z } from 'zod';
 import { withRateLimit, SUBMISSION_RATE_LIMIT } from '@/lib/rateLimit';
-import { isDuplicateRequest } from '@/lib/redis';
+import { isDuplicateRequest, cacheInvalidatePattern } from '@/lib/redis';
 
 const submissionSchema = z.object({
   userId: z.string(),
@@ -127,6 +127,9 @@ async function handleSubmit(
     const submissionCount = await prisma.submission.count({
       where: { roundId: params.roundId },
     });
+
+    // Invalidate cache for the submitting user (they now have a submission)
+    await cacheInvalidatePattern(`profile:${validatedData.userId}*`);
 
     return NextResponse.json({
       submission,

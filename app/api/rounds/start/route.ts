@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { cacheInvalidatePattern } from '@/lib/redis';
 import { z } from 'zod';
 
 const startRoundSchema = z.object({
@@ -62,6 +63,17 @@ export async function POST(request: NextRequest) {
         durationSeconds: validatedData.durationSeconds,
       },
     });
+
+    // Invalidate profile cache for all users in the lobby (parallel for performance)
+    const lobbyUsers = await prisma.user.findMany({
+      where: { lobbyId: validatedData.lobbyId },
+      select: { id: true }
+    });
+    
+    // Use Promise.all for parallel invalidation instead of sequential
+    await Promise.all(
+      lobbyUsers.map(user => cacheInvalidatePattern(`profile:${user.id}*`))
+    );
 
     return NextResponse.json({
       message: 'Round started successfully',

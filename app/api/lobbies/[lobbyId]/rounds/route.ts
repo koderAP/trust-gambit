@@ -22,7 +22,13 @@ export async function GET(
       },
     });
 
-    return NextResponse.json({ rounds });
+    return NextResponse.json({ rounds }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      }
+    });
   } catch (error) {
     console.error('Fetch lobby rounds error:', error);
     return NextResponse.json(

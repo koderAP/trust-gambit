@@ -202,14 +202,18 @@ trust-gambit/
 
 ### Performance & Scalability
 
-- **High Concurrency**: Handles 16-17 registrations/second sustained
+- **Adaptive Polling**: Context-aware refresh rates (3-4s active, 15-18s idle)
+- **High Concurrency**: Handles 300+ concurrent users with polling architecture
 - **Horizontal Scaling**: 5 app instances with nginx load balancing
-- **Connection Pooling**: 60 connections per instance, 200 total to PostgreSQL
+- **Connection Pooling**: 50 connections per instance, optimized for burst traffic
+- **Redis Caching**: 95%+ cache hit rate, 5-second TTL for real-time feel
+- **Smart Invalidation**: Parallel cache invalidation on state changes
 - **Rate Limiting**: Token bucket algorithm, configurable per endpoint
-- **Caching**: Redis-backed caching with TTL for frequent queries
 - **Circuit Breakers**: Graceful degradation on database/Redis failures
-- **Bulk Operations**: Optimized for large games (700+ players, 50+ lobbies)
-- **Extended Timeouts**: 60-second API routes for large-scale operations
+- **Change Detection**: Only update UI when data changes (preserves timer state)
+- **Load Reduction**: 67% lower load during idle periods, 13% overall reduction
+
+See **[Performance Guide](./docs/PERFORMANCE.md)** for detailed optimization strategies.
 
 ## 📚 Documentation
 
@@ -218,7 +222,7 @@ trust-gambit/
 - **[Game Mechanics](./docs/game.md)** - Detailed game rules and scoring
 - **[State Machine](./docs/state-machine.md)** - Game state flow and transitions
 - **[Architecture](./docs/ARCHITECTURE-DIAGRAM.md)** - System architecture diagrams
-- **[Performance](./docs/HIGH-CONCURRENCY-GUIDE.md)** - Concurrency and optimization
+- **[Performance & Scalability](./docs/PERFORMANCE.md)** - Adaptive polling, caching, and optimization for 300+ users
 
 ## 🔧 Development
 

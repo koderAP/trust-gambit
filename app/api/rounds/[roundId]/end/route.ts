@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { calculateDelegationGraph } from '@/lib/calculateDelegationGraph';
+import { cacheInvalidatePattern } from '@/lib/redis';
 
 // Force dynamic rendering for all API routes
 export const dynamic = 'force-dynamic'
@@ -57,6 +58,19 @@ export async function POST(
     } catch (calcError) {
       console.error('Error calculating delegation graph:', calcError);
       // Don't fail the request if calculation fails
+    }
+
+    // Invalidate profile cache for all users in the lobby (parallel for performance)
+    if (round.lobbyId) {
+      const lobbyUsers = await prisma.user.findMany({
+        where: { lobbyId: round.lobbyId },
+        select: { id: true }
+      });
+      
+      // Use Promise.all for parallel invalidation instead of sequential
+      await Promise.all(
+        lobbyUsers.map(user => cacheInvalidatePattern(`profile:${user.id}*`))
+      );
     }
 
     return NextResponse.json({
