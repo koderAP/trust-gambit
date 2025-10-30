@@ -86,6 +86,7 @@ export async function POST(request: NextRequest) {
     await Promise.all(updatePromises);
 
     // Calculate delegation graphs for all rounds in parallel
+    // NOTE: This will auto-create PASS submissions for users who didn't submit
     const calculationResults = await Promise.allSettled(
       activeRounds.map(async (round) => {
         try {
@@ -118,10 +119,16 @@ export async function POST(request: NextRequest) {
       r => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value.success)
     );
 
-    const totalSubmissions = activeRounds.reduce(
-      (sum, round) => sum + round.submissions.length,
-      0
+    // Get final submission counts AFTER calculateDelegationGraph (which creates PASS submissions)
+    const submissionCounts = await Promise.all(
+      activeRounds.map(async (round) => ({
+        roundId: round.id,
+        count: await prisma.submission.count({ where: { roundId: round.id } })
+      }))
     );
+    const submissionCountMap = new Map(submissionCounts.map(s => [s.roundId, s.count]));
+    
+    const totalSubmissions = submissionCounts.reduce((sum, s) => sum + s.count, 0);
 
     const lobbyMap = new Map(lobbies.map(l => [l.id, l._count.users]));
     const totalPlayers = activeRounds.reduce(
@@ -140,7 +147,7 @@ export async function POST(request: NextRequest) {
         perLobby: activeRounds.map(r => ({
           lobbyId: r.lobbyId,
           roundNumber: r.roundNumber,
-          submissions: r.submissions.length,
+          submissions: submissionCountMap.get(r.id) || 0, // Use the count AFTER PASS submissions created
           players: r.lobbyId ? (lobbyMap.get(r.lobbyId) || 0) : 0,
         })),
       },

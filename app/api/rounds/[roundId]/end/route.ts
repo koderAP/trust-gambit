@@ -52,6 +52,7 @@ export async function POST(
     });
 
     // Calculate delegation graph and scores
+    // NOTE: This will auto-create PASS submissions for users who didn't submit
     try {
       const graphData = await calculateDelegationGraph(params.roundId);
       console.log('Delegation graph calculated successfully');
@@ -59,6 +60,11 @@ export async function POST(
       console.error('Error calculating delegation graph:', calcError);
       // Don't fail the request if calculation fails
     }
+
+    // Get final submission count AFTER calculateDelegationGraph (which creates PASS submissions)
+    const finalSubmissionCount = await prisma.submission.count({
+      where: { roundId: params.roundId }
+    });
 
     // Invalidate profile cache for all users in the lobby (parallel for performance)
     if (round.lobbyId) {
@@ -76,7 +82,7 @@ export async function POST(
     return NextResponse.json({
       message: 'Round ended successfully',
       round: updatedRound,
-      submissionCount: round.submissions.length,
+      submissionCount: finalSubmissionCount, // Use the count AFTER PASS submissions created
       totalPlayers,
     });
   } catch (error) {

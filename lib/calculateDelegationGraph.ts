@@ -70,6 +70,47 @@ export async function calculateDelegationGraph(roundId: string) {
   console.log(`Explicit submissions: ${round.submissions.length}`);
   console.log(`Implicit PASS (no submission): ${implicitPassUsers.length}`);
 
+  // ✅ FIX: Create actual database Submission records for users who didn't submit
+  if (implicitPassUsers.length > 0) {
+    console.log(`Creating PASS submissions for ${implicitPassUsers.length} users who didn't submit...`);
+    
+    const passSubmissions = await prisma.submission.createMany({
+      data: implicitPassUsers.map(user => ({
+        userId: user.id,
+        roundId: round.id,
+        action: 'PASS',
+        answer: null,
+        delegateTo: null,
+        submittedAt: new Date(),
+      })),
+      skipDuplicates: true, // In case some were created in a race condition
+    });
+    
+    console.log(`✅ Created ${passSubmissions.count} PASS submissions`);
+    
+    // Reload round.submissions to include the newly created PASS submissions
+    const updatedRound = await prisma.round.findUnique({
+      where: { id: roundId },
+      include: {
+        submissions: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        game: true,
+      },
+    });
+    
+    if (updatedRound) {
+      round.submissions = updatedRound.submissions;
+    }
+  }
+
   // Get scoring parameters
   const lambda = round.game.lambda || 0.5;
   const beta = round.game.beta || 0.1;
@@ -77,10 +118,10 @@ export async function calculateDelegationGraph(roundId: string) {
 
   console.log(`Scoring parameters: λ=${lambda}, β=${beta}, γ=${gamma}`);
 
-  // Build nodes map (including implicit PASS)
+  // Build nodes map from all submissions (now includes auto-created PASS submissions)
   const nodes = new Map<string, GraphNode>();
   
-  // Add explicit submissions
+  // Add all submissions (explicit + auto-created PASS)
   for (const sub of round.submissions) {
     const isCorrect = sub.action === 'SOLVE' && sub.answer
       ? sub.answer.trim().toLowerCase() === round.correctAnswer.trim().toLowerCase()
@@ -96,21 +137,6 @@ export async function calculateDelegationGraph(roundId: string) {
       distanceFromSolver: null,
       inCycle: false,
     });
-  }
-  
-  // Add implicit PASS for users who didn't submit
-  for (const user of implicitPassUsers) {
-    nodes.set(user.id, {
-      userId: user.id,
-      action: 'PASS',
-      answer: null,
-      delegateTo: null,
-      isCorrect: null,
-      score: 0,
-      distanceFromSolver: null,
-      inCycle: false,
-    });
-    console.log(`  ${user.name} (${user.id}): No submission, treating as PASS`);
   }
 
   // Detect cycles and calculate distances
