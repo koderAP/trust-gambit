@@ -193,7 +193,7 @@ export async function calculateDelegationGraph(roundId: string) {
     if (scoreCache.has(userId)) {
       return { 
         score: scoreCache.get(userId)!,
-        distance: distanceCache.get(userId) || null
+        distance: distanceCache.get(userId) ?? null
       };
     }
 
@@ -262,11 +262,15 @@ export async function calculateDelegationGraph(roundId: string) {
           score = -1 - Math.pow(lambda, distance);
           console.log(`  ${userId}: Delegates to pass at distance ${distance}, score = ${score}`);
         } else {
-          // Delegation chain - score already calculated recursively
-          if (targetResult.distance !== null) {
+          // Delegation chain - use the target's score to determine sign
+          // If target got positive score (correct chain), propagate positive
+          // If target got negative score (wrong/pass chain), propagate negative
+          if (targetResult.score >= 0) {
             score = 1 + Math.pow(lambda, distance);
+            console.log(`  ${userId}: Delegates to correct chain at distance ${distance}, score = ${score}`);
           } else {
             score = -1 - Math.pow(lambda, distance);
+            console.log(`  ${userId}: Delegates to incorrect chain at distance ${distance}, score = ${score}`);
           }
         }
       }

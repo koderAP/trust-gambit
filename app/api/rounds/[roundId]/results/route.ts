@@ -64,7 +64,9 @@ export async function GET(
       action: sub.action,
       answer: sub.action === 'SOLVE' ? sub.answer : null,
       delegateTo: sub.delegateTo,
-      isCorrect: sub.isCorrect,
+      isCorrect: sub.action === 'SOLVE' && sub.answer
+        ? sub.answer.trim().toLowerCase() === round.correctAnswer.trim().toLowerCase()
+        : null,
       score: userScores.get(sub.userId)?.score || 0,
       inCycle: userScores.get(sub.userId)?.inCycle || false,
       isCurrentUser: sub.userId === userId,
