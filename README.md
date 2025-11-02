@@ -85,8 +85,8 @@ See [DEPLOYMENT.md](./docs/DEPLOYMENT.md) for detailed production deployment ins
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                         nginx (Load Balancer)                │
-│                    Rate Limiting & Routing                   │
+│                         nginx (Load Balancer)               │
+│                    Rate Limiting & Routing                  │
 └──────┬──────────────────────────────────────────────────────┘
        │
        ├─────┬─────┬─────┬─────┐
