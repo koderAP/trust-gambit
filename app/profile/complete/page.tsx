@@ -25,6 +25,8 @@ function ProfileCompleteContent() {
   
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [profileEditsAllowed, setProfileEditsAllowed] = useState(true)
+  const [checkingAccess, setCheckingAccess] = useState(true)
   const [currentDomainIndex, setCurrentDomainIndex] = useState(0)
   const [domainRatings, setDomainRatings] = useState<DomainRating[]>(
     DOMAINS.map(domain => ({
@@ -37,6 +39,28 @@ function ProfileCompleteContent() {
   const currentDomain = domainRatings[currentDomainIndex]
   const progress = ((currentDomainIndex + 1) / DOMAINS.length) * 100
   const isLastDomain = currentDomainIndex === DOMAINS.length - 1
+
+  // Check if profile editing is allowed
+  useEffect(() => {
+    const checkProfileEditAccess = async () => {
+      try {
+        const res = await fetch('/api/admin/game-state?includeUsers=false&includeLobbies=false&includeRounds=false&includeSubmissions=false&includeScores=false')
+        const data = await res.json()
+        
+        if (res.ok && data.activeGame) {
+          setProfileEditsAllowed(data.activeGame.allowProfileEdits !== false)
+        }
+      } catch (err) {
+        console.error('Error checking profile edit access:', err)
+        // Default to allowing edits if check fails
+        setProfileEditsAllowed(true)
+      } finally {
+        setCheckingAccess(false)
+      }
+    }
+    
+    checkProfileEditAccess()
+  }, [])
 
   const updateCurrentRating = (rating: number) => {
     const updated = [...domainRatings]
@@ -136,6 +160,22 @@ function ProfileCompleteContent() {
           </CardHeader>
           
           <CardContent className="space-y-6">
+            {/* Profile Edit Locked Message */}
+            {!checkingAccess && !profileEditsAllowed && (
+              <div className="p-4 bg-orange-50 border-2 border-orange-400 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">🔒</span>
+                  <div>
+                    <h4 className="font-semibold text-orange-900 mb-1">Profile Editing is Currently Locked</h4>
+                    <p className="text-sm text-orange-800">
+                      The game admin has temporarily disabled profile editing. You cannot modify your domain ratings at this time. 
+                      This is part of the three-phase game management. Please check back later or contact the admin.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             {/* Progress Bar */}
             <div className="space-y-2">
               <div className="flex justify-between text-sm text-muted-foreground">
@@ -174,7 +214,8 @@ function ProfileCompleteContent() {
                     max="10"
                     value={currentDomain.rating}
                     onChange={(e) => updateCurrentRating(parseInt(e.target.value))}
-                    className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary mt-2"
+                    disabled={!profileEditsAllowed}
+                    className={`w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary mt-2 ${!profileEditsAllowed ? 'opacity-50 cursor-not-allowed' : ''}`}
                   />
                   <div className="flex justify-between text-xs text-muted-foreground mt-1">
                     <span>No Knowledge (0)</span>
@@ -191,6 +232,7 @@ function ProfileCompleteContent() {
                     placeholder={`Example: I have 3 years of experience in ${currentDomain.domain.toLowerCase()}, completed several projects, but still learning advanced concepts.`}
                     value={currentDomain.reason}
                     onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => updateCurrentReason(e.target.value)}
+                    disabled={!profileEditsAllowed}
                     rows={4}
                     className="resize-none"
                   />
@@ -206,7 +248,7 @@ function ProfileCompleteContent() {
               <Button
                 variant="outline"
                 onClick={handlePrevious}
-                disabled={currentDomainIndex === 0}
+                disabled={currentDomainIndex === 0 || !profileEditsAllowed}
                 className="flex-1"
               >
                 Previous
@@ -215,6 +257,7 @@ function ProfileCompleteContent() {
               {!isLastDomain ? (
                 <Button
                   onClick={handleNext}
+                  disabled={!profileEditsAllowed}
                   className="flex-1"
                 >
                   Next Domain
@@ -222,7 +265,7 @@ function ProfileCompleteContent() {
               ) : (
                 <Button
                   onClick={handleSubmit}
-                  disabled={loading}
+                  disabled={loading || !profileEditsAllowed}
                   className="flex-1"
                 >
                   {loading ? (

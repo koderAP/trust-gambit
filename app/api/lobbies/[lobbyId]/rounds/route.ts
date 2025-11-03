@@ -22,7 +22,16 @@ export async function GET(
       },
     });
 
-    return NextResponse.json({ rounds }, {
+    // Security: Remove correctAnswer from ACTIVE rounds to prevent cheating
+    const safeRounds = rounds.map(round => {
+      if (round.status === 'ACTIVE' || round.status === 'NOT_STARTED') {
+        const { correctAnswer, ...roundWithoutAnswer } = round;
+        return roundWithoutAnswer;
+      }
+      return round;
+    });
+
+    return NextResponse.json({ rounds: safeRounds }, {
       headers: {
         'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
         'Pragma': 'no-cache',

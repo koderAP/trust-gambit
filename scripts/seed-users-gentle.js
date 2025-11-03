@@ -188,7 +188,7 @@ async function seedUsers() {
   console.log(`📧 Email pattern: player${TIMESTAMP}-N@trustgambit.com`);
   console.log(`🔑 Password (all users): password123`);
   console.log(`📍 Hostels: Distributed across Hostel 1-12`);
-  console.log(`📊 Domain ratings: Random 1-10 for all 10 domains`);
+  console.log(`📊 Domain ratings: Random 1-10 for all 11 domains`);
   console.log('');
   console.log('✨ All successful users have completed profiles!');
   console.log('🎮 Ready to assign to lobbies and start game!');

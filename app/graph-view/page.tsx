@@ -157,7 +157,7 @@ function GraphViewContent() {
           <CardContent className="space-y-2">
             <div>
               <p className="text-sm text-gray-300">Question:</p>
-              <p className="font-medium">{graphData.round.question}</p>
+              <p className="font-medium whitespace-pre-line">{graphData.round.question}</p>
             </div>
             <div>
               <p className="text-sm text-gray-300">Correct Answer:</p>

@@ -8,15 +8,16 @@ const CONCURRENT_BATCH = parseInt(process.env.CONCURRENT_BATCH || '50');
 
 const DOMAINS = [
   'Algorithms',
-  'Finance',
-  'Economics',
-  'Statistics',
-  'Probability',
-  'Machine Learning',
-  'Crypto',
+  'Astronomy',
   'Biology',
-  'Indian History',
+  'Crypto',
+  'Economics',
+  'Finance',
   'Game Theory',
+  'Indian History',
+  'Machine Learning',
+  'Probability',
+  'Statistics',
 ];
 
 interface RegistrationResult {

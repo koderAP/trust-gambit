@@ -66,17 +66,18 @@ This document describes the state machine for the Trust Gambit web application, 
 - **Required Fields**:
   - Name
   - Email
-  - Self-ratings for all 10 domains (0-10 scale)
+  - Self-ratings for all 11 domains (0-10 scale)
     - Algorithms
-    - Finance
-    - Economics
-    - Statistics
-    - Probability
-    - Machine Learning
-    - Crypto
+    - Astronomy
     - Biology
-    - Indian History
+    - Crypto
+    - Economics
+    - Finance
     - Game Theory
+    - Indian History
+    - Machine Learning
+    - Probability
+    - Statistics
 - **Actions Available**: 
   - Edit form fields
   - Save draft
@@ -128,7 +129,7 @@ This document describes the state machine for the Trust Gambit web application, 
 ## 3. Round State Machine (Per Question)
 
 **Important**: Each question represents ONE ROUND. This state machine cycles for every round (question).
-- Stage 1: 20 rounds (questions) across 10 domains
+- Stage 1: 22 rounds (questions) across 11 domains
 - Stage 2: 8 rounds (questions) across 4 domains
 
 ### 3.1 WAITING_FOR_ROUND_START
@@ -249,7 +250,7 @@ This document describes the state machine for the Trust Gambit web application, 
 - **Description**: Separate tab/panel showing all lobby players
 - **Display Information**:
   - List of all players in lobby
-  - Each player's self-ratings (10 domains)
+  - Each player's self-ratings (11 domains)
   - Each player's cumulative score (if round started)
   - Historical performance (previous questions)
   - Trust bonus history
@@ -297,7 +298,7 @@ Rule: Request Lobby Button Enabled
 IF:
   - Game state = GAME_STARTED
   - User form state = FORM_COMPLETE
-  - All 10 domain ratings filled (0-10)
+  - All 11 domain ratings filled (0-10)
   - Name and email provided
 THEN:
   - Enable "Request Lobby" button
@@ -402,7 +403,7 @@ ADMIN_DASHBOARD
 ### Example: User Journey Through One Round (Question)
 
 1. **Initial State**: `FORM_INCOMPLETE`
-   - User fills all 10 domain ratings + personal info
+   - User fills all 11 domain ratings + personal info
    - Transition to `FORM_COMPLETE`
 
 2. **Lobby Request**: `FORM_COMPLETE`
@@ -579,7 +580,7 @@ stateDiagram-v2
   currentStage: 1 | 2,           // Major phase (Stage 1 or Stage 2)
   currentRound: number,          // Current round (question) number within stage
   totalRounds: {
-    stage1: 20,                  // 10 domains × 2 questions each
+    stage1: 22,                  // 11 domains × 2 questions each
     stage2: 8                    // 4 domains × 2 questions each
   },
   parameters: {
@@ -646,7 +647,7 @@ stateDiagram-v2
 {
   enabled: false,
   reason: "Please complete all declaration form fields",
-  tooltip: "Fill all 10 domain ratings and personal information"
+  tooltip: "Fill all 11 domain ratings and personal information"
 }
 
 // Enabled State

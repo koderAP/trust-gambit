@@ -26,7 +26,7 @@ export async function PUT(request: Request) {
       )
     }
 
-    // Validate that all 10 domains are provided
+    // Validate that all 11 domains are provided
     if (domainRatings.length !== DOMAINS.length) {
       return NextResponse.json(
         { error: `All ${DOMAINS.length} domain ratings are required` },
@@ -53,6 +53,19 @@ export async function PUT(request: Request) {
       return NextResponse.json(
         { error: 'User not found' },
         { status: 404 }
+      )
+    }
+
+    // Check if profile editing is allowed
+    const game = await prisma.game.findFirst({
+      orderBy: { createdAt: 'desc' },
+      select: { allowProfileEdits: true }
+    })
+
+    if (game && game.allowProfileEdits === false) {
+      return NextResponse.json(
+        { error: 'Profile editing is currently locked by the game administrator' },
+        { status: 403 }
       )
     }
 

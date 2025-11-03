@@ -1,0 +1,163 @@
+[
+  {
+    "stage": 1,
+    "domain": "Astronomy",
+    "question": "Identify the constellation: \nA) Delphinus \nB) Sagitta \nC) Sagittarius \nD) Orion",
+    "correctAnswer": "Sagittarius",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Astronomy",
+    "question": "Which constellation was at the Zenith as of 21st September 3PM near Delhi? a) Orion b) Canis Major c) Bootes d) Pavo",
+    "correctAnswer": "Bootes",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Astronomy",
+    "question": "What would the analemma look like if the eccentricity of earth's orbit was 0.024, tilt was 0 degrees and measured from the south pole? a) horizontal line b) symmetric figure 8 c) vertical line d) asymmetrical figure 8",
+    "correctAnswer": "horizontal line",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Biology",
+    "question": "While rushing to the Trust Gambit venue you fall and hurt your leg. You vigorously rub the affected area and feel less pain. This is because: a. Rubbing releases analgesics from the skin b. Vigorous rubbing opens mechanically-gated Cl⁻ channels causing hyperpolarization c. Vigorous rubbing desensitizes pain receptors d. Vigorous rubbing generates multiple alternative impulses which act as competing sensory information",
+    "correctAnswer": "Vigorous rubbing generates multiple alternative impulses which act as competing sensory information",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Biology",
+    "question": "Attenuation is a regulatory mechanism in tryptophan operon that results in premature termination of transcription. Such mechanism is not possible in an eukaryote because: a. polycistronic mRNA is not transcribed b. transcription and translation are not coupled c. sigma factor is not involved in transcription initiation d. Shine-Dalgarno sequence needed for ribosome recognition is absent in eukaryotic mRNA",
+    "correctAnswer": "transcription and translation are not coupled",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Biology",
+    "question": "Herbivores have evolved to feed effectively, while plants have countered with anti-herbivore defenses. Extrafloral nectar is one such defence tool which attracts diverse predators and parasitoids, especially ants. Higher volumes of extrafloral nectar production attract more ants and can increase their aggressiveness. The relationship between the plant and the ants can be correctly described as: a. Mutualism b. Antagonism c. Commensalism d. Amensalism",
+    "correctAnswer": "Mutualism",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Crypto",
+    "question": "How many integers x ∈ (0,142) have x^12 = 1 mod 143?",
+    "correctAnswer": "24",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Crypto",
+    "question": "The ciphertext HLOODELWE was created using a 2-rail Rail Fence transposition cipher on a 9-letter word. What is the original plaintext? A) CODEBREAK B) HLODEWLEY C) HELLOWOED D) HELWOEKED",
+    "correctAnswer": "HELLOWOED",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Crypto",
+    "question": "The word SECRET is encrypted as HVXIVG. How is the word CRYPTO encrypted using the same cipher? A) TUSPUJ B) XIBKGL C) GIBKXP D) XIBLGM",
+    "correctAnswer": "XIBKGL",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Crypto",
+    "question": "The plaintext ENCRYPTNOW is encrypted using a 4-column columnar transposition cipher, but the empty space is filled with the letter X. What is the resulting ciphertext? A) ENCYRPTTOWX B) ENTCXRPYOWN C) EYONPXCTXRNX D) EYONPWCTXRNX",
+    "correctAnswer": "EYONPWCTXRNX",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Crypto",
+    "question": "A spy uses a cipher where A to M are replaced by their Atbash partner (A -> Z, B -> Y, …., M -> N). For N to Z, a fixed shift of +5 is used (N -> S, O -> T,....). What is the ciphertext for CRYPTOGRAM? A) ATDZRPRTBCC B) XWSUYTTW ZN C) XWDUYTTWZN D) YCQVTNVCYM",
+    "correctAnswer": "XWDUYTTWZN",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Probability",
+    "question": "Two integers X and Y are chosen independently and uniformly at random from the set {1, 2, …, 42}. What is the probability that 1/X + 1/Y = 1/6?",
+    "correctAnswer": "9/1764",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Probability",
+    "question": "Pick a number a at random from 1 to 23. Write down a¹, a², a³, a⁴, etc. Each time subtract 23 until you get 1-23 (0 becomes 23). Stop when a number repeats. A number a is a complete-power if it includes every number 1-23 before repeating. What is the probability that a randomly chosen number from 1 to 23 is a complete-power?",
+    "correctAnswer": "10/23",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Probability",
+    "question": "A number is chosen at random from 1 to 100. What is the probability that this number can be written as the sum of three perfect squares?",
+    "correctAnswer": "0.84",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Probability",
+    "question": "A cube has 6 faces. One face is textured and fixed, while the remaining 5 faces can each be painted in any of 3 colors. Two colorings are identical if the cube can be rotated in 3D to match, but the textured face must stay in position. Find the number of distinct colorings under this rotation symmetry.",
+    "correctAnswer": "51",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Game Theory",
+    "question": "Two players alternately write '(' or ')' to build a sequence of length 2n. At any prefix, ')' cannot exceed '(' by more than 1. Each player prefers longer freedom. In equilibrium, what is the expected payoff ratio E[A]/E[B] as n → ∞? A) 1 B) sqrt(2) - 1 C) (sqrt(5) + 1)/2 D) 2/pi",
+    "correctAnswer": "sqrt(2) - 1",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Game Theory",
+    "question": "Two players alternately mark vertices of a regular n-gon (n is odd prime ≥ 7). A player loses if after their move, three marked vertices a,b,c satisfy 2b ≡ a + c (mod n). Which best describes the equilibrium? A) Player 1 wins using rotational symmetry B) Player 2 has mirror strategy using multiplicative map C) Symmetric winning chances depending on parity D) No deterministic win - mixed equilibrium",
+    "correctAnswer": "Player 2 has mirror strategy using multiplicative map",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Algorithms",
+    "question": "Given a BST T with distinct keys, we search for key k and end up at a leaf. Let A = nodes left of search path, B = nodes on search path, C = nodes right of search path. Let S = {(a,b):a∈A, b∈B, a<b} ∪ {(b,c):b∈B, c∈C, b<c}. Cardinality of S is same as: A) {(a,b):a∈A,b∈B}∪{(b,c):b∈B,c∈C} B) {(b1,b2):b1∈B,b2∈B} C) Can't be concluded D) {(a,c):a∈A,c∈C}",
+    "correctAnswer": "{(a,c):a∈A,c∈C}",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Algorithms",
+    "question": "Python code: a = [[1]]; b = a * 3; a[0].append(2); print(b). What is the result? A) [[1, 2], [1], [1]] B) [[1, 2], [1, 2], [1, 2]] C) [[1, 2], [1, 2], [1]] D) [[1], [1], [1]]",
+    "correctAnswer": "[[1, 2], [1, 2], [1, 2]]",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Algorithms",
+    "question": "Python code: a = [[1, 2], [3, 4]]; b = a; c = a[:]; a[0][0] = 99; a.append([5, 6]); print(a, b, c). What are the values? A) a=[[99,2],[3,4],[5,6]], b=[[99,2],[3,4],[5,6]], c=[[1,2],[3,4],[5,6]] B) a=[[99,2],[3,4],[5,6]], b=[[99,2],[3,4],[5,6]], c=[[99,2],[3,4]] C) a=[[99,2],[3,4],[5,6]], b=[[1,2],[3,4],[5,6]], c=[[99,2],[3,4]] D) a=[[99,2],[3,4],[5,6]], b=[[99,2],[3,4]], c=[[1,2],[3,4]]",
+    "correctAnswer": "a=[[99,2],[3,4],[5,6]], b=[[99,2],[3,4],[5,6]], c=[[99,2],[3,4]]",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Machine Learning",
+    "question": "A climate prediction model uses Gaussian likelihood with mean μθ(x) and fixed variance σ²=0.25. The target variable was scaled by factor 2 before training but σ wasn't adjusted. If current σ = 0.25 was used on data scaled by 2, what should the corrected σ be after returning to original scale?",
+    "correctAnswer": "0.5",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Machine Learning",
+    "question": "A Transformer model with 48 layers has gradient instability. Analysis shows average gain factor per layer exceeds 1 by 1%, so gradients multiply by (1.01)^N after N layers. By what approximate factor do gradients grow in magnitude through all 48 layers under this 1% amplification?",
+    "correctAnswer": "1.64",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Machine Learning",
+    "question": "An L2-regularized logistic regression achieves minimum validation loss at λ₂ = 0.01. To switch to L1 with equivalent weight shrinkage, knowing E[|w|] ≈ √(2v/π) and E[w²] = v for normally distributed weights, what should λ₁ be to match λ₂ = 0.01?",
+    "correctAnswer": "0.0125",
+    "imageUrl": ""
+  }
+]

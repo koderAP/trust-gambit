@@ -22,8 +22,9 @@ console.log(`📧 Email prefix: player${TIMESTAMP}-`);
 console.log('');
 
 const DOMAINS = [
-  'Algorithms', 'Finance', 'Economics', 'Statistics', 'Probability',
-  'Machine Learning', 'Crypto', 'Biology', 'Indian History', 'Game Theory'
+  'Algorithms', 'Astronomy', 'Biology', 'Crypto', 'Economics',
+  'Finance', 'Game Theory', 'Indian History', 'Machine Learning',
+  'Probability', 'Statistics'
 ];
 
 let successCount = 0;
@@ -144,7 +145,12 @@ async function seedUsers() {
   console.log(`📧 Email pattern: player${TIMESTAMP}-N@trustgambit.com`);
   console.log(`🔑 Password (all users): password123`);
   console.log(`📍 Hostels: Distributed across Hostel 1-12`);
-  console.log(`📊 Domain ratings: Random 1-10 for all 10 domains`);
+    console.log(`✅ Successfully seeded ${successCount}/${TOTAL} users in ${elapsed}ms (${avgTime}ms avg)`);
+  console.log(`❌ Failed: ${failedCount}`);
+  console.log('');
+  console.log(`📊 Domain ratings: Random 1-10 for all 11 domains`);
+  console.log(`🏢 Hostel: Aravali, Kumaon, Nilgiri, or Satpura (random)`);
+  console.log(`🔗 Server: ${SERVER_URL}`);
   console.log('');
   console.log('✨ All users have completed profiles!');
   console.log('🎮 Ready to assign to lobbies and start game!');

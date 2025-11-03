@@ -24,7 +24,7 @@ model User {
   lobbyId   String?
   lobby     Lobby?   @relation(fields: [lobbyId], references: [id])
   
-  // Domain ratings (10 domains)
+  // Domain ratings (11 domains)
   domainRatings DomainRating[]
   
   submissions Submission[]
@@ -88,6 +88,9 @@ model Game {
   status      String   @default("NOT_STARTED") // NOT_STARTED, REGISTRATION_OPEN, LOBBIES_FORMING, STAGE_1_ACTIVE, STAGE_1_COMPLETE, STAGE_2_ACTIVE, STAGE_2_COMPLETE, ENDED
   currentStage Int     @default(0) // 0=not started, 1=stage 1, 2=stage 2
   currentRound Int     @default(0) // Current round number
+  
+  // Three-phase game control
+  allowProfileEdits Boolean @default(true) // Allow users to edit their domain ratings
   
   // Scoring parameters
   lambda      Float    @default(0.5) // Chain propagation parameter

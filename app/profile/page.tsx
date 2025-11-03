@@ -40,6 +40,7 @@ function ProfileEditContent() {
   const [success, setSuccess] = useState(false)
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [domainRatings, setDomainRatings] = useState<DomainRating[]>([])
+  const [profileEditsAllowed, setProfileEditsAllowed] = useState(true)
 
   useEffect(() => {
     if (!userId) {
@@ -69,8 +70,24 @@ function ProfileEditContent() {
         setLoading(false)
       }
     }
+    
+    const checkProfileEditAccess = async () => {
+      try {
+        const res = await fetch('/api/admin/game-state?includeUsers=false&includeLobbies=false&includeRounds=false&includeSubmissions=false&includeScores=false')
+        const data = await res.json()
+        
+        if (res.ok && data.activeGame) {
+          setProfileEditsAllowed(data.activeGame.allowProfileEdits !== false)
+        }
+      } catch (err) {
+        console.error('Error checking profile edit access:', err)
+        // Default to allowing edits if check fails
+        setProfileEditsAllowed(true)
+      }
+    }
 
     fetchProfile()
+    checkProfileEditAccess()
   }, [userId])
 
   const updateRating = (index: number, rating: number) => {
@@ -242,6 +259,22 @@ function ProfileEditContent() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-8">
+            {/* Profile Edit Locked Message */}
+            {!profileEditsAllowed && (
+              <div className="p-4 bg-orange-50 border-2 border-orange-400 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">🔒</span>
+                  <div>
+                    <h4 className="font-semibold text-orange-900 mb-1">Profile Editing is Currently Locked</h4>
+                    <p className="text-sm text-orange-800">
+                      The game admin has temporarily disabled profile editing. You cannot modify your domain ratings at this time. 
+                      This is part of the three-phase game management. Please check back later or contact the admin.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             {domainRatings.map((domainRating, index) => (
               <div key={domainRating.domain} className="space-y-4 pb-6 border-b last:border-b-0">
                 <div>
@@ -259,7 +292,8 @@ function ProfileEditContent() {
                     max="10"
                     value={domainRating.rating}
                     onChange={(e) => updateRating(index, parseInt(e.target.value))}
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
+                    disabled={!profileEditsAllowed}
+                    className={`w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary ${!profileEditsAllowed ? 'opacity-50 cursor-not-allowed' : ''}`}
                   />
                   <div className="flex justify-between text-xs text-muted-foreground">
                     <span>1 - Beginner</span>
@@ -274,6 +308,7 @@ function ProfileEditContent() {
                     placeholder="Describe your experience, qualifications, or why you rated yourself this way..."
                     value={domainRating.reason}
                     onChange={(e) => updateReason(index, e.target.value)}
+                    disabled={!profileEditsAllowed}
                     rows={3}
                     className="resize-none"
                   />
@@ -292,7 +327,7 @@ function ProfileEditContent() {
           </Link>
           <Button 
             onClick={handleSave} 
-            disabled={saving}
+            disabled={saving || !profileEditsAllowed}
             className="flex-1"
           >
             {saving ? (

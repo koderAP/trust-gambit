@@ -58,7 +58,7 @@ create_user() {
   
   # Step 2: Complete profile with domain ratings
   # Domains from lib/constants.ts
-  DOMAINS=("Algorithms" "Finance" "Economics" "Statistics" "Probability" "Machine Learning" "Crypto" "Biology" "Indian History" "Game Theory")
+  DOMAINS=("Algorithms" "Astronomy" "Biology" "Crypto" "Economics" "Finance" "Game Theory" "Indian History" "Machine Learning" "Probability" "Statistics")
   DOMAIN_RATINGS="["
   for j in "${!DOMAINS[@]}"; do
     RATING=$((1 + RANDOM % 10))
@@ -136,7 +136,7 @@ echo ""
 echo "📧 Email pattern: player${TIMESTAMP}-N@trustgambit.com"
 echo "🔑 Password (all users): password123"
 echo "📍 Hostels: Distributed across Hostel 1-12"
-echo "📊 Domain ratings: Random 1-10 for all 10 domains"
+echo "📊 Domain ratings: Random 1-10 for all 11 domains"
 echo ""
 echo "✨ All users have completed profiles!"
 echo "🎮 Ready to assign to lobbies and start game!"

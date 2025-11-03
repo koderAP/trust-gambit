@@ -1,0 +1,86 @@
+[
+  {
+    "stage": 1,
+    "domain": "Algorithms",
+    "question": "What is the time complexity of binary search in a sorted array?",
+    "correctAnswer": "O(log n)",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Astronomy",
+    "question": "What is the name of the nearest star to Earth (excluding the Sun)?",
+    "correctAnswer": "Proxima Centauri",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Biology",
+    "question": "What is the powerhouse of the cell?",
+    "correctAnswer": "Mitochondria",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Crypto",
+    "question": "What cryptographic hash function does Bitcoin use for mining?",
+    "correctAnswer": "SHA-256",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Economics",
+    "question": "What is the economic term for the total market value of all final goods and services produced in a country?",
+    "correctAnswer": "GDP",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Finance",
+    "question": "What does NPV stand for in financial analysis?",
+    "correctAnswer": "Net Present Value",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Game Theory",
+    "question": "What is a situation where no player can benefit by changing their strategy while others keep theirs unchanged called?",
+    "correctAnswer": "Nash Equilibrium",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Indian History",
+    "question": "In which year did India gain independence?",
+    "correctAnswer": "1947",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Machine Learning",
+    "question": "What type of learning uses labeled training data?",
+    "correctAnswer": "Supervised Learning",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Probability",
+    "question": "What is the probability of getting heads when flipping a fair coin?",
+    "correctAnswer": "0.5",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Statistics",
+    "question": "What is the measure of dispersion that represents the average distance of data points from the mean?",
+    "correctAnswer": "Standard Deviation",
+    "imageUrl": ""
+  },
+  {
+    "stage": 2,
+    "domain": "Algorithms",
+    "question": "What algorithm is used to find the shortest path in a weighted graph?",
+    "correctAnswer": "Dijkstra's Algorithm",
+    "imageUrl": ""
+  }
+]

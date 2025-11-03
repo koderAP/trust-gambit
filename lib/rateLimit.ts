@@ -168,20 +168,22 @@ export function withRateLimit(
 /**
  * Aggressive rate limiter for submission endpoints
  * Allows higher burst but prevents abuse
+ * Optimized for 100+ concurrent users during stress testing
  */
 export const SUBMISSION_RATE_LIMIT: RateLimitOptions = {
   interval: 10000, // 10 seconds
   uniqueTokenPerInterval: 5000, // Track 5000 users
-  tokensPerInterval: 5, // Max 5 submissions per 10 seconds per user
+  tokensPerInterval: 10, // Max 10 submissions per 10 seconds per user (increased from 5)
 };
 
 /**
  * Moderate rate limiter for general API endpoints
+ * Optimized for high-concurrency scenarios
  */
 export const API_RATE_LIMIT: RateLimitOptions = {
   interval: 60000, // 1 minute
   uniqueTokenPerInterval: 2000,
-  tokensPerInterval: 100, // 100 requests per minute per user
+  tokensPerInterval: 200, // 200 requests per minute per user (increased from 100)
 };
 
 /**

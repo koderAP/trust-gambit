@@ -340,11 +340,11 @@ async function runCompleteRegistrationTest() {
 
   console.log('\n💾 DATABASE IMPACT');
   console.log('==================');
-  const dbWrites = (totalProfileSuccess * 12); // 1 user + 10 domain ratings + 1 update
+  const dbWrites = (totalProfileSuccess * 13); // 1 user + 11 domain ratings + 1 update
   const dbWritesPerSec = (dbWrites / (overallTime / 1000)).toFixed(2);
   console.log(`Total DB Writes: ${dbWrites}`);
   console.log(`  - User records: ${totalProfileSuccess}`);
-  console.log(`  - Domain ratings: ${totalProfileSuccess * 10}`);
+  console.log(`  - Domain ratings: ${totalProfileSuccess * 11}`);
   console.log(`  - Profile updates: ${totalProfileSuccess}`);
   console.log(`Write Throughput: ${dbWritesPerSec} writes/sec`);
 

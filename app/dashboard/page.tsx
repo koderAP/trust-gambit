@@ -725,7 +725,7 @@ function DashboardContent(): JSX.Element {
                             {/* Question */}
                             <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
                               <h3 className="font-semibold text-lg mb-2 text-blue-900">Question:</h3>
-                              <p className="text-gray-800">{profile.currentRound.question}</p>
+                              <p className="text-gray-800 whitespace-pre-line">{profile.currentRound.question}</p>
                               {profile.currentRound.imageUrl && (
                                 <div className="mt-3">
                                   <img 
@@ -912,7 +912,7 @@ function DashboardContent(): JSX.Element {
                                 <div className="flex justify-between items-center">
                                   <div>
                                     <p className="font-medium">Round {round.roundNumber} - {round.domain}</p>
-                                    <p className="text-xs text-muted-foreground">{round.question}</p>
+                                    <p className="text-xs text-muted-foreground whitespace-pre-line">{round.question}</p>
                                   </div>
                                   <Button size="sm" variant="outline">
                                     View Results
@@ -1165,7 +1165,7 @@ function DashboardContent(): JSX.Element {
                       <CardTitle className="text-base">Question</CardTitle>
                     </CardHeader>
                     <CardContent className="pb-3">
-                      <p className="font-medium mb-2 text-sm">{viewingRound.round.question}</p>
+                      <p className="font-medium mb-2 text-sm whitespace-pre-line">{viewingRound.round.question}</p>
                       <p className="text-xs text-green-600">
                         <strong>Correct Answer:</strong> {viewingRound.round.correctAnswer}
                       </p>

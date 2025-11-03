@@ -95,7 +95,8 @@ export async function POST(request: NextRequest) {
     });
 
     // Try to find an unused global question for this stage
-    const unusedQuestion = await prisma.question.findFirst({
+    // For Stage 2, also allow Stage 1 questions to be used
+    let unusedQuestion = await prisma.question.findFirst({
       where: {
         stage: stage,
         isUsed: false,
@@ -104,6 +105,23 @@ export async function POST(request: NextRequest) {
         createdAt: 'asc', // Use oldest first
       },
     });
+
+    // If Stage 2 and no Stage 2 questions available, try Stage 1 questions
+    if (!unusedQuestion && stage === 2) {
+      console.log('No unused Stage 2 questions found, looking for unused Stage 1 questions...');
+      unusedQuestion = await prisma.question.findFirst({
+        where: {
+          stage: 1,
+          isUsed: false,
+        },
+        orderBy: {
+          createdAt: 'asc', // Use oldest first
+        },
+      });
+      if (unusedQuestion) {
+        console.log(`Found unused Stage 1 question (ID: ${unusedQuestion.id}) for Stage 2 use`);
+      }
+    }
 
     // If no pre-configured rounds exist, create them dynamically
     if (configuredRounds.length === 0) {
@@ -120,8 +138,9 @@ export async function POST(request: NextRequest) {
       } else {
         // Fall back to dummy questions
         console.log(`No unused questions found. Creating dummy question for Round ${validatedData.roundNumber}`);
-        const domains = ['Algorithms', 'Finance', 'Economics', 'Statistics', 'Probability', 
-                        'Machine Learning', 'Crypto', 'Biology', 'Indian History', 'Game Theory'];
+        const domains = ['Algorithms', 'Astronomy', 'Biology', 'Crypto', 'Economics',
+                        'Finance', 'Game Theory', 'Indian History', 'Machine Learning',
+                        'Probability', 'Statistics'];
         const domainIndex = (validatedData.roundNumber - 1) % domains.length;
         domain = domains[domainIndex];
         question = `Dummy Round ${validatedData.roundNumber} question - ${domain}`;

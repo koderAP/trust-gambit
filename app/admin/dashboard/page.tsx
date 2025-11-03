@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { SimpleModal } from '@/components/ui/simple-modal'
-import { Shield, Users, Play, LogOut, CheckCircle2, Clock, Activity, Layers, Target, Info, TrendingUp, AlertCircle, Eye, ChevronDown, ChevronUp } from 'lucide-react'
+import { Shield, Users, Play, LogOut, CheckCircle2, Clock, Activity, Layers, Target, Info, TrendingUp, AlertCircle, Eye, ChevronDown, ChevronUp, Lock, Unlock } from 'lucide-react'
 
 type User = {
   id: string
@@ -48,6 +48,7 @@ type GameState = {
     lambda: number
     beta: number
     gamma: number
+    allowProfileEdits: boolean
     totalLobbies: number
     totalRounds: number
     rounds: Array<{
@@ -127,11 +128,22 @@ export default function AdminDashboard() {
   const [savingQuestion, setSavingQuestion] = useState(false)
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null)
   const [showDangerZone, setShowDangerZone] = useState(false) // For collapsible danger zone
+  
+  // Bulk upload state
+  const [uploadingBulk, setUploadingBulk] = useState(false)
+  const [bulkUploadFile, setBulkUploadFile] = useState<File | null>(null)
+  
+  // Clear all questions state
+  const [clearingAllQuestions, setClearingAllQuestions] = useState(false)
 
   // Tab refresh states
   const [refreshingUsers, setRefreshingUsers] = useState(false)
   const [refreshingLobbies, setRefreshingLobbies] = useState(false)
   const [refreshingGame, setRefreshingGame] = useState(false)
+  
+  // Profile edit control state
+  const [allowProfileEdits, setAllowProfileEdits] = useState(true)
+  const [togglingProfileEdits, setTogglingProfileEdits] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -181,6 +193,11 @@ export default function AdminDashboard() {
       }
 
       setGameState(data)
+      
+      // Update profile edits control state
+      if (data.activeGame?.allowProfileEdits !== undefined) {
+        setAllowProfileEdits(data.activeGame.allowProfileEdits)
+      }
     } catch (err: any) {
       console.error('Error fetching game state:', err)
       setError(err.message)
@@ -548,6 +565,55 @@ export default function AdminDashboard() {
     }
   }
 
+  const handleBulkUpload = async () => {
+    if (!bulkUploadFile) {
+      setError('Please select a JSON file to upload')
+      return
+    }
+
+    setUploadingBulk(true)
+    setError('')
+    setSuccess('')
+
+    try {
+      // Read the file content
+      const fileContent = await bulkUploadFile.text()
+      let questions
+
+      try {
+        questions = JSON.parse(fileContent)
+      } catch (parseError) {
+        throw new Error('Invalid JSON file. Please check the file format.')
+      }
+
+      // Upload to the API
+      const res = await fetch('/api/admin/questions/bulk-upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(questions),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to upload questions')
+      }
+
+      setSuccess(`Successfully uploaded ${data.count} questions!`)
+      setBulkUploadFile(null)
+      
+      // Reset file input
+      const fileInput = document.getElementById('bulk-upload-input') as HTMLInputElement
+      if (fileInput) fileInput.value = ''
+      
+      await fetchQuestions()
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setUploadingBulk(false)
+    }
+  }
+
   const handleDeleteQuestion = async (questionId: string) => {
     if (!confirm('Are you sure you want to delete this question?')) return
 
@@ -569,6 +635,39 @@ export default function AdminDashboard() {
       await fetchQuestions()
     } catch (err: any) {
       setError(err.message)
+    }
+  }
+
+  const handleClearAllQuestions = async () => {
+    const confirmMessage = 'Are you sure you want to DELETE ALL QUESTIONS from the database? This action cannot be undone!'
+    
+    if (!confirm(confirmMessage)) return
+    
+    // Double confirmation for safety
+    const doubleConfirm = confirm('⚠️ FINAL WARNING: This will permanently delete ALL questions. Are you absolutely sure?')
+    if (!doubleConfirm) return
+
+    setError('')
+    setSuccess('')
+    setClearingAllQuestions(true)
+
+    try {
+      const res = await fetch('/api/admin/questions/clear-all', {
+        method: 'DELETE',
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to clear questions')
+      }
+
+      setSuccess(`Successfully deleted ${data.deletedCount} questions`)
+      await fetchQuestions()
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setClearingAllQuestions(false)
     }
   }
 
@@ -746,7 +845,7 @@ export default function AdminDashboard() {
               <Activity className="mr-2 h-4 w-4" />
               Overview
             </TabsTrigger>
-            <TabsTrigger value="questions" className="data-[state=active]:bg-yellow-600 data-[state=active]:text-white" disabled={!activeGame}>
+            <TabsTrigger value="questions" className="data-[state=active]:bg-yellow-600 data-[state=active]:text-white">
               <Info className="mr-2 h-4 w-4" />
               Questions
             </TabsTrigger>
@@ -1189,6 +1288,93 @@ export default function AdminDashboard() {
                       <span>γ (Cycle): {activeGame.gamma}</span>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Profile Edit Control - Three-Phase Game Management */}
+            {activeGame && (
+              <Card className={`border ${allowProfileEdits ? 'bg-green-500/10 border-green-500/50' : 'bg-orange-500/10 border-orange-500/50'} text-white`}>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    {allowProfileEdits ? <Unlock className="h-5 w-5 text-green-500" /> : <Lock className="h-5 w-5 text-orange-500" />}
+                    Profile Edit Control
+                  </CardTitle>
+                  <CardDescription className="text-gray-300">
+                    Control whether users can edit their domain ratings (3-phase game management)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className={`p-3 rounded-lg border ${
+                    allowProfileEdits 
+                      ? 'bg-green-500/20 border-green-500/50' 
+                      : 'bg-orange-500/20 border-orange-500/50'
+                  }`}>
+                    <p className="text-sm font-semibold mb-1">
+                      Current Status: {allowProfileEdits ? '🔓 UNLOCKED' : '🔒 LOCKED'}
+                    </p>
+                    <p className="text-xs text-gray-300">
+                      {allowProfileEdits 
+                        ? 'Users CAN currently edit their domain ratings and profile' 
+                        : 'Users CANNOT currently edit their domain ratings - profile is locked'}
+                    </p>
+                  </div>
+                  
+                  <Button
+                    onClick={async () => {
+                      setError('')
+                      setSuccess('')
+                      setTogglingProfileEdits(true)
+                      try {
+                        const res = await fetch('/api/admin/toggle-profile-edits', {
+                          method: 'POST',
+                        })
+                        const data = await res.json()
+                        if (!res.ok) throw new Error(data.error || 'Failed to toggle profile edits')
+                        
+                        setAllowProfileEdits(data.allowProfileEdits)
+                        setSuccess(data.message)
+                        
+                        // Update game state
+                        if (gameState?.activeGame) {
+                          setGameState({
+                            ...gameState,
+                            activeGame: {
+                              ...gameState.activeGame,
+                              allowProfileEdits: data.allowProfileEdits
+                            }
+                          })
+                        }
+                      } catch (err: any) {
+                        setError(err.message)
+                      } finally {
+                        setTogglingProfileEdits(false)
+                      }
+                    }}
+                    disabled={togglingProfileEdits}
+                    className={`w-full font-semibold ${
+                      allowProfileEdits
+                        ? 'bg-orange-600 hover:bg-orange-700'
+                        : 'bg-green-600 hover:bg-green-700'
+                    }`}
+                  >
+                    {togglingProfileEdits ? (
+                      <Clock className="mr-2 h-4 w-4 animate-spin" />
+                    ) : allowProfileEdits ? (
+                      <Lock className="mr-2 h-4 w-4" />
+                    ) : (
+                      <Unlock className="mr-2 h-4 w-4" />
+                    )}
+                    {togglingProfileEdits 
+                      ? 'Toggling...' 
+                      : allowProfileEdits 
+                        ? 'Lock Profile Editing' 
+                        : 'Unlock Profile Editing'}
+                  </Button>
+                  
+                  <p className="text-xs text-gray-400 mt-2">
+                    💡 Use this to control the three phases: (1) Profile setup, (2) Game play with locked profiles, (3) Post-game with unlocked profiles
+                  </p>
                 </CardContent>
               </Card>
             )}
@@ -1636,7 +1822,7 @@ export default function AdminDashboard() {
                               <div className="flex items-center justify-between gap-3">
                                 <div className="flex-1">
                                   <p className="font-medium">Round {round.roundNumber} - {round.domain}</p>
-                                  <p className="text-xs text-gray-400 mt-1">{round.question}</p>
+                                  <p className="text-xs text-gray-400 mt-1 whitespace-pre-line">{round.question}</p>
                                   <p className="text-xs text-gray-500 mt-1">
                                     Lobby: {round.lobbyId || 'All'} | Submissions: {round.submissionsCount}
                                     {round.startTime && (
@@ -1815,15 +2001,16 @@ export default function AdminDashboard() {
                       className="w-full px-3 py-2 bg-white/10 border border-white/30 rounded text-white"
                     >
                       <option value="Algorithms" className="bg-gray-800">Algorithms</option>
-                      <option value="Finance" className="bg-gray-800">Finance</option>
-                      <option value="Economics" className="bg-gray-800">Economics</option>
-                      <option value="Statistics" className="bg-gray-800">Statistics</option>
-                      <option value="Probability" className="bg-gray-800">Probability</option>
-                      <option value="Machine Learning" className="bg-gray-800">Machine Learning</option>
-                      <option value="Crypto" className="bg-gray-800">Crypto</option>
+                      <option value="Astronomy" className="bg-gray-800">Astronomy</option>
                       <option value="Biology" className="bg-gray-800">Biology</option>
-                      <option value="Indian History" className="bg-gray-800">Indian History</option>
+                      <option value="Crypto" className="bg-gray-800">Crypto</option>
+                      <option value="Economics" className="bg-gray-800">Economics</option>
+                      <option value="Finance" className="bg-gray-800">Finance</option>
                       <option value="Game Theory" className="bg-gray-800">Game Theory</option>
+                      <option value="Indian History" className="bg-gray-800">Indian History</option>
+                      <option value="Machine Learning" className="bg-gray-800">Machine Learning</option>
+                      <option value="Probability" className="bg-gray-800">Probability</option>
+                      <option value="Statistics" className="bg-gray-800">Statistics</option>
                     </select>
                   </div>
 
@@ -1903,9 +2090,71 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
+                {/* Bulk Upload Section */}
+                <div className="p-4 bg-purple-500/20 border border-purple-500/50 rounded-lg space-y-4">
+                  <h3 className="font-semibold text-lg flex items-center gap-2">
+                    <Target className="h-5 w-5 text-purple-400" />
+                    Bulk Upload Questions (JSON)
+                  </h3>
+                  <p className="text-sm text-gray-300">
+                    Upload multiple questions at once using a JSON file. Each question must have: stage, domain, question, correctAnswer, and optional imageUrl.
+                  </p>
+                  
+                  <div className="bg-gray-900/50 p-3 rounded border border-gray-700">
+                    <p className="text-xs text-gray-400 mb-2">Expected JSON format:</p>
+                    <pre className="text-xs text-green-300 overflow-x-auto">
+{`[
+  {
+    "stage": 1,
+    "domain": "Algorithms",
+    "question": "What is the time complexity?",
+    "correctAnswer": "O(log n)",
+    "imageUrl": ""
+  }
+]`}
+                    </pre>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <input
+                      id="bulk-upload-input"
+                      type="file"
+                      accept=".json"
+                      onChange={(e) => setBulkUploadFile(e.target.files?.[0] || null)}
+                      className="flex-1 text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700 file:cursor-pointer"
+                    />
+                    <Button
+                      onClick={handleBulkUpload}
+                      disabled={uploadingBulk || !bulkUploadFile}
+                      className="bg-purple-600 hover:bg-purple-700 text-white"
+                    >
+                      {uploadingBulk ? 'Uploading...' : 'Upload'}
+                    </Button>
+                  </div>
+                  
+                  {bulkUploadFile && (
+                    <p className="text-xs text-gray-400">
+                      Selected: {bulkUploadFile.name} ({(bulkUploadFile.size / 1024).toFixed(2)} KB)
+                    </p>
+                  )}
+                </div>
+
                 {/* Questions List */}
                 <div>
-                  <h3 className="font-semibold text-lg mb-3">Configured Questions ({questions.length})</h3>
+                  <div className="flex justify-between items-center mb-3">
+                    <h3 className="font-semibold text-lg">Configured Questions ({questions.length})</h3>
+                    {questions.length > 0 && (
+                      <Button
+                        onClick={handleClearAllQuestions}
+                        disabled={clearingAllQuestions}
+                        variant="destructive"
+                        size="sm"
+                        className="bg-red-600 hover:bg-red-700 text-white"
+                      >
+                        {clearingAllQuestions ? 'Deleting...' : '🗑️ Clear All Questions'}
+                      </Button>
+                    )}
+                  </div>
                   
                   {questions.length === 0 ? (
                     <div className="text-center py-8 text-gray-400">
@@ -1963,7 +2212,7 @@ export default function AdminDashboard() {
                               </div>
                             )}
                           </div>
-                          <p className="text-sm mb-2"><strong>Q:</strong> {q.question}</p>
+                          <p className="text-sm mb-2 whitespace-pre-line"><strong>Q:</strong> {q.question}</p>
                           {q.imageUrl && (
                             <div className="my-2">
                               <img 
@@ -2149,7 +2398,7 @@ export default function AdminDashboard() {
                   <CardTitle className="text-lg">Question</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <p className="text-gray-900">{selectedRoundResults.round.question}</p>
+                  <p className="text-gray-900 whitespace-pre-line">{selectedRoundResults.round.question}</p>
                   <div className="pt-2 border-t border-gray-200">
                     <p className="text-sm font-semibold text-green-700">
                       Correct Answer: {selectedRoundResults.round.correctAnswer}

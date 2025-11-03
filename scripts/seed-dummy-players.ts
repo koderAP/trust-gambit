@@ -5,15 +5,16 @@ const prisma = new PrismaClient()
 
 const domains = [
   'Algorithms',
-  'Finance',
-  'Economics',
-  'Statistics',
-  'Probability',
-  'Machine Learning',
-  'Crypto',
+  'Astronomy',
   'Biology',
+  'Crypto',
+  'Economics',
+  'Finance',
+  'Game Theory',
   'Indian History',
-  'Game Theory'
+  'Machine Learning',
+  'Probability',
+  'Statistics'
 ]
 
 const hostels = [

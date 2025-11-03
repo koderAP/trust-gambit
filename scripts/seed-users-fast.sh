@@ -60,7 +60,7 @@ create_user() {
     }")
   
   # Step 3: Complete profile with domain ratings
-  DOMAINS=("Algorithms" "Finance" "Economics" "Statistics" "Probability" "Machine Learning" "Crypto" "Biology" "Indian History" "Game Theory")
+  DOMAINS=("Algorithms" "Astronomy" "Biology" "Crypto" "Economics" "Finance" "Game Theory" "Indian History" "Machine Learning" "Probability" "Statistics")
   DOMAIN_RATINGS="["
   for j in "${!DOMAINS[@]}"; do
     RATING=$((1 + RANDOM % 10))

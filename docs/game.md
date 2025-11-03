@@ -36,9 +36,9 @@ diverse domains, forcing choices that blend logic with strategic risk.
 ## 2 Setup
 
 - Participants compete individually.
-- Each participant submits a self-rating from 0 to 10 across 10 domains (Algorithms, Finance,
-    Economics, Statistics, Probability, Machine Learning, Crypto, Biology, Indian History, Game
-    Theory). Each domain features 2 questions
+- Each participant submits a self-rating from 0 to 10 across 11 domains (Algorithms, Astronomy,
+    Biology, Crypto, Economics, Finance, Game Theory, Indian History, Machine Learning,
+    Probability, Statistics). Each domain features 2 questions
 - The game is played in 2 stages;
     - Stage 1: 120 participants are divided into 8 pools of 15 people each (random division).
        The top 2 people from each team qualify for Stage 2. Each question is considered a "round".

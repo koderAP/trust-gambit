@@ -185,7 +185,7 @@ trust-gambit/
 
 ### For Players
 
-- **Self-Rating System**: Rate your expertise across 10 domains (Algorithms, Finance, Economics, Statistics, Probability, ML, Crypto, Biology, Indian History, Game Theory)
+- **Self-Rating System**: Rate your expertise across 11 domains (Algorithms, Astronomy, Biology, Crypto, Economics, Finance, Game Theory, Indian History, Machine Learning, Probability, Statistics)
 - **Strategic Decisions**: Choose between solving, delegating, or passing each round
 - **Trust Networks**: Build reputation by solving correctly and receiving delegations
 - **Visual Analytics**: Interactive delegation graph visualization

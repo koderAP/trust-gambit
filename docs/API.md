@@ -191,7 +191,7 @@ Get a user's profile information.
       "domain": "FINANCE",
       "rating": 5
     }
-    // ... 10 domains total
+    // ... 11 domains total
   ]
 }
 ```
@@ -204,7 +204,7 @@ Get a user's profile information.
 
 **POST** `/api/profile/complete`
 
-Complete user profile with domain ratings (10 domains required).
+Complete user profile with domain ratings (11 domains required).
 
 **Request Body:**
 ```json
@@ -240,7 +240,7 @@ Complete user profile with domain ratings (10 domains required).
 **Authentication:** Required
 
 **Validation:**
-- All 10 domains must be rated
+- All 11 domains must be rated
 - Ratings must be integers 0-10
 - Hostel name required
 

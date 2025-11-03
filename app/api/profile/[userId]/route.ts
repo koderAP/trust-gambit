@@ -80,7 +80,11 @@ export async function GET(
         where: { lobbyId: user.lobby.id, status: 'ACTIVE' },
         orderBy: { roundNumber: 'desc' }
       })
-      if (round) currentRound = round
+      if (round) {
+        // Security: Don't expose the answer until round is completed
+        const { correctAnswer, ...roundWithoutAnswer } = round
+        currentRound = round.status === 'COMPLETED' ? round : roundWithoutAnswer
+      }
     }
 
     const response = {

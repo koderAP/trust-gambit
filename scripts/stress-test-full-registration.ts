@@ -39,15 +39,16 @@ const TOTAL_REGISTRATIONS = SEQUENTIAL_MODE
 // Domain list for ratings (must match lib/constants.ts)
 const DOMAINS = [
   'Algorithms',
-  'Finance',
-  'Economics',
-  'Statistics',
-  'Probability',
-  'Machine Learning',
-  'Crypto',
+  'Astronomy',
   'Biology',
-  'Indian History',
+  'Crypto',
+  'Economics',
+  'Finance',
   'Game Theory',
+  'Indian History',
+  'Machine Learning',
+  'Probability',
+  'Statistics',
 ]
 
 const HOSTELS = [

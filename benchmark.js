@@ -22,8 +22,9 @@ export const options = {
 };
 
 const DOMAINS = [
-  'Algorithms', 'Finance', 'Economics', 'Statistics', 'Probability',
-  'Machine Learning', 'Crypto', 'Biology', 'Indian History', 'Game Theory'
+  'Algorithms', 'Astronomy', 'Biology', 'Crypto', 'Economics',
+  'Finance', 'Game Theory', 'Indian History', 'Machine Learning',
+  'Probability', 'Statistics'
 ];
 
 export default function () {
