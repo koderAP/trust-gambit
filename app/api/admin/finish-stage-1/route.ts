@@ -85,11 +85,57 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Calculate how many Stage 2 lobbies we need (max 15 players per lobby)
+    // Calculate optimal Stage 2 lobby distribution (10-20 players per lobby)
     const totalQualifiedPlayers = lobbyTopPlayers.reduce((sum, l) => sum + l.topPlayers.length, 0);
-    const stage2LobbiesCount = Math.ceil(totalQualifiedPlayers / 15);
+    
+    // Find optimal number of lobbies that minimizes variance while keeping size 10-20
+    let stage2LobbiesCount: number;
+    let playersPerLobby: number[];
+    
+    if (totalQualifiedPlayers <= 20) {
+      // Single lobby
+      stage2LobbiesCount = 1;
+      playersPerLobby = [totalQualifiedPlayers];
+    } else {
+      // Try different lobby counts and pick the one with minimum variance
+      const minLobbies = Math.ceil(totalQualifiedPlayers / 20);
+      const maxLobbies = Math.floor(totalQualifiedPlayers / 10);
+      
+      let bestCount = minLobbies;
+      let minVariance = Infinity;
+      
+      for (let numLobbies = minLobbies; numLobbies <= maxLobbies; numLobbies++) {
+        const baseSize = Math.floor(totalQualifiedPlayers / numLobbies);
+        const remainder = totalQualifiedPlayers % numLobbies;
+        
+        // Some lobbies will have baseSize+1, others baseSize
+        const largerLobbies = remainder;
+        const smallerLobbies = numLobbies - remainder;
+        
+        // Calculate variance
+        const avgSize = totalQualifiedPlayers / numLobbies;
+        const variance = (largerLobbies * Math.pow(baseSize + 1 - avgSize, 2) + 
+                         smallerLobbies * Math.pow(baseSize - avgSize, 2)) / numLobbies;
+        
+        if (variance < minVariance) {
+          minVariance = variance;
+          bestCount = numLobbies;
+        }
+      }
+      
+      stage2LobbiesCount = bestCount;
+      
+      // Calculate distribution
+      const baseSize = Math.floor(totalQualifiedPlayers / stage2LobbiesCount);
+      const remainder = totalQualifiedPlayers % stage2LobbiesCount;
+      playersPerLobby = Array(stage2LobbiesCount).fill(baseSize);
+      for (let i = 0; i < remainder; i++) {
+        playersPerLobby[i]++;
+      }
+    }
 
     console.log(`Creating ${stage2LobbiesCount} Stage 2 lobbies for ${totalQualifiedPlayers} qualified players`);
+    console.log(`Lobby distribution: ${playersPerLobby.join(', ')} players`);
 
     // Create Stage 2 lobbies (WAITING status, need to be activated)
     const stage2Lobbies = [];
@@ -99,7 +145,7 @@ export async function POST(request: NextRequest) {
           name: `Stage 2 - Pool ${i + 1}`,
           poolNumber: i + 1,
           stage: 2,
-          maxUsers: 15,
+          maxUsers: playersPerLobby[i], // Dynamic max based on optimal distribution
           currentUsers: 0,
           status: 'WAITING', // Need to activate Stage 2 lobbies manually
           gameId: validatedData.gameId,
@@ -167,6 +213,7 @@ export async function POST(request: NextRequest) {
       stage1Lobbies: game.lobbies.length,
       qualifiedPlayers: totalQualifiedPlayers,
       stage2Lobbies: stage2LobbiesCount,
+      lobbyDistribution: playersPerLobby,
       promotions,
     });
   } catch (error) {
