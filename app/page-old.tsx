@@ -150,11 +150,11 @@ export default function Home() {
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5 text-green-600" />
-                    <span className="font-semibold text-green-700">They&apos;re right: 1 + λ×(2k/(k+1))</span>
+                    <span className="font-semibold text-green-700">They're right: 1 + λ×(2k/(k+1))</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <XCircle className="h-5 w-5 text-red-600" />
-                    <span className="font-semibold text-red-700">They&apos;re wrong: -1 point</span>
+                    <span className="font-semibold text-red-700">They're wrong: -1 point</span>
                   </div>
                 </div>
                 <p className="text-sm text-gray-600 mt-4 italic">Build trust networks</p>
@@ -254,12 +254,12 @@ export default function Home() {
                       <div className="bg-white p-3 rounded border-l-4 border-red-500">
                         <div className="font-semibold text-red-700">Eve (distance 1)</div>
                         <div className="text-2xl font-bold text-red-600">-1</div>
-                        <div className="text-xs text-gray-600">Flat penalty (distance doesn&apos;t matter)</div>
+                        <div className="text-xs text-gray-600">Flat penalty (distance doesn't matter)</div>
                       </div>
                       <div className="bg-white p-3 rounded border-l-4 border-red-500">
                         <div className="font-semibold text-red-700">Dave (distance 2)</div>
                         <div className="text-2xl font-bold text-red-600">-1</div>
-                        <div className="text-xs text-gray-600">Flat penalty (distance doesn&apos;t matter)</div>
+                        <div className="text-xs text-gray-600">Flat penalty (distance doesn't matter)</div>
                       </div>
                     </div>
                     <p className="text-sm text-gray-600 mt-2 italic">
@@ -306,7 +306,7 @@ export default function Home() {
           </Card>
 
           {/* Key Strategies */}
-          <Card className="border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 mb-12">
+          <Card className="border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50">
             <CardHeader>
               <CardTitle className="text-3xl flex items-center gap-2">
                 <Brain className="h-8 w-8 text-indigo-600" />
@@ -360,7 +360,7 @@ export default function Home() {
                     </div>
                     <div>
                       <h4 className="font-bold text-gray-900 mb-1">Think Per-Round</h4>
-                      <p className="text-gray-600 text-sm">Each question is independent. Past scores don&apos;t affect current round strategies—stay adaptable!</p>
+                      <p className="text-gray-600 text-sm">Each question is independent. Past scores don't affect current round strategies—stay adaptable!</p>
                     </div>
                   </div>
                   <div className="flex gap-3">
@@ -376,56 +376,56 @@ export default function Home() {
               </div>
             </CardContent>
           </Card>
-
-          {/* Competition Structure */}
-          <Card className="border-2 border-primary shadow-xl">
-            <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10">
-              <CardTitle className="text-3xl">Competition Structure</CardTitle>
-              <CardDescription className="text-base">
-                Two stages, 11 domains, multiple rounds
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-8">
-              <div className="space-y-6">
-                <div className="p-5 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg">
-                  <h3 className="font-bold text-xl mb-2 text-blue-900">Stage 1: Qualifiers</h3>
-                  <ul className="space-y-2 text-gray-700">
-                    <li className="flex items-start gap-2">
-                      <span className="text-blue-600 mt-1">•</span>
-                      <span>120 participants divided into 8 pools of 15 players each</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-blue-600 mt-1">•</span>
-                      <span>Questions across all 11 domains (Algorithms, Astronomy, Biology, Crypto, Economics, Finance, Game Theory, Indian History, Machine Learning, Probability, Statistics)</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-blue-600 mt-1">•</span>
-                      <span className="font-semibold">Top 2 from each pool advance to Stage 2</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="p-5 bg-purple-50 border-l-4 border-purple-500 rounded-r-lg">
-                  <h3 className="font-bold text-xl mb-2 text-purple-900">Stage 2: Finals</h3>
-                  <ul className="space-y-2 text-gray-700">
-                    <li className="flex items-start gap-2">
-                      <span className="text-purple-600 mt-1">•</span>
-                      <span>16 finalists compete for top 3 positions</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-purple-600 mt-1">•</span>
-                      <span>Focus on 4 key domains: Algorithms, Probability, Economics, Machine Learning</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-purple-600 mt-1">•</span>
-                      <span className="font-semibold">Winner takes all the glory! 🏆</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
+
+        {/* Competition Structure */}
+        <Card className="max-w-4xl mx-auto shadow-xl border-2 mb-16">
+          <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10">
+            <CardTitle className="text-3xl">Competition Structure</CardTitle>
+            <CardDescription className="text-base">
+              Two stages, 11 domains, multiple rounds
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-8">
+            <div className="space-y-6">
+              <div className="p-5 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg">
+                <h3 className="font-bold text-xl mb-2 text-blue-900">Stage 1: Qualifiers</h3>
+                <ul className="space-y-2 text-gray-700">
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-600 mt-1">•</span>
+                    <span>120 participants divided into 8 pools of 15 players each</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-600 mt-1">•</span>
+                    <span>Questions across all 11 domains (Algorithms, Astronomy, Biology, Crypto, Economics, Finance, Game Theory, Indian History, Machine Learning, Probability, Statistics)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-600 mt-1">•</span>
+                    <span className="font-semibold">Top 2 from each pool advance to Stage 2</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="p-5 bg-purple-50 border-l-4 border-purple-500 rounded-r-lg">
+                <h3 className="font-bold text-xl mb-2 text-purple-900">Stage 2: Finals</h3>
+                <ul className="space-y-2 text-gray-700">
+                  <li className="flex items-start gap-2">
+                    <span className="text-purple-600 mt-1">•</span>
+                    <span>16 finalists compete for top 3 positions</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-purple-600 mt-1">•</span>
+                    <span>Focus on 4 key domains: Algorithms, Probability, Economics, Machine Learning</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-purple-600 mt-1">•</span>
+                    <span className="font-semibold">Winner takes all the glory! 🏆</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Call to Action */}
         <Card className="max-w-4xl mx-auto bg-gradient-to-br from-primary to-indigo-600 text-white border-0 shadow-2xl">
@@ -454,6 +454,131 @@ export default function Home() {
       <footer className="border-t bg-white/80 backdrop-blur-sm mt-16">
         <div className="container mx-auto px-4 py-8 text-center text-gray-600">
           <p className="font-semibold">Trust Gambit - A Game Theory Research Project</p>
+          <p className="text-sm mt-2">© 2025 All Rights Reserved</p>
+        </div>
+      </footer>
+    </div>
+  )
+          </div>
+        </div>
+
+        {/* Features */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+          <Card className="hover:shadow-lg transition-shadow border-2 hover:border-primary/50">
+            <CardHeader>
+              <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
+                <Users className="h-8 w-8 text-primary" />
+              </div>
+              <CardTitle className="text-xl">Multiplayer</CardTitle>
+              <CardDescription className="text-base">
+                Compete with other players in strategic gameplay
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow border-2 hover:border-primary/50">
+            <CardHeader>
+              <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
+                <Target className="h-8 w-8 text-primary" />
+              </div>
+              <CardTitle className="text-xl">Multi-Stage</CardTitle>
+              <CardDescription className="text-base">
+                Navigate through challenging rounds across multiple stages
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow border-2 hover:border-primary/50">
+            <CardHeader>
+              <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
+                <Network className="h-8 w-8 text-primary" />
+              </div>
+              <CardTitle className="text-xl">Trust Network</CardTitle>
+              <CardDescription className="text-base">
+                Build trust by delegating to reliable players
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow border-2 hover:border-primary/50">
+            <CardHeader>
+              <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
+                <TrendingUp className="h-8 w-8 text-primary" />
+              </div>
+              <CardTitle className="text-xl">Strategic Scoring</CardTitle>
+              <CardDescription className="text-base">
+                Earn points through solving, delegating, and trust
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        </div>
+
+        {/* How It Works */}
+        <Card className="max-w-4xl mx-auto shadow-xl border-2">
+          <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10">
+            <CardTitle className="text-3xl">How It Works</CardTitle>
+            <CardDescription className="text-base">
+              Three simple actions, infinite strategic possibilities
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-8">
+            <div className="space-y-8">
+              <div className="flex gap-6 items-start group hover:bg-primary/5 p-4 rounded-lg transition-colors">
+                <div className="flex-shrink-0 w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center font-bold text-xl shadow-lg group-hover:scale-110 transition-transform">
+                  1
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-xl mb-2 text-gray-900">💡 Solve</h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    Answer the question yourself. Get <span className="font-semibold text-primary">+1 point</span> if correct, 
+                    but risk <span className="font-semibold text-red-600">-1 point</span> if wrong. 
+                    The high-risk, high-reward option.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-6 items-start group hover:bg-primary/5 p-4 rounded-lg transition-colors">
+                <div className="flex-shrink-0 w-14 h-14 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 text-white flex items-center justify-center font-bold text-xl shadow-lg group-hover:scale-110 transition-transform">
+                  2
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-xl mb-2 text-gray-900">🤝 Delegate</h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    Trust another player to solve it. If they solve correctly, you get <span className="font-semibold text-primary">1 + λᵏ points</span>. 
+                    Build trust networks and strategic alliances over time.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-6 items-start group hover:bg-primary/5 p-4 rounded-lg transition-colors">
+                <div className="flex-shrink-0 w-14 h-14 rounded-full bg-gradient-to-br from-green-500 to-green-600 text-white flex items-center justify-center font-bold text-xl shadow-lg group-hover:scale-110 transition-transform">
+                  3
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-xl mb-2 text-gray-900">⏭️ Pass</h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    Skip the question entirely. The safe option with <span className="font-semibold">0 points</span>, 
+                    but delegating to a pass can be risky for others!
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 p-5 bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-300 rounded-lg">
+              <p className="text-sm text-yellow-900 leading-relaxed">
+                <strong className="text-base">⚠️ Beware of cycles!</strong><br/>
+                If delegation chains form a loop, everyone in the cycle gets <span className="font-semibold text-red-700">-1 - γ points</span> for that round.
+                Strategic thinking is key!
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t bg-white/80 backdrop-blur-sm mt-16">
+        <div className="container mx-auto px-4 py-8 text-center text-gray-600">
+          <p>Trust Gambit - A Game Theory Research Project</p>
           <p className="text-sm mt-2">© 2025 All Rights Reserved</p>
         </div>
       </footer>

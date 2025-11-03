@@ -163,12 +163,13 @@ async function debugRoundScoring(roundId: string) {
 
       let score: number;
 
+      // NEW FORMULA: Upstream of correct terminus = 1 + λ × (2k / (k+1)), incorrect/pass = -1
       if (target.action === 'SOLVE') {
-        score = target.isCorrect ? 1 + Math.pow(lambda, distance) : -1 - Math.pow(lambda, distance);
+        score = target.isCorrect ? 1 + lambda * (2 * distance / (distance + 1)) : -1;
       } else if (target.action === 'PASS') {
-        score = -1 - Math.pow(lambda, distance);
+        score = -1;
       } else {
-        score = targetResult.score >= 0 ? 1 + Math.pow(lambda, distance) : -1 - Math.pow(lambda, distance);
+        score = targetResult.score >= 0 ? 1 + lambda * (2 * distance / (distance + 1)) : -1;
       }
 
       return { score, distance };

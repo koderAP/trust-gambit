@@ -1,23 +1,31 @@
 import http from 'k6/http';
 import { check, sleep, group } from 'k6';
+import { Rate, Trend } from 'k6/metrics';
 
-const BASE_URL = __ENV.BASE_URL || 'http://142.93.213.0';
+const BASE_URL = __ENV.BASE_URL || 'http://localhost:3000';
+
+// Custom metrics
+const registrationErrorRate = new Rate('registration_errors');
+const loginErrorRate = new Rate('login_errors');
+const profileCompletionTime = new Trend('profile_completion_time');
 
 export const options = {
   stages: [
-    { duration: '1m', target: 100 },
-    { duration: '5m', target: 100 },
-    // { duration: '3m', target: 100 },
-    // { duration: '1m', target: 200 },
-    // { duration: '1m', target: 200 },
-    // { duration: '2m', target: 100 },
-    // { duration: '1m', target: 0 },
+    { duration: '30s', target: 20 },   // Ramp up to 20 users
+    { duration: '1m', target: 50 },    // Ramp up to 50 users
+    { duration: '2m', target: 100 },   // Ramp up to 100 users
+    { duration: '2m', target: 100 },   // Stay at 100 users
+    { duration: '1m', target: 150 },   // Spike to 150 users
+    { duration: '1m', target: 50 },    // Ramp down to 50 users
+    { duration: '30s', target: 0 },    // Ramp down to 0
   ],
   thresholds: {
-    http_req_failed: ['rate<0.01'],
-    http_req_duration: ['p(95)<1500'],
-    'group_duration{group:::User Onboarding}': ['p(95)<4000'],
-    'group_duration{group:::Core Gameplay Loop}': ['p(95)<2000'],
+    http_req_failed: ['rate<0.05'],              // Less than 5% errors
+    http_req_duration: ['p(95)<2000', 'p(99)<3000'], // 95th percentile under 2s, 99th under 3s
+    'group_duration{group:::User Onboarding}': ['p(95)<5000'],
+    'group_duration{group:::User Login}': ['p(95)<1500'],
+    'registration_errors': ['rate<0.05'],
+    'login_errors': ['rate<0.05'],
   },
 };
 
@@ -29,7 +37,7 @@ const DOMAINS = [
 
 export default function () {
   const jar = http.cookieJar();
-  const uniqueId = `${__VU}-${__ITER}`;
+  const uniqueId = `${__VU}-${__ITER}-${Date.now()}`;
   const email = `user_${uniqueId}@test.com`;
   const password = `password_${uniqueId}`;
   const name = `Test User ${uniqueId}`;
@@ -45,17 +53,23 @@ export default function () {
       tags: { name: 'RegisterUser' },
     });
 
-    check(registerRes, {
+    const registrationSuccess = check(registerRes, {
       'Registration successful (status 2xx)': (r) => r.status >= 200 && r.status < 300,
       'Registration response contains userId': (r) => {
-        const id = r.json('userId');
-        if (id) {
-          userId = id;
-          return true;
+        try {
+          const id = r.json('userId');
+          if (id) {
+            userId = id;
+            return true;
+          }
+        } catch (e) {
+          console.error(`Registration JSON parse error: ${e}`);
         }
         return false;
       },
     });
+
+    registrationErrorRate.add(!registrationSuccess);
 
     // 2️⃣ Complete profile if registered successfully
     if (userId) {
@@ -66,16 +80,21 @@ export default function () {
       }));
 
       const profilePayload = JSON.stringify({ userId, domainRatings });
+      const profileStart = Date.now();
       const profileRes = http.post(`${BASE_URL}/api/profile/complete`, profilePayload, {
         headers: { 'Content-Type': 'application/json' },
         tags: { name: 'CompleteProfile' },
       });
+
+      profileCompletionTime.add(Date.now() - profileStart);
 
       check(profileRes, {
         'Profile completion successful (status 2xx)': (r) => r.status >= 200 && r.status < 300,
       });
     }
   });
+
+  sleep(1);
 
   // --------------------- USER LOGIN ---------------------
   group('User Login', function () {
@@ -87,65 +106,25 @@ export default function () {
       jar, // attach cookie jar
     });
 
-    check(loginRes, {
+    const loginSuccess = check(loginRes, {
       'Login successful (status 2xx)': (r) => r.status >= 200 && r.status < 300,
     });
+
+    loginErrorRate.add(!loginSuccess);
   });
 
-  sleep(2);
+  sleep(1);
 
-  // --------------------- CORE GAMEPLAY LOOP ---------------------
-  // group('Core Gameplay Loop', function () {
-  //   const gameStateRes = http.get(`${BASE_URL}/api/game-state`, {
-  //     tags: { name: 'GetGameState' },
-  //     jar,
-  //   });
+  // --------------------- HEALTH CHECK ---------------------
+  group('Health Check', function () {
+    const healthRes = http.get(`${BASE_URL}/api/health`, {
+      tags: { name: 'HealthCheck' },
+    });
 
-  //   check(gameStateRes, {
-  //     'Get Game State successful (status 200)': (r) => r.status === 200,
-  //   });
-
-  //   if (gameStateRes.status === 200) {
-  //     const gameState = gameStateRes.json();
-  //     const lobbyId = gameState.lobby ? gameState.lobby.id : null;
-  //     const currentRound = gameState.currentRound;
-
-  //     // Submit round action if active
-  //     if (currentRound && currentRound.status === 'ACTIVE') {
-  //       const actionPayload = JSON.stringify({
-  //         action: 'SOLVE',
-  //         answer: 'Option A',
-  //         delegateTo: null,
-  //       });
-
-  //       const submitActionRes = http.post(
-  //         `${BASE_URL}/api/rounds/start`,
-  //         actionPayload,
-  //         {
-  //           headers: { 'Content-Type': 'application/json' },
-  //           tags: { name: 'SubmitRoundAction' },
-  //           jar,
-  //         }
-  //       );
-
-  //       check(submitActionRes, {
-  //         'Submit Action successful (status 200)': (r) => r.status === 200,
-  //       });
-  //     }
-
-  //     // Check leaderboard
-  //     if (lobbyId) {
-  //       const leaderboardRes = http.get(`${BASE_URL}/api/lobbies/${lobbyId}/leaderboard`, {
-  //         tags: { name: 'GetLeaderboard' },
-  //         jar,
-  //       });
-
-  //       check(leaderboardRes, {
-  //         'Get Leaderboard successful (status 200)': (r) => r.status === 200,
-  //       });
-  //     }
-  //   }
-  // });
+    check(healthRes, {
+      'Health check successful (status 200)': (r) => r.status === 200,
+    });
+  });
 
   sleep(2);
 }

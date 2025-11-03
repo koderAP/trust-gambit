@@ -120,17 +120,22 @@ function runTest(scenario: string, a4Action: 'PASS' | 'SOLVE', a4IsCorrect: bool
         
         if (target.action === 'SOLVE') {
           if (target.isCorrect) {
-            score = 1 + Math.pow(lambda, distance);
+            // NEW FORMULA: Upstream of correct terminus at distance k: score = 1 + λ × (2k / (k+1))
+            score = 1 + lambda * (2 * distance / (distance + 1));
           } else {
-            score = -1 - Math.pow(lambda, distance);
+            // NEW: Upstream of incorrect terminus: flat penalty of -1
+            score = -1;
           }
         } else if (target.action === 'PASS') {
-          score = -1 - Math.pow(lambda, distance);
+          // NEW: Upstream of pass terminus: flat penalty of -1
+          score = -1;
         } else {
           if (targetResult.score >= 0) {
-            score = 1 + Math.pow(lambda, distance);
+            // NEW FORMULA: Upstream of correct chain at distance k: score = 1 + λ × (2k / (k+1))
+            score = 1 + lambda * (2 * distance / (distance + 1));
           } else {
-            score = -1 - Math.pow(lambda, distance);
+            // NEW: Upstream of incorrect/pass chain: flat penalty of -1
+            score = -1;
           }
         }
       }
@@ -158,12 +163,14 @@ function runTest(scenario: string, a4Action: 'PASS' | 'SOLVE', a4IsCorrect: bool
   console.log('Expected scores:');
   if (a4Action === 'SOLVE' && !a4IsCorrect) {
     console.log(`  A4: -1.0000 (incorrect solve)`);
-    console.log(`  A3: -1.5000 (distance 1 from incorrect solver: -1 - λ^1 = -1 - 0.5)`);
-    console.log(`  A2: -1.2500 (distance 2 from incorrect solver: -1 - λ^2 = -1 - 0.25) ⚠️`);
-    console.log(`  A1: -1.1250 (distance 3 from incorrect solver: -1 - λ^3 = -1 - 0.125)`);
+    console.log(`  A3: -1.0000 (distance 1 from incorrect solver: -1 flat penalty)`);
+    console.log(`  A2: -1.0000 (distance 2 from incorrect solver: -1 flat penalty)`);
+    console.log(`  A1: -1.0000 (distance 3 from incorrect solver: -1 flat penalty)`);
   } else if (a4Action === 'PASS') {
     console.log(`  A4: 0.0000 (pass)`);
-    console.log(`  A3: -1.5000 (distance 1 from pass: -1 - λ^1 = -1 - 0.5)`);
+    console.log(`  A3: -1.0000 (distance 1 from pass: -1 flat penalty)`);
+    console.log(`  A2: -1.0000 (distance 2 from pass: -1 flat penalty)`);
+    console.log(`  A1: -1.0000 (distance 3 from pass: -1 flat penalty)`);    console.log(`  A3: -1.5000 (distance 1 from pass: -1 - λ^1 = -1 - 0.5)`);
     console.log(`  A2: -1.2500 (distance 2 from pass: -1 - λ^2 = -1 - 0.25) ⚠️`);
     console.log(`  A1: -1.1250 (distance 3 from pass: -1 - λ^3 = -1 - 0.125)`);
   }

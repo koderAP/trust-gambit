@@ -112,22 +112,28 @@ function calculateScoreMemoized(userId: string, visitedInChain: Set<string> = ne
       
       if (target.action === 'SOLVE') {
         if (target.isCorrect) {
-          score = 1 + Math.pow(lambda, distance);
+          // NEW FORMULA: Upstream of correct terminus at distance k: score = 1 + λ × (2k / (k+1))
+          score = 1 + lambda * (2 * distance / (distance + 1));
+          console.log(`    → Target is CORRECT SOLVE: score = 1 + λ × (2×${distance} / (${distance}+1)) = ${score}`);
         } else {
-          score = -1 - Math.pow(lambda, distance);
+          // NEW: Upstream of incorrect terminus: flat penalty of -1
+          score = -1;
+          console.log(`    → Target is INCORRECT SOLVE: score = -1 (flat penalty)`);
         }
-        console.log(`    → Target is ${target.isCorrect ? 'CORRECT' : 'INCORRECT'} SOLVE: score = -1 - λ^${distance} = ${score}`);
       } else if (target.action === 'PASS') {
-        score = -1 - Math.pow(lambda, distance);
-        console.log(`    → Target is PASS: score = -1 - λ^${distance} = ${score}`);
+        // NEW: Upstream of pass terminus: flat penalty of -1
+        score = -1;
+        console.log(`    → Target is PASS: score = -1 (flat penalty)`);
       } else {
         // Delegation chain
         if (targetResult.score >= 0) {
-          score = 1 + Math.pow(lambda, distance);
-          console.log(`    → Target is DELEGATE (positive chain): score = 1 + λ^${distance} = ${score}`);
+          // NEW FORMULA: Upstream of correct chain at distance k: score = 1 + λ × (2k / (k+1))
+          score = 1 + lambda * (2 * distance / (distance + 1));
+          console.log(`    → Target is DELEGATE (positive chain): score = 1 + λ × (2×${distance} / (${distance}+1)) = ${score}`);
         } else {
-          score = -1 - Math.pow(lambda, distance);
-          console.log(`    → Target is DELEGATE (negative chain): score = -1 - λ^${distance} = ${score}`);
+          // NEW: Upstream of incorrect/pass chain: flat penalty of -1
+          score = -1;
+          console.log(`    → Target is DELEGATE (negative chain): score = -1 (flat penalty)`);
         }
       }
     }

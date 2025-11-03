@@ -26,14 +26,15 @@ console.log(`Using ??: distanceCache.get('unknown') ?? null = ${distanceCache.ge
 // Impact on scoring
 console.log(`\n=== Impact on delegation chain scoring ===`);
 
+// NEW FORMULA: Incorrect/pass terminus = -1 (flat penalty)
 function testScoring(cachedDistance: number | null, lambda: number) {
   if (cachedDistance !== null) {
     const distance = cachedDistance + 1;
-    const score = -1 - Math.pow(lambda, distance);
+    const score = -1;
     return { distance, score };
   } else {
     const distance = 1;
-    const score = -1 - Math.pow(lambda, distance);
+    const score = -1;
     return { distance, score };
   }
 }

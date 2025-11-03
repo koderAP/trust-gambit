@@ -124,34 +124,40 @@ function testDelegationChainScoring() {
     } else if (node.action === 'DELEGATE' && node.delegateTo) {
       const target = nodes.get(node.delegateTo);
       if (!target) {
-        score = -1 - lambda;
+        score = -1 - gamma;
       } else {
         // Recursive call with memoization
         const targetResult = calculateScoreMemoized(node.delegateTo, new Set(visitedInChain));
         distance = (targetResult.distance !== null) ? targetResult.distance + 1 : 1;
         
         if (target.inCycle) {
-          score = -1 - Math.pow(gamma, distance);
+          // NEW: Upstream of cycle at distance k: score = -1 - γ/(k+1)
+          score = -1 - gamma / (distance + 1);
           console.log(`  ${userId}: Delegates to cycle at distance ${distance}, score = ${score}`);
         } else if (target.action === 'SOLVE') {
           if (target.isCorrect) {
-            score = 1 + Math.pow(lambda, distance);
+            // NEW FORMULA: Upstream of correct terminus at distance k: score = 1 + λ × (2k / (k+1))
+            score = 1 + lambda * (2 * distance / (distance + 1));
           } else {
-            score = -1 - Math.pow(lambda, distance);
+            // NEW: Upstream of incorrect terminus: flat penalty of -1
+            score = -1;
           }
           console.log(`  ${userId}: Delegates to ${target.isCorrect ? 'correct' : 'incorrect'} solver at distance ${distance}, score = ${score}`);
         } else if (target.action === 'PASS') {
-          score = -1 - Math.pow(lambda, distance);
+          // NEW: Upstream of pass terminus: flat penalty of -1
+          score = -1;
           console.log(`  ${userId}: Delegates to pass at distance ${distance}, score = ${score}`);
         } else {
           // Delegation chain - use the target's score to determine sign
           // If target got positive score (correct chain), propagate positive
           // If target got negative score (wrong/pass chain), propagate negative
           if (targetResult.score >= 0) {
-            score = 1 + Math.pow(lambda, distance);
+            // NEW FORMULA: Upstream of correct chain at distance k: score = 1 + λ × (2k / (k+1))
+            score = 1 + lambda * (2 * distance / (distance + 1));
             console.log(`  ${userId}: Delegates to correct chain at distance ${distance}, score = ${score}`);
           } else {
-            score = -1 - Math.pow(lambda, distance);
+            // NEW: Upstream of incorrect/pass chain: flat penalty of -1
+            score = -1;
             console.log(`  ${userId}: Delegates to incorrect chain at distance ${distance}, score = ${score}`);
           }
         }
@@ -182,11 +188,12 @@ function testDelegationChainScoring() {
   console.log('\n=== Results ===');
   console.log('Expected vs Actual:\n');
   
+  // NEW EXPECTED VALUES based on new scoring mechanism
   const expected = {
-    'A4': 0,
-    'A3': -1 - Math.pow(lambda, 1),
-    'A2': -1 - Math.pow(lambda, 2),
-    'A1': -1 - Math.pow(lambda, 3),
+    'A4': 0,   // Pass (terminus)
+    'A3': -1,  // Upstream of pass terminus at k=1: -1 (flat penalty)
+    'A2': -1,  // Upstream of pass terminus at k=2: -1 (flat penalty)
+    'A1': -1,  // Upstream of pass terminus at k=3: -1 (flat penalty)
   };
 
   for (const [userId, node] of nodes) {

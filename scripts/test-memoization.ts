@@ -95,7 +95,13 @@ function calculateScoreMemoized1(userId: string, visitedInChain: Set<string> = n
       distance = (targetResult.distance !== null) ? targetResult.distance + 1 : 1;
       
       if (target.action === 'SOLVE') {
-        score = target.isCorrect ? 1 + Math.pow(lambda, distance) : -1 - Math.pow(lambda, distance);
+        if (target.isCorrect) {
+          // NEW FORMULA: Upstream of correct terminus at distance k: score = 1 + λ × (2k / (k+1))
+          score = 1 + lambda * (2 * distance / (distance + 1));
+        } else {
+          // NEW: Upstream of incorrect terminus: flat penalty of -1
+          score = -1;
+        }
       }
       console.log(`    → score=${score}, distance=${distance}`);
     }
@@ -200,10 +206,11 @@ function calculateScoreMemoized2(userId: string, visitedInChain: Set<string> = n
       const targetResult = calculateScoreMemoized2(node.delegateTo, new Set(visitedInChain));
       distance = (targetResult.distance !== null) ? targetResult.distance + 1 : 1;
       
+      // NEW FORMULA: Upstream of correct terminus = 1 + λ × (2k / (k+1)), incorrect/pass = -1
       if (target.action === 'SOLVE') {
-        score = target.isCorrect ? 1 + Math.pow(lambda, distance) : -1 - Math.pow(lambda, distance);
+        score = target.isCorrect ? 1 + lambda * (2 * distance / (distance + 1)) : -1;
       } else {
-        score = targetResult.score >= 0 ? 1 + Math.pow(lambda, distance) : -1 - Math.pow(lambda, distance);
+        score = targetResult.score >= 0 ? 1 + lambda * (2 * distance / (distance + 1)) : -1;
       }
     }
   }

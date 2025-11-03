@@ -187,40 +187,50 @@ export async function calculateDelegationGraph(roundId: string) {
   // ✅ OPTIMIZED: Memoization for score calculation
   const scoreCache = new Map<string, number>();
   const distanceCache = new Map<string, number>();
+  const leadsToCache = new Map<string, 'cycle' | 'correct' | 'incorrect' | 'pass'>();
 
-  function calculateScoreMemoized(userId: string, visitedInChain: Set<string> = new Set()): { score: number, distance: number | null } {
+  function calculateScoreMemoized(userId: string, visitedInChain: Set<string> = new Set()): { 
+    score: number, 
+    distance: number | null,
+    leadsTo: 'cycle' | 'correct' | 'incorrect' | 'pass'
+  } {
     // Check cache
     if (scoreCache.has(userId)) {
       return { 
         score: scoreCache.get(userId)!,
-        distance: distanceCache.get(userId) ?? null
+        distance: distanceCache.get(userId) ?? null,
+        leadsTo: leadsToCache.get(userId)!
       };
     }
 
     const node = nodes.get(userId);
-    if (!node) return { score: 0, distance: null };
+    if (!node) return { score: 0, distance: null, leadsTo: 'pass' };
 
     // Detect cycles in this calculation path
     if (visitedInChain.has(userId)) {
       node.inCycle = true;
       const score = -1 - gamma;
       scoreCache.set(userId, score);
-      return { score, distance: null };
+      leadsToCache.set(userId, 'cycle');
+      return { score, distance: null, leadsTo: 'cycle' };
     }
 
     visitedInChain.add(userId);
     let score = 0;
     let distance: number | null = null;
+    let leadsTo: 'cycle' | 'correct' | 'incorrect' | 'pass' = 'pass';
 
     if (node.inCycle) {
       // Nodes in cycles get -1 - γ
       score = -1 - gamma;
+      leadsTo = 'cycle';
       console.log(`  ${userId}: In cycle, score = ${score}`);
     } else if (node.action === 'SOLVE') {
       if (node.isCorrect) {
         // Correct answer: +1
         score = 1;
         distance = 0;
+        leadsTo = 'correct';
         
         // ✅ OPTIMIZED: Use pre-calculated delegator count (O(1) instead of O(n))
         const delegators = delegatorCount.get(userId) || 0;
@@ -232,45 +242,71 @@ export async function calculateDelegationGraph(roundId: string) {
         // Incorrect answer: -1
         score = -1;
         distance = 0;
+        leadsTo = 'incorrect';
         console.log(`  ${userId}: Incorrect solve, score = ${score}`);
       }
     } else if (node.action === 'PASS') {
       // Pass without delegating: 0
       score = 0;
+      leadsTo = 'pass';
       console.log(`  ${userId}: Passed, score = ${score}`);
     } else if (node.action === 'DELEGATE' && node.delegateTo) {
       // ✅ OPTIMIZED: Use recursion with memoization
       const target = nodes.get(node.delegateTo);
       if (!target) {
-        score = -1 - lambda;
+        score = -1 - gamma;
+        leadsTo = 'cycle';
       } else {
         // Recursive call with memoization
         const targetResult = calculateScoreMemoized(node.delegateTo, new Set(visitedInChain));
         distance = (targetResult.distance !== null) ? targetResult.distance + 1 : 1;
         
-        if (target.inCycle) {
-          score = -1 - Math.pow(gamma, distance);
+        // NEW: Propagate leadsTo from target
+        leadsTo = targetResult.leadsTo;
+        
+        if (target.inCycle || targetResult.leadsTo === 'cycle') {
+          // Upstream of cycle at distance k: score = -1 - γ/(k+1)
+          score = -1 - gamma / (distance + 1);
+          leadsTo = 'cycle';
           console.log(`  ${userId}: Delegates to cycle at distance ${distance}, score = ${score}`);
         } else if (target.action === 'SOLVE') {
           if (target.isCorrect) {
-            score = 1 + Math.pow(lambda, distance);
+            // NEW FORMULA: Upstream of correct terminus at distance k: score = 1 + λ × (2k / (k+1))
+            score = 1 + lambda * (2 * distance / (distance + 1));
+            leadsTo = 'correct';
           } else {
-            score = -1 - Math.pow(lambda, distance);
+            // Upstream of incorrect terminus: flat penalty of -1
+            score = -1;
+            leadsTo = 'incorrect';
           }
           console.log(`  ${userId}: Delegates to ${target.isCorrect ? 'correct' : 'incorrect'} solver at distance ${distance}, score = ${score}`);
         } else if (target.action === 'PASS') {
-          score = -1 - Math.pow(lambda, distance);
+          // Upstream of pass terminus: flat penalty of -1
+          score = -1;
+          leadsTo = 'pass';
           console.log(`  ${userId}: Delegates to pass at distance ${distance}, score = ${score}`);
         } else {
-          // Delegation chain - use the target's score to determine sign
-          // If target got positive score (correct chain), propagate positive
-          // If target got negative score (wrong/pass chain), propagate negative
-          if (targetResult.score >= 0) {
-            score = 1 + Math.pow(lambda, distance);
+          // Delegation chain - check what the target leads to
+          if (targetResult.leadsTo === 'correct') {
+            // NEW FORMULA: Upstream of correct chain at distance k: score = 1 + λ × (2k / (k+1))
+            score = 1 + lambda * (2 * distance / (distance + 1));
+            leadsTo = 'correct';
             console.log(`  ${userId}: Delegates to correct chain at distance ${distance}, score = ${score}`);
-          } else {
-            score = -1 - Math.pow(lambda, distance);
+          } else if (targetResult.leadsTo === 'incorrect') {
+            // Upstream of incorrect chain: flat penalty of -1
+            score = -1;
+            leadsTo = 'incorrect';
             console.log(`  ${userId}: Delegates to incorrect chain at distance ${distance}, score = ${score}`);
+          } else if (targetResult.leadsTo === 'pass') {
+            // Upstream of pass chain: flat penalty of -1
+            score = -1;
+            leadsTo = 'pass';
+            console.log(`  ${userId}: Delegates to pass chain at distance ${distance}, score = ${score}`);
+          } else {
+            // targetResult.leadsTo === 'cycle' - already handled above
+            score = -1 - gamma / (distance + 1);
+            leadsTo = 'cycle';
+            console.log(`  ${userId}: Delegates to cycle chain at distance ${distance}, score = ${score}`);
           }
         }
       }
@@ -278,6 +314,7 @@ export async function calculateDelegationGraph(roundId: string) {
 
     // Cache the results
     scoreCache.set(userId, score);
+    leadsToCache.set(userId, leadsTo);
     if (distance !== null) {
       distanceCache.set(userId, distance);
     }
@@ -285,7 +322,7 @@ export async function calculateDelegationGraph(roundId: string) {
     node.score = score;
     node.distanceFromSolver = distance;
 
-    return { score, distance };
+    return { score, distance, leadsTo };
   }
 
   // Calculate scores with memoization
