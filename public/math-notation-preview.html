@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trust Gambit - Mathematical Notation Examples</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #764ba2;
+            margin-top: 30px;
+        }
+        .question {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .domain {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .answer {
+            margin-top: 10px;
+            padding: 10px;
+            background: #e7f5e7;
+            border-left: 4px solid #28a745;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .math-display {
+            display: block;
+            margin: 1em 0;
+            text-align: center;
+            font-size: 1.2em;
+        }
+        .math-inline {
+            display: inline;
+        }
+        sup, sub {
+            font-size: 0.75em;
+            line-height: 0;
+            position: relative;
+            vertical-align: baseline;
+        }
+        sup {
+            top: -0.5em;
+        }
+        sub {
+            bottom: -0.25em;
+        }
+        .note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Trust Gambit Round 2 Questions</h1>
+        <p>Below are examples of how the mathematical notation will render in the game interface.</p>
+
+        <div class="note">
+            <strong>📝 Note:</strong> The system automatically converts LaTeX notation to properly formatted HTML. 
+            All mathematical symbols, fractions, square roots, and special characters are rendered beautifully!
+        </div>
+
+        <h2>Question Examples</h2>
+
+        <div class="question">
+            <span class="domain">Combinatorics</span>
+            <p>How many distinct terms are there when <span class="math-inline">(1 + x<sup>7</sup> + x<sup>13</sup>)<sup>100</sup></span> is multiplied out and simplified?</p>
+            <div class="answer">Answer: 1235</div>
+        </div>
+
+        <div class="question">
+            <span class="domain">Calculus</span>
+            <p>Consider the sequence <span class="math-inline">a<sub>1</sub> = 1</span> and</p>
+            <div class="math-display">
+                a<sub>n+1</sub> = √<span style="text-decoration: overline;">1 - √<span style="text-decoration: overline;">1 - a<sub>n</sub><sup>2</sup></span></span>
+            </div>
+            <p>Find <span class="math-inline">⌊lim<sub>n → ∞</sub> 2<sup>n</sup> a<sub>n</sub>⌋</span>.</p>
+            <div class="answer">Answer: 3</div>
+        </div>
+
+        <div class="question">
+            <span class="domain">Calculus</span>
+            <p>Let <span class="math-inline">a<sub>0</sub> ∈ (0, 1)</span> and define <span class="math-inline">a<sub>n+1</sub> = √<span style="text-decoration: overline;">1 - a<sub>n</sub></span></span> for <span class="math-inline">n = 0, 1, 2, …</span>. Find <span class="math-inline">⌊lim<sub>n → ∞</sub> a<sub>n</sub> · 100⌋</span>.</p>
+            <div class="answer">Answer: 61</div>
+        </div>
+
+        <div class="question">
+            <span class="domain">Number Theory</span>
+            <p>How many ordered pairs of real numbers <span class="math-inline">(s, t)</span> with <span class="math-inline">0 &lt; s, t &lt; 1</span> are there such that both <span class="math-inline">3s + 7t</span> and <span class="math-inline">5s + t</span> are integers?</p>
+            <div class="answer">Answer: 31</div>
+        </div>
+
+        <div class="question">
+            <span class="domain">Probability</span>
+            <p>A blind horse stands one step away from a precipice. Each second, it takes a step: forward (towards the precipice) with probability <span class="math-inline"><sup>1</sup>/<sub>3</sub></span>, or backward (away from the precipice) with probability <span class="math-inline"><sup>2</sup>/<sub>3</sub></span>. If the horse ever steps forward from the brink, it falls.</p>
+            <p>What is the probability that the horse eventually falls into the precipice, rounded to the nearest integer percent?</p>
+            <div class="answer">Answer: 50</div>
+        </div>
+
+        <div class="question">
+            <span class="domain">Combinatorics</span>
+            <p>Twenty-five of King Arthur's knights are seated at their customary round table. Three of them are chosen at random and sent off to slay a dragon. Let <span class="math-inline">P</span> be the probability that at least two of the three chosen knights were sitting next to each other.</p>
+            <p>If <span class="math-inline">P</span> is written as a fraction in lowest terms, what is the sum of the numerator and the denominator?</p>
+            <div class="answer">Answer: 57</div>
+        </div>
+
+        <h2>✨ Supported Mathematical Notation</h2>
+        <div class="question" style="border-left-color: #28a745;">
+            <ul>
+                <li><strong>Superscripts:</strong> x<sup>2</sup>, 2<sup>n</sup>, (1 + x)<sup>100</sup></li>
+                <li><strong>Subscripts:</strong> a<sub>n</sub>, a<sub>n+1</sub></li>
+                <li><strong>Square roots:</strong> √<span style="text-decoration: overline;">x</span>, √<span style="text-decoration: overline;">1 - a<sub>n</sub></span></li>
+                <li><strong>Fractions:</strong> <sup>1</sup>/<sub>3</sub>, <sup>2</sup>/<sub>3</sub></li>
+                <li><strong>Floor function:</strong> ⌊x⌋</li>
+                <li><strong>Arrows:</strong> →</li>
+                <li><strong>Infinity:</strong> ∞</li>
+                <li><strong>Special symbols:</strong> ∈, ·, …</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

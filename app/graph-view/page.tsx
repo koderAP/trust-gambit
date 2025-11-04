@@ -6,6 +6,7 @@ import { DelegationGraphVisualization } from '@/components/DelegationGraphVisual
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { formatSuperscript } from '@/lib/utils'
 
 function GraphViewContent() {
   const searchParams = useSearchParams()
@@ -157,7 +158,10 @@ function GraphViewContent() {
           <CardContent className="space-y-2">
             <div>
               <p className="text-sm text-gray-300">Question:</p>
-              <p className="font-medium whitespace-pre-line">{graphData.round.question}</p>
+              <p 
+                className="font-medium whitespace-pre-line"
+                dangerouslySetInnerHTML={{ __html: formatSuperscript(graphData.round.question) }}
+              />
             </div>
             <div>
               <p className="text-sm text-gray-300">Correct Answer:</p>

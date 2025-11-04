@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { SimpleModal } from '@/components/ui/simple-modal'
 import { Shield, Users, Play, LogOut, CheckCircle2, Clock, Activity, Layers, Target, Info, TrendingUp, AlertCircle, Eye, ChevronDown, ChevronUp, Lock, Unlock, Download } from 'lucide-react'
+import { formatSuperscript } from '@/lib/utils'
 
 type User = {
   id: string
@@ -1930,7 +1931,10 @@ export default function AdminDashboard() {
                               <div className="flex items-center justify-between gap-3">
                                 <div className="flex-1">
                                   <p className="font-medium">Round {round.roundNumber} - {round.domain}</p>
-                                  <p className="text-xs text-gray-400 mt-1 whitespace-pre-line">{round.question}</p>
+                                  <p 
+                                    className="text-xs text-gray-400 mt-1 whitespace-pre-line"
+                                    dangerouslySetInnerHTML={{ __html: formatSuperscript(round.question) }}
+                                  />
                                   <p className="text-xs text-gray-500 mt-1">
                                     Lobby: {round.lobbyId || 'All'} | Submissions: {round.submissionsCount}
                                     {round.startTime && (
@@ -2320,7 +2324,10 @@ export default function AdminDashboard() {
                               </div>
                             )}
                           </div>
-                          <p className="text-sm mb-2 whitespace-pre-line"><strong>Q:</strong> {q.question}</p>
+                          <p className="text-sm mb-2 whitespace-pre-line">
+                            <strong>Q:</strong>{' '}
+                            <span dangerouslySetInnerHTML={{ __html: formatSuperscript(q.question) }} />
+                          </p>
                           {q.imageUrl && (
                             <div className="my-2">
                               <img 
@@ -2506,7 +2513,10 @@ export default function AdminDashboard() {
                   <CardTitle className="text-lg">Question</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <p className="text-gray-900 whitespace-pre-line">{selectedRoundResults.round.question}</p>
+                  <p 
+                    className="text-gray-900 whitespace-pre-line"
+                    dangerouslySetInnerHTML={{ __html: formatSuperscript(selectedRoundResults.round.question) }}
+                  />
                   <div className="pt-2 border-t border-gray-200">
                     <p className="text-sm font-semibold text-green-700">
                       Correct Answer: {selectedRoundResults.round.correctAnswer}
