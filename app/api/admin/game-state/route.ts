@@ -176,6 +176,7 @@ export async function GET(request: NextRequest) {
         lambda: activeGame.lambda,
         beta: activeGame.beta,
         gamma: activeGame.gamma,
+        passScore: activeGame.passScore,
         allowProfileEdits: activeGame.allowProfileEdits,
         totalLobbies: includeLobbies ? (activeGame.lobbies as any[])?.length ?? 0 : undefined,
         totalRounds: includeRounds ? (activeGame.rounds as any[])?.length ?? 0 : undefined,

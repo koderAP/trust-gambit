@@ -8,6 +8,7 @@ const updateGameParamsSchema = z.object({
   lambda: z.number().min(0).max(1).optional(),
   beta: z.number().min(0).max(1).optional(),
   gamma: z.number().min(0).max(1).optional(),
+  passScore: z.number().min(-1).max(0).optional(),
 });
 
 /**
@@ -45,6 +46,7 @@ export async function POST(request: NextRequest) {
     if (validatedData.lambda !== undefined) updateData.lambda = validatedData.lambda;
     if (validatedData.beta !== undefined) updateData.beta = validatedData.beta;
     if (validatedData.gamma !== undefined) updateData.gamma = validatedData.gamma;
+    if (validatedData.passScore !== undefined) updateData.passScore = validatedData.passScore;
 
     const updatedGame = await prisma.game.update({
       where: { id: validatedData.gameId },
@@ -57,6 +59,7 @@ export async function POST(request: NextRequest) {
       lambda: updatedGame.lambda,
       beta: updatedGame.beta,
       gamma: updatedGame.gamma,
+      passScore: updatedGame.passScore,
     });
   } catch (error) {
     if (error instanceof z.ZodError) {

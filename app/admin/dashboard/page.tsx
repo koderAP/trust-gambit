@@ -112,6 +112,7 @@ export default function AdminDashboard() {
   const [lambda, setLambda] = useState<number>(0.5)
   const [beta, setBeta] = useState<number>(0.1)
   const [gamma, setGamma] = useState<number>(0.2)
+  const [passScore, setPassScore] = useState<number>(-1.0)
   const [defaultDuration, setDefaultDuration] = useState<number>(60)
   const [roundDurationOverride, setRoundDurationOverride] = useState<number | null>(null)
   const [updatingParams, setUpdatingParams] = useState(false)
@@ -201,6 +202,11 @@ export default function AdminDashboard() {
       // Update profile edits control state
       if (data.activeGame?.allowProfileEdits !== undefined) {
         setAllowProfileEdits(data.activeGame.allowProfileEdits)
+      }
+      
+      // Update PASS score from game state
+      if (data.activeGame?.passScore !== undefined) {
+        setPassScore(data.activeGame.passScore)
       }
     } catch (err: any) {
       console.error('Error fetching game state:', err)
@@ -1014,6 +1020,26 @@ export default function AdminDashboard() {
                         />
                         <p className="text-xs text-purple-300/70">Time limit per round (seconds)</p>
                       </div>
+
+                      {/* PASS Score Slider */}
+                      <div className="space-y-2">
+                        <label className="text-sm text-purple-200 flex items-center justify-between">
+                          <span>🎯 PASS Action Score</span>
+                          <span className="text-purple-300 font-mono">{passScore}</span>
+                        </label>
+                        <input
+                          type="range"
+                          min="-1"
+                          max="0"
+                          step="1"
+                          value={passScore}
+                          onChange={(e) => setPassScore(parseFloat(e.target.value))}
+                          className="w-full h-2 bg-purple-700/30 rounded-lg appearance-none cursor-pointer slider"
+                        />
+                        <p className="text-xs text-purple-300/70">
+                          {passScore === -1 ? 'Penalty: -1 point for PASS' : 'Neutral: 0 points for PASS'}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1343,6 +1369,7 @@ export default function AdminDashboard() {
                       <span>λ (Chain): {activeGame.lambda}</span>
                       <span>β (Trust): {activeGame.beta}</span>
                       <span>γ (Cycle): {activeGame.gamma}</span>
+                      <span>PASS: {activeGame.passScore}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -1820,6 +1847,29 @@ export default function AdminDashboard() {
                       </div>
                     </div>
 
+                    {/* PASS Score Input - Available during active game */}
+                    <div className="pt-4 border-t border-white/10">
+                      <div className="space-y-2">
+                        <label className="text-sm text-purple-200 flex items-center justify-between">
+                          <span>🎯 PASS Action Score</span>
+                          <span className="text-purple-300 font-mono">{passScore}</span>
+                        </label>
+                        <p className="text-xs text-purple-300/70 mb-2">Current: {passScore}</p>
+                        <input
+                          type="number"
+                          min="-1"
+                          max="0"
+                          step="1"
+                          value={passScore}
+                          onChange={(e) => setPassScore(parseFloat(e.target.value))}
+                          className="w-full px-2 py-1 bg-white/10 border border-purple-400/50 rounded text-white text-sm"
+                        />
+                        <p className="text-xs text-purple-300/70">
+                          {passScore === -1 ? 'Penalty: -1 point for PASS' : 'Neutral: 0 points for PASS'}
+                        </p>
+                      </div>
+                    </div>
+
                     <div className="pt-2">
                       <Button
                         onClick={async () => {
@@ -1835,11 +1885,12 @@ export default function AdminDashboard() {
                                 lambda,
                                 beta,
                                 gamma,
+                                passScore,
                               }),
                             });
                             const data = await res.json();
                             if (!res.ok) throw new Error(data.error || 'Failed to update parameters');
-                            setSuccess(`Game parameters updated! λ=${data.lambda}, β=${data.beta}, γ=${data.gamma}`);
+                            setSuccess(`Game parameters updated! λ=${data.lambda}, β=${data.beta}, γ=${data.gamma}, PASS=${data.passScore ?? passScore}`);
                             // OPTIMIZED: Refresh stats only (params are metadata)
                             await refreshStats();
                           } catch (err: any) {

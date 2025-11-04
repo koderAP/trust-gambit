@@ -115,8 +115,9 @@ export async function calculateDelegationGraph(roundId: string) {
   const lambda = round.game.lambda || 0.5;
   const beta = round.game.beta || 0.1;
   const gamma = round.game.gamma || 0.2;
+  const passScore = round.game.passScore ?? 0; // NEW: Get passScore parameter
 
-  console.log(`Scoring parameters: λ=${lambda}, β=${beta}, γ=${gamma}`);
+  console.log(`Scoring parameters: λ=${lambda}, β=${beta}, γ=${gamma}, passScore=${passScore}`);
 
   // Build nodes map from all submissions (now includes auto-created PASS submissions)
   const nodes = new Map<string, GraphNode>();
@@ -246,8 +247,8 @@ export async function calculateDelegationGraph(roundId: string) {
         console.log(`  ${userId}: Incorrect solve, score = ${score}`);
       }
     } else if (node.action === 'PASS') {
-      // Pass without delegating: 0
-      score = 0;
+      // Pass without delegating: use passScore parameter (can be 0 or -1)
+      score = passScore;
       leadsTo = 'pass';
       console.log(`  ${userId}: Passed, score = ${score}`);
     } else if (node.action === 'DELEGATE' && node.delegateTo) {
@@ -332,6 +333,11 @@ export async function calculateDelegationGraph(roundId: string) {
 
   // Save scores to database
   for (const [userId, node] of nodes) {
+    // Calculate trust bonus separately for database storage
+    const trustBonus = (node.action === 'SOLVE' && node.isCorrect) 
+      ? beta * (delegatorCount.get(userId) || 0)
+      : 0;
+    
     await prisma.roundScore.upsert({
       where: {
         roundId_userId: {
@@ -344,7 +350,7 @@ export async function calculateDelegationGraph(roundId: string) {
         userId,
         solveScore: node.action === 'SOLVE' ? (node.isCorrect ? 1 : -1) : 0,
         delegateScore: node.action === 'DELEGATE' ? node.score : 0,
-        trustScore: 0, // Will be calculated separately for trust bonus
+        trustScore: trustBonus,
         totalScore: node.score,
         inCycle: node.inCycle,
         distanceFromSolver: node.distanceFromSolver,
@@ -352,6 +358,7 @@ export async function calculateDelegationGraph(roundId: string) {
       update: {
         solveScore: node.action === 'SOLVE' ? (node.isCorrect ? 1 : -1) : 0,
         delegateScore: node.action === 'DELEGATE' ? node.score : 0,
+        trustScore: trustBonus,
         totalScore: node.score,
         inCycle: node.inCycle,
         distanceFromSolver: node.distanceFromSolver,
