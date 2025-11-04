@@ -1,0 +1,254 @@
+[
+  {
+    "stage": 1,
+    "domain": "Astronomy",
+    "question": "Identify the constellation:\n[Insert image]\nA) Delphinus\nB) Sagitta\nC) Sagittarius\nD) Orion",
+    "correctAnswer": "Sagittarius",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Crypto",
+    "question": "How many integers x ∈ (0,142) have x^12 = 1 mod 143?",
+    "correctAnswer": "24",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Biology",
+    "question": "While rushing to the Trust Gambit venue you fall and hurt your leg. You vigorously rub the affected area and feel less pain. This is because:\nA) Rubbing releases analgesics from the skin\nB) Vigorous rubbing opens mechanically-gated Cl⁻ channels causing hyperpolarization\nC) Vigorous rubbing desensitizes pain receptors\nD) Vigorous rubbing generates multiple alternative impulses which act as competing sensory information",
+    "correctAnswer": "Vigorous rubbing generates multiple alternative impulses which act as competing sensory information",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Probability",
+    "question": "Two integers X and Y are chosen independently and uniformly at random from the set {1, 2, …, 42}. What is the probability that 1/X + 1/Y = 1/6?",
+    "correctAnswer": "9/1764",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Game Theory",
+    "question": "Two players alternately write '(' or ')' to build a sequence of length 2n. At any prefix, ')' cannot exceed '(' by more than 1. Each player prefers longer freedom. In equilibrium, what is the expected payoff ratio E[A]/E[B] as n → ∞?\nA) 1\nB) sqrt(2) - 1\nC) (sqrt(5) + 1)/2\nD) 2/pi",
+    "correctAnswer": "sqrt(2) - 1",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Algorithms",
+    "question": "Given a BST T with distinct keys, we search for key k and end up at a leaf. Let A = nodes left of search path, B = nodes on search path, C = nodes right of search path. Let S = {(a,b):a∈A, b∈B, a<b} ∪ {(b,c):b∈B, c∈C, b<c}. Cardinality of S is same as:\nA) {(a,b):a∈A,b∈B}∪{(b,c):b∈B,c∈C}\nB) {(b1,b2):b1∈B,b2∈B}\nC) Can't be concluded\nD) {(a,c):a∈A,c∈C}",
+    "correctAnswer": "{(a,c):a∈A,c∈C}",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Machine Learning",
+    "question": "A climate prediction model uses Gaussian likelihood with mean μθ(x) and fixed variance σ²=0.25. The target variable was scaled by factor 2 before training but σ wasn't adjusted. If current σ = 0.25 was used on data scaled by 2, what should the corrected σ be after returning to original scale?",
+    "correctAnswer": "0.5",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Astronomy",
+    "question": "Which constellation was at the Zenith as of 21st September 3PM near Delhi?\nA) Orion\nB) Canis Major\nC) Bootes\nD) Pavo",
+    "correctAnswer": "Bootes",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Statistics",
+    "question": "A fair six-sided die is rolled twice. What is the probability that the sum of the two rolls is greater than 9?\nA) 1/6\nB) 5/36\nC) 1/4\nD) 1/3",
+    "correctAnswer": "1/6",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Crypto",
+    "question": "The ciphertext HLOODELWE was created using a 2-rail Rail Fence transposition cipher on a 9-letter word. What is the original plaintext?\nA) CODEBREAK\nB) HLODEWLEY\nC) HELLOWOED\nD) HELWOEKED",
+    "correctAnswer": "HELLOWOED",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Indian History",
+    "question": "This early 19th-century painting portrays a harrowing night scene where civilians of a European capital face execution by foreign troops. Created by a master who witnessed the events himself, it immortalizes the uprising of ordinary citizens in Madrid against an occupying emperor's forces. The brutal struggle it represents became a symbol of resistance throughout Europe. Which war does this painting commemorate?\n[Insert image of Goya's painting]\nA) Franco-Prussian War\nB) War of the Third Coalition\nC) Peninsular War\nD) Crimean War",
+    "correctAnswer": "Peninsular War",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Biology",
+    "question": "Attenuation is a regulatory mechanism in tryptophan operon that results in premature termination of transcription. Such mechanism is not possible in an eukaryote because:\nA) Polycistronic mRNA is not transcribed\nB) Transcription and translation are not coupled\nC) Sigma factor is not involved in transcription initiation\nD) Shine-Dalgarno sequence needed for ribosome recognition is absent in eukaryotic mRNA",
+    "correctAnswer": "Transcription and translation are not coupled",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Probability",
+    "question": "Pick a number a at random from 1 to 23. Write down a¹, a², a³, a⁴, etc. Each time subtract 23 until you get 1-23 (0 becomes 23). Stop when a number repeats. A number a is a complete-power if it includes every number 1-23 before repeating. What is the probability that a randomly chosen number from 1 to 23 is a complete-power?",
+    "correctAnswer": "10/23",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Game Theory",
+    "question": "Two players alternately mark vertices of a regular n-gon (n is odd prime ≥ 7). A player loses if after their move, three marked vertices a,b,c satisfy 2b ≡ a + c (mod n). Which best describes the equilibrium?\nA) Player 1 wins using rotational symmetry\nB) Player 2 has mirror strategy using multiplicative map\nC) Symmetric winning chances depending on parity\nD) No deterministic win - mixed equilibrium",
+    "correctAnswer": "Player 2 has mirror strategy using multiplicative map",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Algorithms",
+    "question": "Python code: a = [[1]]; b = a * 3; a[0].append(2); print(b). What is the result?\nA) [[1, 2], [1], [1]]\nB) [[1, 2], [1, 2], [1, 2]]\nC) [[1, 2], [1, 2], [1]]\nD) [[1], [1], [1]]",
+    "correctAnswer": "[[1, 2], [1, 2], [1, 2]]",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Crypto",
+    "question": "The word SECRET is encrypted as HVXIVG. How is the word CRYPTO encrypted using the same cipher?\nA) TUSPUJ\nB) XIBKGL\nC) GIBKXP\nD) XIBLGM",
+    "correctAnswer": "XIBKGL",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Machine Learning",
+    "question": "A Transformer model with 48 layers has gradient instability. Analysis shows average gain factor per layer exceeds 1 by 1%, so gradients multiply by (1.01)^N after N layers. By what approximate factor do gradients grow in magnitude through all 48 layers under this 1% amplification?",
+    "correctAnswer": "1.64",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Statistics",
+    "question": "A dataset has a mean of 50 and a standard deviation of 10. If each value is multiplied by 2 and then 5 is added, what is the new standard deviation?\nA) 10\nB) 15\nC) 20\nD) 25",
+    "correctAnswer": "20",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Astronomy",
+    "question": "What would the analemma look like if the eccentricity of earth's orbit was 0.024, tilt was 0 degrees and measured from the south pole?\n[Insert image showing options]\nA) Horizontal line\nB) Symmetric figure 8\nC) Vertical line\nD) Asymmetrical figure 8",
+    "correctAnswer": "Horizontal line",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Biology",
+    "question": "Herbivores have evolved to feed effectively, while plants have countered with anti-herbivore defenses. Extrafloral nectar is one such defence tool which attracts diverse predators and parasitoids, especially ants. Higher volumes of extrafloral nectar production attract more ants and can increase their aggressiveness. The relationship between the plant and the ants can be correctly described as:\nA) Mutualism\nB) Antagonism\nC) Commensalism\nD) Amensalism",
+    "correctAnswer": "Mutualism",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Probability",
+    "question": "A number is chosen at random from 1 to 100. What is the probability that this number can be written as the sum of three perfect squares?",
+    "correctAnswer": "0.84",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Game Theory",
+    "question": "In the Prisoner's Dilemma, both players confess even though mutual cooperation yields better outcomes. What is this equilibrium called?\nA) Pareto Optimal\nB) Nash Equilibrium\nC) Dominant Strategy Equilibrium\nD) Subgame Perfect Equilibrium",
+    "correctAnswer": "Nash Equilibrium",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Crypto",
+    "question": "The plaintext ENCRYPTNOW is encrypted using a 4-column columnar transposition cipher, but the empty space is filled with the letter X. What is the resulting ciphertext?\nA) ENCYRPTTOWX\nB) ENTCXRPYOWN\nC) EYONPXCTXRNX\nD) EYONPWCTXRNX",
+    "correctAnswer": "EYONPWCTXRNX",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Algorithms",
+    "question": "Python code: a = [[1, 2], [3, 4]]; b = a; c = a[:]; a[0][0] = 99; a.append([5, 6]); print(a, b, c). What are the values?\nA) a=[[99,2],[3,4],[5,6]], b=[[99,2],[3,4],[5,6]], c=[[1,2],[3,4],[5,6]]\nB) a=[[99,2],[3,4],[5,6]], b=[[99,2],[3,4],[5,6]], c=[[99,2],[3,4]]\nC) a=[[99,2],[3,4],[5,6]], b=[[1,2],[3,4],[5,6]], c=[[99,2],[3,4]]\nD) a=[[99,2],[3,4],[5,6]], b=[[99,2],[3,4]], c=[[1,2],[3,4]]",
+    "correctAnswer": "a=[[99,2],[3,4],[5,6]], b=[[99,2],[3,4],[5,6]], c=[[99,2],[3,4]]",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Statistics",
+    "question": "In a hypothesis test with significance level α = 0.05, if the p-value is 0.03, what is the correct decision?\nA) Reject the null hypothesis\nB) Fail to reject the null hypothesis\nC) Accept the alternative hypothesis as proven\nD) Increase the sample size",
+    "correctAnswer": "Reject the null hypothesis",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Machine Learning",
+    "question": "An L2-regularized logistic regression achieves minimum validation loss at λ₂ = 0.01. To switch to L1 with equivalent weight shrinkage, knowing E[|w|] ≈ √(2v/π) and E[w²] = v for normally distributed weights, what should λ₁ be to match λ₂ = 0.01?",
+    "correctAnswer": "0.0125",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Crypto",
+    "question": "A spy uses a cipher where A to M are replaced by their Atbash partner (A -> Z, B -> Y, …., M -> N). For N to Z, a fixed shift of +5 is used (N -> S, O -> T,....). What is the ciphertext for CRYPTOGRAM?\nA) ATDZRPRTBCC\nB) XWSUYTTW ZN\nC) XWDUYTTWZN\nD) YCQVTNVCYM",
+    "correctAnswer": "XWDUYTTWZN",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Probability",
+    "question": "A cube has 6 faces. One face is textured and fixed, while the remaining 5 faces can each be painted in any of 3 colors. Two colorings are identical if the cube can be rotated in 3D to match, but the textured face must stay in position. Find the number of distinct colorings under this rotation symmetry.",
+    "correctAnswer": "51",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Game Theory",
+    "question": "In a sealed-bid second-price auction (Vickrey auction), what is the dominant strategy for each bidder?\nA) Bid half of your true valuation\nB) Bid your true valuation\nC) Bid slightly above your true valuation\nD) Bid the expected value of other bids",
+    "correctAnswer": "Bid your true valuation",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Algorithms",
+    "question": "In a Red-Black tree, after inserting a new node (which is initially colored RED), you find that its parent is also RED. Which of the following is NOT a valid operation to fix this violation?\nA) Recolor the parent and uncle to BLACK, and grandparent to RED\nB) Perform a left rotation followed by recoloring\nC) Perform a right rotation followed by recoloring\nD) Change the newly inserted node to BLACK without any rotation",
+    "correctAnswer": "Change the newly inserted node to BLACK without any rotation",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Crypto",
+    "question": "A message is encoded using a Caesar cipher with shift of 7. The encoded message is WVTL. What is the original plaintext?\nA) POEM\nB) PLAN\nC) PLAY\nD) PLOT",
+    "correctAnswer": "POEM",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Statistics",
+    "question": "A random variable X follows a binomial distribution with n=10 trials and probability of success p=0.3. What is the expected value E[X]?\nA) 2.1\nB) 3.0\nC) 3.5\nD) 7.0",
+    "correctAnswer": "3.0",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Indian History",
+    "question": "A great ruler from South India, known for both his diplomacy and military skill, once helped northern sultans settle their disputes. But years later, in the 16th century those same allies turned against him. In one disastrous battle, his empire collapsed, and the wealthy city of Hampi was destroyed. Which battle does this describe?\nA) Battle of Khanwa\nB) Battle of Talikota\nC) Battle of Wadi\nD) Battle of Toppur",
+    "correctAnswer": "Battle of Talikota",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Game Theory",
+    "question": "Two firms simultaneously choose quantities in a Cournot duopoly. If firm 1 increases its quantity, what happens to firm 2's best response quantity?\nA) Increases\nB) Decreases\nC) Stays the same\nD) Becomes zero",
+    "correctAnswer": "Decreases",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Algorithms",
+    "question": "What is the time complexity of finding the k-th smallest element in an unsorted array of n elements using QuickSelect algorithm in the average case?\nA) O(n)\nB) O(n log n)\nC) O(n²)\nD) O(k log n)",
+    "correctAnswer": "O(n)",
+    "imageUrl": ""
+  },
+  {
+    "stage": 1,
+    "domain": "Crypto",
+    "question": "In RSA encryption, if p=5 and q=11, what is the value of φ(n) where n=p×q?\nA) 40\nB) 44\nC) 50\nD) 54",
+    "correctAnswer": "40",
+    "imageUrl": ""
+  }
+]

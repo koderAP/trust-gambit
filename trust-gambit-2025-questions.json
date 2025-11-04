@@ -37,7 +37,7 @@
   {
     "stage": 1,
     "domain": "Biology",
-    "question": "Herbivores have evolved to feed effectively, while plants have countered with anti-herbivore defenses. Extrafloral nectar is one such defence tool which attracts diverse predators and parasitoids, especially ants. Higher volumes of extrafloral nectar production attract more ants and can increase their aggressiveness. The relationship between the plant and the ants can be correctly described as:\na. Mutualism\nb. Antagonism\nc. Commensalism\nd. Amensalism",
+    "question": "Herbivores have evolved to feed effectively, while plants have countered with anti-herbivore defenses. Extrafloral nectar is one such defence tool which attracts diverse predators and parasitoids, especially ants. Higher volumes of extrafloral nectar production attract more ants and can increase their aggressiveness. The relationship between the plant and the ants can be correctly described as:\nA) Mutualism\nB) Antagonism\nC) Commensalism\nD) Amensalism",
     "correctAnswer": "Mutualism",
     "imageUrl": ""
   },
@@ -240,7 +240,7 @@
   {
     "stage": 1,
     "domain": "Indian History",
-    "question": "This early 19th-century painting portrays a harrowing night scene where civilians of a European capital face execution by foreign troops. Created by a master who witnessed the events himself, it immortalizes the uprising of ordinary citizens in Madrid against an occupying emperor's forces. The brutal struggle it represents became a symbol of resistance throughout Europe. Which war does this painting commemorate?\nA) Franco-Prussian War\nB) War of the Third Coalition\nC) Peninsular War\nD) Crimean War",
+    "question": "This early 19th-century painting portrays a harrowing night scene where civilians of a European capital face execution by foreign troops. Created by a master who witnessed the events himself, it immortalizes the uprising of ordinary citizens in Madrid against an occupying emperor's forces. The brutal struggle it represents became a symbol of resistance throughout Europe. Which war does this painting commemorate?\n[Insert image of Goya's painting]\nA) Franco-Prussian War\nB) War of the Third Coalition\nC) Peninsular War\nD) Crimean War",
     "correctAnswer": "Peninsular War",
     "imageUrl": ""
   },

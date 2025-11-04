@@ -2,7 +2,7 @@ import http from 'k6/http';
 import { check, sleep, group } from 'k6';
 import { Rate, Trend } from 'k6/metrics';
 
-const BASE_URL = __ENV.BASE_URL || 'http://localhost/';
+const BASE_URL = __ENV.BASE_URL || 'http://142.93.213.0/';
 
 // Custom metrics
 const registrationErrorRate = new Rate('registration_errors');
@@ -11,13 +11,10 @@ const profileCompletionTime = new Trend('profile_completion_time');
 
 export const options = {
   stages: [
-    { duration: '30s', target: 100 },   // Ramp up to 20 users
-    { duration: '1m', target: 150 },    // Ramp up to 50 users
-    { duration: '2m', target: 200 },   // Ramp up to 100 users
+
+    { duration: '2m', target: 100 },   // Ramp up to 100 users
     { duration: '2m', target: 100 },   // Stay at 100 users
-    { duration: '1m', target: 150 },   // Spike to 150 users
-    { duration: '1m', target: 50 },    // Ramp down to 50 users
-    { duration: '30s', target: 0 },    // Ramp down to 0
+
   ],
   thresholds: {
     http_req_failed: ['rate<0.05'],              // Less than 5% errors

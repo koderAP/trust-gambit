@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { SimpleModal } from '@/components/ui/simple-modal'
-import { Shield, Users, Play, LogOut, CheckCircle2, Clock, Activity, Layers, Target, Info, TrendingUp, AlertCircle, Eye, ChevronDown, ChevronUp, Lock, Unlock } from 'lucide-react'
+import { Shield, Users, Play, LogOut, CheckCircle2, Clock, Activity, Layers, Target, Info, TrendingUp, AlertCircle, Eye, ChevronDown, ChevronUp, Lock, Unlock, Download } from 'lucide-react'
 
 type User = {
   id: string
@@ -118,6 +118,10 @@ export default function AdminDashboard() {
 
   // Questions state
   const [questions, setQuestions] = useState<any[]>([])
+  
+  // Export data state
+  const [exportingData, setExportingData] = useState(false)
+  
   const [newQuestion, setNewQuestion] = useState({
     stage: 1,
     domain: 'Algorithms',
@@ -503,6 +507,47 @@ export default function AdminDashboard() {
     await signOut({ callbackUrl: '/admin/login' })
   }
 
+  const handleExportGameData = async () => {
+    if (!activeGame) {
+      setError('No active game to export')
+      return
+    }
+
+    setExportingData(true)
+    setError('')
+    setSuccess('')
+
+    try {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5)
+      const stageName = activeGame.currentStage === 1 ? 'stage-1' : activeGame.currentStage === 2 ? 'stage-2' : 'game'
+      const filename = `trust-gambit-${stageName}-${timestamp}.json`
+
+      const res = await fetch(`/api/admin/export-game-data?gameId=${activeGame.id}`)
+      
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Failed to export game data')
+      }
+
+      // Download the file
+      const blob = await res.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      window.URL.revokeObjectURL(url)
+
+      setSuccess(`Game data exported successfully! File: ${filename}`)
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setExportingData(false)
+    }
+  }
+
   const fetchQuestions = async () => {
     console.log('Fetching all global questions')
     try {
@@ -730,6 +775,18 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="flex gap-2">
+            {/* Export Game Data Button - Show if game exists */}
+            {activeGame && (
+              <Button
+                variant="outline"
+                onClick={handleExportGameData}
+                disabled={exportingData}
+                className="text-blue-400 border-blue-400 hover:bg-blue-500/10"
+              >
+                <Download className="mr-2 h-4 w-4" />
+                {exportingData ? 'Exporting...' : 'Export Data'}
+              </Button>
+            )}
             {/* End Game Button - Show if game is active */}
             {activeGame && (activeGame.status === 'STAGE_1_ACTIVE' || activeGame.status === 'STAGE_2_ACTIVE' || activeGame.status === 'LOBBIES_FORMING') && (
               <Button
