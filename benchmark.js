@@ -2,7 +2,7 @@ import http from 'k6/http';
 import { check, sleep, group } from 'k6';
 import { Rate, Trend } from 'k6/metrics';
 
-const BASE_URL = __ENV.BASE_URL || 'http://142.93.213.0/';
+const BASE_URL = __ENV.BASE_URL || 'http://localhost/';
 
 // Custom metrics
 const registrationErrorRate = new Rate('registration_errors');

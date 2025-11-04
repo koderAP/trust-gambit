@@ -6,7 +6,7 @@ const globalForPrisma = globalThis as unknown as {
 
 /**
  * Optimized Prisma Client Configuration for High Concurrency
- * Handles 300+ req/sec burst traffic
+ * Handles 250+ simultaneous users
  */
 
 // ✅ Configure connection pool in DATABASE_URL
@@ -19,14 +19,14 @@ function getOptimizedDatabaseUrl(): string {
     
     // Add connection pool settings if not already present
     if (!url.searchParams.has('connection_limit')) {
-      // Increased from 20 to 50 for 300+ concurrent users
-      // PostgreSQL default max: 100-200 connections
-      // Reserve ~50 for admin operations and migrations
-      url.searchParams.set('connection_limit', '50');
+      // Configured for 250+ simultaneous users
+      // Each app instance gets 100 connections
+      // 5 instances × 100 = 500 total (PostgreSQL max: 600)
+      url.searchParams.set('connection_limit', '100');
     }
     
     if (!url.searchParams.has('pool_timeout')) {
-      // Increased from 10 to 20 seconds for high load scenarios
+      // Increased timeout for high load scenarios
       url.searchParams.set('pool_timeout', '20');
     }
     

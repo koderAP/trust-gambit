@@ -28,29 +28,29 @@ services:
       POSTGRES_USER: trustgambit
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme123}
       POSTGRES_DB: trustgambit
-      # Performance tuning for high concurrency (300+ req/sec)
-      POSTGRES_MAX_CONNECTIONS: "200"
-      POSTGRES_SHARED_BUFFERS: "256MB"
-      POSTGRES_EFFECTIVE_CACHE_SIZE: "1GB"
-      POSTGRES_MAINTENANCE_WORK_MEM: "64MB"
-      POSTGRES_WORK_MEM: "16MB"
-      POSTGRES_WAL_BUFFERS: "16MB"
-      POSTGRES_MAX_WAL_SIZE: "1GB"
-      POSTGRES_MIN_WAL_SIZE: "80MB"
+      # Performance tuning for 250+ simultaneous users
+      POSTGRES_MAX_CONNECTIONS: "600"
+      POSTGRES_SHARED_BUFFERS: "512MB"
+      POSTGRES_EFFECTIVE_CACHE_SIZE: "2GB"
+      POSTGRES_MAINTENANCE_WORK_MEM: "128MB"
+      POSTGRES_WORK_MEM: "8MB"
+      POSTGRES_WAL_BUFFERS: "32MB"
+      POSTGRES_MAX_WAL_SIZE: "2GB"
+      POSTGRES_MIN_WAL_SIZE: "128MB"
     command:
       - "postgres"
       - "-c"
-      - "max_connections=200"
+      - "max_connections=600"
       - "-c"
-      - "shared_buffers=256MB"
+      - "shared_buffers=512MB"
       - "-c"
-      - "effective_cache_size=1GB"
+      - "effective_cache_size=2GB"
       - "-c"
-      - "maintenance_work_mem=64MB"
+      - "maintenance_work_mem=128MB"
       - "-c"
       - "checkpoint_completion_target=0.9"
       - "-c"
-      - "wal_buffers=16MB"
+      - "wal_buffers=32MB"
       - "-c"
       - "default_statistics_target=100"
       - "-c"
@@ -58,19 +58,19 @@ services:
       - "-c"
       - "effective_io_concurrency=200"
       - "-c"
-      - "work_mem=16MB"
+      - "work_mem=8MB"
       - "-c"
-      - "min_wal_size=80MB"
+      - "min_wal_size=128MB"
       - "-c"
-      - "max_wal_size=1GB"
+      - "max_wal_size=2GB"
       - "-c"
-      - "max_worker_processes=4"
+      - "max_worker_processes=8"
       - "-c"
-      - "max_parallel_workers_per_gather=2"
+      - "max_parallel_workers_per_gather=4"
       - "-c"
-      - "max_parallel_workers=4"
+      - "max_parallel_workers=8"
       - "-c"
-      - "max_parallel_maintenance_workers=2"
+      - "max_parallel_maintenance_workers=4"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -89,7 +89,7 @@ services:
     command:
       - "redis-server"
       - "--maxmemory"
-      - "512mb"
+      - "1gb"
       - "--maxmemory-policy"
       - "allkeys-lru"
       - "--save"
@@ -118,14 +118,14 @@ services:
       replicas: 5
       resources:
         limits:
+          cpus: '2'
+          memory: 1024M
+        reservations:
           cpus: '1'
           memory: 512M
-        reservations:
-          cpus: '0.5'
-          memory: 256M
     environment:
       # Database
-      DATABASE_URL: postgresql://trustgambit:${POSTGRES_PASSWORD:-changeme123}@postgres:5432/trustgambit?connection_limit=60&pool_timeout=10&connect_timeout=10
+      DATABASE_URL: postgresql://trustgambit:${POSTGRES_PASSWORD:-changeme123}@postgres:5432/trustgambit?connection_limit=100&pool_timeout=20&connect_timeout=10
       
       # NextAuth Configuration
       # IMPORTANT: Set NEXTAUTH_URL to your public domain in production!
