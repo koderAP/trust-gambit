@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
         lambda: 0.5,
         beta: 0.1,
         gamma: 0.2,
-        passScore: -1.0,
+        passScore: 0.0,
       },
     });
 

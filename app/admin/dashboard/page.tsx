@@ -112,7 +112,7 @@ export default function AdminDashboard() {
   const [lambda, setLambda] = useState<number>(0.5)
   const [beta, setBeta] = useState<number>(0.1)
   const [gamma, setGamma] = useState<number>(0.2)
-  const [passScore, setPassScore] = useState<number>(-1.0)
+  const [passScore, setPassScore] = useState<number>(0.0)
   const [defaultDuration, setDefaultDuration] = useState<number>(60)
   const [roundDurationOverride, setRoundDurationOverride] = useState<number | null>(null)
   const [updatingParams, setUpdatingParams] = useState(false)

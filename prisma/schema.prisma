@@ -96,7 +96,7 @@ model Game {
   lambda      Float    @default(0.5) // Chain propagation parameter
   beta        Float    @default(0.1) // Trust bonus parameter (per delegator)
   gamma       Float    @default(0.2) // Cycle penalty parameter
-  passScore   Float    @default(-1.0) // Score for PASS action (-1 or 0)
+  passScore   Float    @default(0.0) // Score for PASS action (-1 or 0)
   
   lobbies     Lobby[]
   rounds      Round[]
