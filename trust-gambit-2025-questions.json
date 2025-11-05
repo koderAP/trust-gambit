@@ -79,8 +79,8 @@
   {
     "stage": 1,
     "domain": "Crypto",
-    "question": "A message is encoded using a Caesar cipher with shift of 7. The encoded message is WVTL. What is the original plaintext?\nA) POEM\nB) PLAN\nC) PLAY\nD) PLOT",
-    "correctAnswer": "POEM",
+    "question": "A message is encoded using a Caesar cipher with shift of 7. The encoded message is WVTL. What is the original plaintext?\nA) POME\nB) PLAN\nC) PLAY\nD) PLOT",
+    "correctAnswer": "POME",
     "imageUrl": ""
   },
   {
@@ -102,20 +102,6 @@
     "domain": "Probability",
     "question": "Pick a number a at random from 1 to 23. Write down a¹, a², a³, a⁴, etc. Each time subtract 23 until you get 1-23 (0 becomes 23). Stop when a number repeats. A number a is a complete-power if it includes every number 1-23 before repeating. What is the probability that a randomly chosen number from 1 to 23 is a complete-power?",
     "correctAnswer": "10/23",
-    "imageUrl": ""
-  },
-  {
-    "stage": 1,
-    "domain": "Probability",
-    "question": "A number is chosen at random from 1 to 100. What is the probability that this number can be written as the sum of three perfect squares?",
-    "correctAnswer": "0.84",
-    "imageUrl": ""
-  },
-  {
-    "stage": 1,
-    "domain": "Probability",
-    "question": "A cube has 6 faces. One face is textured and fixed, while the remaining 5 faces can each be painted in any of 3 colors. Two colorings are identical if the cube can be rotated in 3D to match, but the textured face must stay in position. Find the number of distinct colorings under this rotation symmetry.",
-    "correctAnswer": "51",
     "imageUrl": ""
   },
   {
@@ -193,13 +179,6 @@
     "domain": "Machine Learning",
     "question": "A climate prediction model uses Gaussian likelihood with mean μθ(x) and fixed variance σ²=0.25. The target variable was scaled by factor 2 before training but σ wasn't adjusted. If current σ = 0.25 was used on data scaled by 2, what should the corrected σ be after returning to original scale?",
     "correctAnswer": "0.5",
-    "imageUrl": ""
-  },
-  {
-    "stage": 1,
-    "domain": "Machine Learning",
-    "question": "A Transformer model with 48 layers has gradient instability. Analysis shows average gain factor per layer exceeds 1 by 1%, so gradients multiply by (1.01)^N after N layers. By what approximate factor do gradients grow in magnitude through all 48 layers under this 1% amplification?",
-    "correctAnswer": "1.64",
     "imageUrl": ""
   },
   {

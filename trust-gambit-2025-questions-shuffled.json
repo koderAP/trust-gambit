@@ -2,9 +2,9 @@
   {
     "stage": 1,
     "domain": "Astronomy",
-    "question": "Identify the constellation:\n[Insert image]\nA) Delphinus\nB) Sagitta\nC) Sagittarius\nD) Orion",
+    "question": "Identify the constellation:\nA) Delphinus\nB) Sagitta\nC) Sagittarius\nD) Orion",
     "correctAnswer": "Sagittarius",
-    "imageUrl": "https://www.imghippo.com/i/wQzW1766ZGY.png"
+    "imageUrl": "https://i.imghippo.com/files/wQzW1766ZGY.png"
   },
   {
     "stage": 1,
@@ -72,9 +72,9 @@
   {
     "stage": 1,
     "domain": "Indian History",
-    "question": "This early 19th-century painting portrays a harrowing night scene where civilians of a European capital face execution by foreign troops. Created by a master who witnessed the events himself, it immortalizes the uprising of ordinary citizens in Madrid against an occupying emperor's forces. The brutal struggle it represents became a symbol of resistance throughout Europe. Which war does this painting commemorate?\n[Insert image of Goya's painting]\nA) Franco-Prussian War\nB) War of the Third Coalition\nC) Peninsular War\nD) Crimean War",
+    "question": "This early 19th-century painting portrays a harrowing night scene where civilians of a European capital face execution by foreign troops. Created by a master who witnessed the events himself, it immortalizes the uprising of ordinary citizens in Madrid against an occupying emperor's forces. The brutal struggle it represents became a symbol of resistance throughout Europe. Which war does this painting commemorate?\nA) Franco-Prussian War\nB) War of the Third Coalition\nC) Peninsular War\nD) Crimean War",
     "correctAnswer": "Peninsular War",
-    "imageUrl": ""
+    "imageUrl": "https://i.imghippo.com/files/SgUm4416BE.png"
   },
   {
     "stage": 1,
@@ -113,13 +113,6 @@
   },
   {
     "stage": 1,
-    "domain": "Machine Learning",
-    "question": "A Transformer model with 48 layers has gradient instability. Analysis shows average gain factor per layer exceeds 1 by 1%, so gradients multiply by (1.01)^N after N layers. By what approximate factor do gradients grow in magnitude through all 48 layers under this 1% amplification?",
-    "correctAnswer": "1.64",
-    "imageUrl": ""
-  },
-  {
-    "stage": 1,
     "domain": "Statistics",
     "question": "A dataset has a mean of 50 and a standard deviation of 10. If each value is multiplied by 2 and then 5 is added, what is the new standard deviation?\nA) 10\nB) 15\nC) 20\nD) 25",
     "correctAnswer": "20",
@@ -128,22 +121,15 @@
   {
     "stage": 1,
     "domain": "Astronomy",
-    "question": "What would the analemma look like if the eccentricity of earth's orbit was 0.024, tilt was 0 degrees and measured from the south pole?\n[Insert image showing options]\nA) Horizontal line\nB) Symmetric figure 8\nC) Vertical line\nD) Asymmetrical figure 8",
+    "question": "What would the analemma look like if the eccentricity of earth's orbit was 0.024, tilt was 0 degrees and measured from the south pole?\nA) Horizontal line\nB) Symmetric figure 8\nC) Vertical line\nD) Asymmetrical figure 8",
     "correctAnswer": "Horizontal line",
-    "imageUrl": ""
+    "imageUrl": "https://i.imghippo.com/files/df4397sRU.webp"
   },
   {
     "stage": 1,
     "domain": "Biology",
     "question": "Herbivores have evolved to feed effectively, while plants have countered with anti-herbivore defenses. Extrafloral nectar is one such defence tool which attracts diverse predators and parasitoids, especially ants. Higher volumes of extrafloral nectar production attract more ants and can increase their aggressiveness. The relationship between the plant and the ants can be correctly described as:\nA) Mutualism\nB) Antagonism\nC) Commensalism\nD) Amensalism",
     "correctAnswer": "Mutualism",
-    "imageUrl": ""
-  },
-  {
-    "stage": 1,
-    "domain": "Probability",
-    "question": "A number is chosen at random from 1 to 100. What is the probability that this number can be written as the sum of three perfect squares?",
-    "correctAnswer": "0.84",
     "imageUrl": ""
   },
   {
@@ -190,13 +176,6 @@
   },
   {
     "stage": 1,
-    "domain": "Probability",
-    "question": "A cube has 6 faces. One face is textured and fixed, while the remaining 5 faces can each be painted in any of 3 colors. Two colorings are identical if the cube can be rotated in 3D to match, but the textured face must stay in position. Find the number of distinct colorings under this rotation symmetry.",
-    "correctAnswer": "51",
-    "imageUrl": ""
-  },
-  {
-    "stage": 1,
     "domain": "Game Theory",
     "question": "In a sealed-bid second-price auction (Vickrey auction), what is the dominant strategy for each bidder?\nA) Bid half of your true valuation\nB) Bid your true valuation\nC) Bid slightly above your true valuation\nD) Bid the expected value of other bids",
     "correctAnswer": "Bid your true valuation",
@@ -212,8 +191,8 @@
   {
     "stage": 1,
     "domain": "Crypto",
-    "question": "A message is encoded using a Caesar cipher with shift of 7. The encoded message is WVTL. What is the original plaintext?\nA) POEM\nB) PLAN\nC) PLAY\nD) PLOT",
-    "correctAnswer": "POEM",
+    "question": "A message is encoded using a Caesar cipher with shift of 7. The encoded message is WVTL. What is the original plaintext?\nA) POME\nB) PLAN\nC) PLAY\nD) PLOT",
+    "correctAnswer": "POME",
     "imageUrl": ""
   },
   {

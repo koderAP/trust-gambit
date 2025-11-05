@@ -22,11 +22,19 @@ export default function RegisterPage() {
     password: '',
     confirmPassword: '',
   })
+  const [consentGiven, setConsentGiven] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
+
+    // Validate consent checkbox
+    if (!consentGiven) {
+      setError('You must consent to allow the use of game data anonymously for research purposes')
+      setLoading(false)
+      return
+    }
 
     // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
@@ -164,10 +172,28 @@ export default function RegisterPage() {
                 />
               </div>
 
+              <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    id="consent"
+                    checked={consentGiven}
+                    onChange={(e) => setConsentGiven(e.target.checked)}
+                    className="mt-1 h-5 w-5 rounded border-gray-300 text-primary focus:ring-2 focus:ring-primary cursor-pointer"
+                  />
+                  <label htmlFor="consent" className="text-sm text-gray-700 cursor-pointer flex-1">
+                    <span className="font-semibold">I consent to the use of my game submissions anonymously for research purposes.</span>
+                    <span className="block mt-1 text-xs text-gray-600">
+                      Your participation data will be used only for academic research and will remain completely anonymous.
+                    </span>
+                  </label>
+                </div>
+              </div>
+
               <Button 
                 type="submit" 
                 className="w-full h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all" 
-                disabled={loading}
+                disabled={loading || !consentGiven}
               >
                 {loading ? (
                   <span className="flex items-center gap-2">
