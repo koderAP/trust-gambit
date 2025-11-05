@@ -7,6 +7,9 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue)](https://www.postgresql.org/)
 [![Redis](https://img.shields.io/badge/Redis-7-red)](https://redis.io/)
 
+
+<img width="1395" height="765" alt="image" src="https://github.com/user-attachments/assets/1c40438a-f8ae-4974-81b6-84cd05a5a7c4" />
+
 ## 🎮 Overview
 
 Trust Gambit is a multiplayer competition platform that explores trust dynamics through strategic gameplay. Players navigate multiple rounds across diverse knowledge domains, making critical decisions to **Solve**, **Delegate**, or **Pass** on questions while building trust networks.
